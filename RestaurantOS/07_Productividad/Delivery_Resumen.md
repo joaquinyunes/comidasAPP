@@ -13,3 +13,8 @@ Que el local reparta con su propia gente y su propio sistema: asigna repartidor,
 
 ## Valor
 Delivery propio rentable y trazable, sin depender de apps externas.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/delivery/seguimiento` (asignaciones + zonas), `POST /api/delivery/asignar` (crea `AsignacionReparto`, marca pedido `en_delivery`), `POST /api/delivery/[id]/estado` (avanza estado y registra `horaSalida`/`horaEntrega`).
+- **UI**: `/dashboard/delivery` (`PanelDelivery`) con auto-refresh.
+- **Nota**: usa modelos `AsignacionReparto`, `ZonaReparto` y `Empleado` ya existentes; sin schema nuevo.

@@ -256,7 +256,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.10 — Logística de Delivery Propio
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
@@ -270,7 +270,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.11 — Gestión de Compras y Proveedores
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
@@ -472,8 +472,8 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 2.7 | 6 | ✅ |
 | 2.8 | 6 | ✅ |
 | 2.9 | 6 | ✅ |
-| 2.10 | 6 | 📋 |
-| 2.11 | 6 | 📋 |
+| 2.10 | 6 | ✅ |
+| 2.11 | 6 | ✅ |
 | 2.12 | 6 | 📋 |
 | 2.13 | 6 | 📋 |
 | 2.14 | 6 | 📋 |

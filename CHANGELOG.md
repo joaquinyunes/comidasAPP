@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-05-29 — Implementación de micro-fase 2.11
+
+Se pasa la micro-fase 2.11 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.11 — Gestión de Compras y Proveedores
+- API: `/api/compras/sugerencia-automatica` (quiebres de stock + cantidad sugerida).
+- UI: `/dashboard/compras` (`PanelCompras`).
+
+## 2026-05-29 — Implementación de micro-fase 2.10
+
+Se pasa la micro-fase 2.10 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.10 — Logística de Delivery Propio
+- API: `/api/delivery/seguimiento`, `POST /api/delivery/asignar`, `POST /api/delivery/[id]/estado`.
+- UI: `/dashboard/delivery` (`PanelDelivery`).
+
 ## 2026-07-12 — Implementación de micro-fase 2.9
 
 Se pasa la micro-fase 2.9 del Bloque 2 de "documentada" a "implementada" (API + UI).
