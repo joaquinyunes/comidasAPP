@@ -13,3 +13,8 @@ Cerrar el círculo del inventario: saber qué falta según lo que ya se vendió,
 
 ## Valor
 Comprar justo, con el proveedor correcto, y ver dónde realmente se pierde la plata.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/compras/sugerencia-automatica` calcula quiebres de `stockPorSucursal` y sugiere cantidad a comprar (`stockMinimo * 2 - actual`).
+- **UI**: `/dashboard/compras` (`PanelCompras`).
+- **Nota**: se apoya en órdenes/proveedores existentes (`/api/compras/*`); la sugerencia parte del stock mínimo por insumo.
