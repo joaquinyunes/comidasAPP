@@ -284,7 +284,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.12 — Trazabilidad y Responsabilidad Interna
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
@@ -298,7 +298,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.13 — Mantenimiento de Equipos Críticos
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
@@ -474,8 +474,8 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 2.9 | 6 | ✅ |
 | 2.10 | 6 | ✅ |
 | 2.11 | 6 | ✅ |
-| 2.12 | 6 | 📋 |
-| 2.13 | 6 | 📋 |
+| 2.12 | 6 | ✅ |
+| 2.13 | 6 | ✅ |
 | 2.14 | 6 | 📋 |
 | 2.15 | 6 | 📋 |
 | 2.16 | 6 | 📋 |

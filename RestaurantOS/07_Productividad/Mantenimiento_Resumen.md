@@ -13,3 +13,8 @@ Que el mantenimiento de horno, heladera y freezer deje de ser "de memoria" y pas
 
 ## Valor
 Evitar catástrofes de sábado y tener respaldo de cumplimiento sanitario.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/mantenimiento/equipos` (próxima intervención, vencidos, temperaturas fuera de rango), `POST /api/mantenimiento/equipos/[id]/intervencion` (registra y calcula próxima según frecuencia), `POST /api/mantenimiento/equipos/[id]/temperatura` (marca fuera de rango).
+- **UI**: `/dashboard/mantenimiento` (`PanelMantenimiento`).
+- **Nota**: usa modelos `Equipo`, `EquipoIntervencion`, `RegistroTemperatura` existentes.

@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-05-30 — Implementación de micro-fase 2.13
+
+Se pasa la micro-fase 2.13 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.13 — Mantenimiento de Equipos Críticos
+- API: `/api/mantenimiento/equipos`, `POST /api/mantenimiento/equipos/[id]/intervencion`, `POST /api/mantenimiento/equipos/[id]/temperatura`.
+- UI: `/dashboard/mantenimiento` (`PanelMantenimiento`).
+
+## 2026-05-30 — Implementación de micro-fase 2.12
+
+Se pasa la micro-fase 2.12 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.12 — Trazabilidad y Responsabilidad Interna
+- API: `/api/trazabilidad/resumen` (anulaciones, eventos, quién hizo qué).
+- UI: `/dashboard/trazabilidad` (`PanelTrazabilidad`).
+
 ## 2026-05-29 — Implementación de micro-fase 2.11
 
 Se pasa la micro-fase 2.11 del Bloque 2 de "documentada" a "implementada" (API + UI).
