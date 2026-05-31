@@ -13,3 +13,8 @@ Que los pedidos grandes (cumpleaños, catering, oficinas) se gestionen como tare
 
 ## Valor
 Vender volumen grande sin romper el servicio del día a día.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/eventos` (pedidos `tipo="evento"` con cubiertos y pendientes de cocina), `POST /api/eventos/crear` (crea pedido de evento con `horaProgramada` y flujo separado).
+- **UI**: `/dashboard/eventos` (`PanelEventos`).
+- **Nota**: usa `Pedido.tipo` (valor `evento`) y `horaProgramada` ya existentes; sin schema nuevo.
