@@ -13,3 +13,8 @@ Que el menú llegue a más gente: turistas, personas con baja visión y otros pa
 
 ## Valor
 Amplía el mercado del cliente final y el de venta del software.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/alcance/resumen` agrega monedas soportadas, menú multidioma (campo `Producto.idiomas`), productos destacados (turísticos) y conteo de traducidos.
+- **UI**: `/dashboard/alcance` (`PanelAlcance`).
+- **Nota**: el alto contraste es un toggle de UI; las monedas son una lista configurable. Sin schema nuevo.

@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-05-31 — Implementación de micro-fase 2.15
+
+Se pasa la micro-fase 2.15 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.15 — Accesibilidad y Alcance del Cliente
+- API: `/api/alcance/resumen` (monedas, menú multidioma, productos turísticos).
+- UI: `/dashboard/alcance` (`PanelAlcance`).
+- Navegación del dashboard actualizada con todas las secciones nuevas.
+
+## 2026-05-31 — Implementación de micro-fase 2.14
+
+Se pasa la micro-fase 2.14 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.14 — Modo Eventos / Pedidos Grandes
+- API: `GET /api/eventos`, `POST /api/eventos/crear` (pedido `tipo="evento"`).
+- UI: `/dashboard/eventos` (`PanelEventos`).
+
 ## 2026-05-30 — Implementación de micro-fase 2.13
 
 Se pasa la micro-fase 2.13 del Bloque 2 de "documentada" a "implementada" (API + UI).
