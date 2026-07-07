@@ -176,3 +176,17 @@ export const MESA_LABELS: Record<MesaEstado, string> = {
   reservada: "Reservada",
   limpieza: "Limpieza",
 };
+
+// Stock / Inventario
+export interface StockProducto {
+  productoId: string;
+  nombre: string;
+  unidad: string;
+  cantidadActual: number;
+  cantidadMinima: number;
+  cantidadMaxima: number;
+  costoUnitario: number;
+  ubicacion: string;
+  lote?: string;
+  fechaVencimiento?: Date;
+}
