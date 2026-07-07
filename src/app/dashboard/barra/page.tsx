@@ -1,16 +1,22 @@
 "use client";
 
-import { KDS } from "@/components/kds";
+import { KDSCompleto } from "@/components/kds-completo";
 
 export default function BarraPage() {
   const handleItemListo = (pedidoId: string, itemId: string) => {
-    // TODO: Enviar cambio de estado al backend via WebSocket
     console.log("Item listo:", { pedidoId, itemId });
   };
 
+  const handlePedidoListo = (pedidoId: string) => {
+    console.log("Pedido listo para entregar:", pedidoId);
+  };
+
   return (
-    <div>
-      <KDS tipo="barra" onItemListo={handleItemListo} />
-    </div>
+    <KDSCompleto
+      tipo="barra"
+      sucursalId="demo-sucursal"
+      onItemListo={handleItemListo}
+      onPedidoListo={handlePedidoListo}
+    />
   );
 }

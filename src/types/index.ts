@@ -41,6 +41,7 @@ export type PedidoEstado =
   | "en_preparacion"
   | "listo"
   | "entregado"
+  | "esperando_cuenta"
   | "cerrado"
   | "cancelado";
 
