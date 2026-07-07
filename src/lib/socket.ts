@@ -1,101 +1,185 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 
 // ============================================
-// Hook para WebSocket
+// TIPOS
 // ============================================
 
-let socket: Socket | null = null;
+export type SocketEvent =
+  | "pedido:nuevo"
+  | "pedido:actualizado"
+  | "pedido:estado_cambiado"
+  | "mesa:actualizada"
+  | "kds:pedido_listo"
+  | "notificacion:nueva"
+  | "caja:movimiento";
 
-export function useSocket() {
+export interface SocketMessage {
+  event: SocketEvent;
+  data: unknown;
+  timestamp: Date;
+  tenantId: string;
+}
+
+// ============================================
+// HOOK: useSocket
+// ============================================
+
+interface UseSocketOptions {
+  tenantId: string;
+  autoConnect?: boolean;
+}
+
+export function useSocket({ tenantId, autoConnect = true }: UseSocketOptions) {
   const socketRef = useRef<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [lastMessage, setLastMessage] = useState<SocketMessage | null>(null);
 
   useEffect(() => {
-    if (!socket) {
-      socket = io(window.location.origin, {
-        path: "/api/socketio",
-        transports: ["websocket", "polling"],
-      });
+    if (!autoConnect) return;
 
-      socket.on("connect", () => {
-        console.log("🔌 WebSocket conectado");
-      });
+    const socket = io(process.env.NEXT_PUBLIC_WS_URL || "http://localhost:3001", {
+      auth: { tenantId },
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
 
-      socket.on("disconnect", () => {
-        console.log("❌ WebSocket desconectado");
+    socket.on("connect", () => {
+      console.log("🔌 Socket conectado");
+      setIsConnected(true);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("🔌 Socket desconectado");
+      setIsConnected(false);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("🔌 Error de conexión:", error.message);
+    });
+
+    // Escuchar todos los eventos
+    const events: SocketEvent[] = [
+      "pedido:nuevo",
+      "pedido:actualizado",
+      "pedido:estado_cambiado",
+      "mesa:actualizada",
+      "kds:pedido_listo",
+      "notificacion:nueva",
+      "caja:movimiento",
+    ];
+
+    events.forEach((event) => {
+      socket.on(event, (data) => {
+        setLastMessage({
+          event,
+          data,
+          timestamp: new Date(),
+          tenantId,
+        });
       });
-    }
+    });
 
     socketRef.current = socket;
 
     return () => {
-      // No desconectar al desmontar componentes
+      socket.disconnect();
     };
-  }, []);
+  }, [tenantId, autoConnect]);
 
-  const joinTenant = useCallback((tenantId: string) => {
-    socketRef.current?.emit("join:tenant", tenantId);
-  }, []);
+  const emit = useCallback((event: SocketEvent, data: Record<string, unknown>) => {
+    if (socketRef.current?.connected) {
+      socketRef.current.emit(event, { ...data, tenantId });
+    }
+  }, [tenantId]);
 
-  const joinCocina = useCallback((sucursalId: string) => {
-    socketRef.current?.emit("join:cocina", sucursalId);
-  }, []);
-
-  const joinBarra = useCallback((sucursalId: string) => {
-    socketRef.current?.emit("join:barra", sucursalId);
-  }, []);
-
-  const cambiarEstadoMesa = useCallback(
-    (mesaId: string, estado: string, tenantId: string) => {
-      socketRef.current?.emit("mesa:cambiar_estado", { mesaId, estado, tenantId });
-    },
-    []
-  );
-
-  const nuevoPedido = useCallback((pedido: any) => {
-    socketRef.current?.emit("pedido:nuevo", pedido);
-  }, []);
-
-  const itemListo = useCallback(
-    (pedidoId: string, itemId: string, tenantId: string) => {
-      socketRef.current?.emit("pedido:item_listo", { pedidoId, itemId, tenantId });
-    },
-    []
-  );
-
-  const onMesaEstadoCambiado = useCallback((callback: (data: any) => void) => {
-    socketRef.current?.on("mesa:estado_cambiado", callback);
-    return () => {
-      socketRef.current?.off("mesa:estado_cambiado", callback);
-    };
-  }, []);
-
-  const onPedidoNuevo = useCallback((callback: (pedido: any) => void) => {
-    socketRef.current?.on("pedido:nuevo", callback);
-    return () => {
-      socketRef.current?.off("pedido:nuevo", callback);
-    };
-  }, []);
-
-  const onItemListo = useCallback((callback: (data: any) => void) => {
-    socketRef.current?.on("pedido:item_listo", callback);
-    return () => {
-      socketRef.current?.off("pedido:item_listo", callback);
-    };
+  const subscribe = useCallback((event: SocketEvent, callback: (data: unknown) => void) => {
+    if (socketRef.current) {
+      socketRef.current.on(event, callback);
+      return () => {
+        socketRef.current?.off(event, callback);
+      };
+    }
+    return () => {};
   }, []);
 
   return {
+    isConnected,
+    lastMessage,
+    emit,
+    subscribe,
     socket: socketRef.current,
-    joinTenant,
-    joinCocina,
-    joinBarra,
-    cambiarEstadoMesa,
-    nuevoPedido,
-    itemListo,
-    onMesaEstadoCambiado,
-    onPedidoNuevo,
-    onItemListo,
   };
+}
+
+// ============================================
+// HOOK: usePedidoRealtime
+// ============================================
+
+export function usePedidoRealtime(tenantId: string, onPedidoUpdate?: (data: unknown) => void) {
+  const { subscribe, emit, isConnected } = useSocket({ tenantId });
+
+  useEffect(() => {
+    const unsubPedido = subscribe("pedido:nuevo", (data) => {
+      console.log("📦 Nuevo pedido:", data);
+      onPedidoUpdate?.(data);
+    });
+
+    const unsubEstado = subscribe("pedido:estado_cambiado", (data) => {
+      console.log("📦 Estado cambiado:", data);
+      onPedidoUpdate?.(data);
+    });
+
+    return () => {
+      unsubPedido();
+      unsubEstado();
+    };
+  }, [subscribe, onPedidoUpdate]);
+
+  const actualizarEstado = useCallback((pedidoId: string, nuevoEstado: string) => {
+    emit("pedido:actualizado", { pedidoId, estado: nuevoEstado });
+  }, [emit]);
+
+  return { isConnected, actualizarEstado };
+}
+
+// ============================================
+// HOOK: useKDSRealtime
+// ============================================
+
+export function useKDSRealtime(tenantId: string, sector: "cocina" | "barra") {
+  const { subscribe, emit, isConnected } = useSocket({ tenantId });
+  const [pedidosEnCola, setPedidosEnCola] = useState<unknown[]>([]);
+
+  useEffect(() => {
+    const unsub = subscribe("pedido:nuevo", (data: unknown) => {
+      const pedido = data as { sector?: string };
+      if (pedido.sector === sector) {
+        setPedidosEnCola((prev) => [...prev, data]);
+      }
+    });
+
+    const unsubListo = subscribe("kds:pedido_listo", (data: unknown) => {
+      setPedidosEnCola((prev) => prev.filter((p) => {
+        const pedido = p as { id?: string };
+        const listo = data as { pedidoId?: string };
+        return pedido.id !== listo.pedidoId;
+      }));
+    });
+
+    return () => {
+      unsub();
+      unsubListo();
+    };
+  }, [subscribe, sector]);
+
+  const marcarListo = useCallback((pedidoId: string) => {
+    emit("kds:pedido_listo", { pedidoId, sector });
+  }, [emit, sector]);
+
+  return { isConnected, pedidosEnCola, marcarListo };
 }

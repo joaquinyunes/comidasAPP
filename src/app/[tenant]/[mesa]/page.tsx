@@ -6,8 +6,8 @@ import { Suspense } from "react";
 
 function MenuContent() {
   const searchParams = useSearchParams();
-  const mesa = searchParams.get("mesa") || "1";
-  const sector = searchParams.get("sector") || "Salón";
+  const mesa = searchParams?.get("mesa") || "1";
+  const sector = searchParams?.get("sector") || "Salón";
 
   // Datos de ejemplo
   const categorias = [
