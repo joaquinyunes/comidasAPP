@@ -13,3 +13,8 @@ Un termómetro de calidad de dos segundos que avisa al dueño en el momento si a
 
 ## Valor
 Saber que algo falla esta noche, no el mes que viene.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/feedback/resumen` agrega total, % feliz, caritas tristes recientes (modelo `Feedback`) y flag de alerta al dueño.
+- **UI**: `/dashboard/feedback` (`PanelFeedback`).
+- **Nota**: usa el modelo `Feedback` existente; sin schema nuevo.

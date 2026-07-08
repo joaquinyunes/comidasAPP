@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-08 — Implementación de micro-fase 2.16
+
+Se pasa la micro-fase 2.16 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.16 — Feedback de Calidad Post-consumo
+- API: `/api/feedback/resumen` (total, % feliz, caritas tristes, alerta al dueño).
+- UI: `/dashboard/feedback` (`PanelFeedback`).
+
 ## 2026-05-31 — Implementación de micro-fase 2.15
 
 Se pasa la micro-fase 2.15 del Bloque 2 de "documentada" a "implementada" (API + UI).
