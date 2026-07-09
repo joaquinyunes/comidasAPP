@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-09 — Implementación de micro-fase 2.17
+
+Se pasa la micro-fase 2.17 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.17 — Resiliencia del Negocio
+- API: `/api/resiliencia/estado` (pedidos 24h, anulaciones, mesas, integridad, modo solo-cobro).
+- UI: `/dashboard/resiliencia` (`PanelResiliencia`).
+
 ## 2026-07-08 — Implementación de micro-fase 2.16
 
 Se pasa la micro-fase 2.16 del Bloque 2 de "documentada" a "implementada" (API + UI).

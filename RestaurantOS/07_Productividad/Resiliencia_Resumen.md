@@ -13,3 +13,8 @@ Que el local nunca deje de operar ni perder información por una falla técnica:
 
 ## Valor
 El sábado a la noche no se cierra el local por un error de sistema.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/resiliencia/estado` reporta pedidos 24h, anulaciones 30d, mesas ocupadas, productos activos, integridad y modo solo-cobro.
+- **UI**: `/dashboard/resiliencia` (`PanelResiliencia`).
+- **Nota**: funciona sobre datos existentes; el modo solo-cobro es un indicador de contingencia.
