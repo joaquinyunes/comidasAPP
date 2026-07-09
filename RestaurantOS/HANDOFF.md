@@ -22,6 +22,7 @@ a3d5baf  feat: MF-Code 7-9 — Reservas, Inventario, Compras
 ab99415  feat: MF-Code 16-18 — Pagos, Multi-sucursal, Configuracion
 0b68bbd  feat: MF-Code 19-24 — Landing, Notif, Reportes, Audit, CRM, API
 4a50994  feat: MF-Code 25-27 — IA Predictiva, Marketplace, White-Label
+NEW       feat: MF-Code 28-30 — Flutter Mobile App (Menú, Pedidos, KDS, Dashboard, Reservas, QR)
 ```
 
 ## Micro-fases completadas
@@ -55,6 +56,9 @@ ab99415  feat: MF-Code 16-18 — Pagos, Multi-sucursal, Configuracion
 | 25 | IA Predictiva (ventas, stock, recomendaciones) | ✅ |
 | 26 | Marketplace — Delivery Online | ✅ |
 | 27 | White-Label + Personalización | ✅ |
+| 28 | Flutter — Menú público + Pedidos + Tracking | ✅ |
+| 29 | Flutter — Dashboard admin + KDS + Notificaciones | ✅ |
+| 30 | Flutter — Reservas + QR Scanner + Auth móvil | ✅ |
 
 ## Rutas disponibles (38)
 
@@ -115,20 +119,63 @@ ab99415  feat: MF-Code 16-18 — Pagos, Multi-sucursal, Configuracion
 | IA | Predictiva (ventas, stock, recomendaciones) | ✅ |
 | API pública | v1 con API key + scopes | ✅ |
 | White-label | Branding, dominio, email, redes | ✅ |
-| Mobile | Flutter (futuro) | ⏳ |
+| Mobile | Flutter (MF-Code 28-30) | ✅ |
+
+## Estructura Flutter (mobile/)
+
+```
+mobile/
+├── pubspec.yaml                    — Dependencias Flutter
+├── lib/
+│   ├── main.dart                   — Entry point + Routing completo
+│   ├── config/
+│   │   ├── constants.dart          — URLs, roles, estados
+│   │   └── theme.dart              — Tema Material3 + colores
+│   ├── models/
+│   │   ├── producto.dart           — Producto + Categoría
+│   │   ├── pedido.dart             — Pedido + Item + Evento
+│   │   ├── mesa.dart               — Mesa + Sector
+│   │   ├── reserva.dart            — Reserva + Disponibilidad
+│   │   ├── cliente.dart            — Cliente CRM
+│   │   └── usuario.dart            — Usuario + LoginResponse
+│   ├── services/
+│   │   ├── api_service.dart        — HTTP client + error handling
+│   │   ├── auth_service.dart       — JWT auth + SharedPreferences
+│   │   ├── pedido_service.dart     — CRUD pedidos + menú
+│   │   └── socket_service.dart     — Socket.io realtime
+│   ├── providers/
+│   │   ├── auth_provider.dart      — Estado de autenticación
+│   │   ├── cart_provider.dart      — Carrito de compras
+│   │   └── pedido_provider.dart    — Estado de pedidos
+│   ├── screens/
+│   │   ├── splash_screen.dart      — Splash animado
+│   │   ├── login_screen.dart       — Login multi-tenant
+│   │   ├── home_screen.dart        — Home con tabs
+│   │   ├── menu_screen.dart        — Menú público + filtros
+│   │   ├── cart_screen.dart        — Carrito + checkout
+│   │   ├── tracking_screen.dart    — Tracking en tiempo real
+│   │   ├── dashboard_screen.dart   — Dashboard KPIs + gráficos
+│   │   ├── kds_screen.dart         — Kitchen Display System
+│   │   ├── mesas_screen.dart       — Plano de mesas (grid/lista)
+│   │   ├── reservas_screen.dart    — Calendario + CRUD reservas
+│   │   ├── notifications_screen.dart — Centro de notificaciones
+│   │   └── qr_scanner_screen.dart  — Scanner QR con cámara
+│   └── widgets/
+│       └── producto_card.dart      — Card de producto con imagen
+```
 
 ## Cómo continuar
 
 1. Leer `SYSTEM_PROMPT.md` para contexto completo
 2. Revisar `06_Roadmap/MicroFases.md` para plan de ejecución
-3. Los MF-Code 28+ corresponden a funcionalidades futuras
+3. Los MF-Code 31+ corresponden a funcionalidades futuras
 
-## Próximos pasos (MF-Code 28+)
+## Próximos pasos (MF-Code 31+)
 
 | MF-Code | Módulo sugerido |
 |---------|-----------------|
-| 28-30 | Flutter mobile app |
 | 31-33 | Gamificación avanzada + challenges |
 | 34-36 | Integración con Rappi, PedidosYa, iFood |
 | 37-39 | BI avanzado con ML |
 | 40-42 | Multi-idioma + internacionalización |
+| 43-45 | App Web PWA + Offline mode |

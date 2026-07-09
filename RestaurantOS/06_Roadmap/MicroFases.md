@@ -102,6 +102,27 @@
 
 ---
 
+## MF-Code 28-30 — Flutter Mobile App
+**Estado**: ✅ Completada
+
+| # | Archivo | Estado |
+|---|---------|--------|
+| 1 | `mobile/pubspec.yaml` | ✅ |
+| 2 | `mobile/lib/main.dart` (routing + providers) | ✅ |
+| 3 | `mobile/lib/config/` (theme + constants) | ✅ |
+| 4 | `mobile/lib/models/` (6 modelos) | ✅ |
+| 5 | `mobile/lib/services/` (API + Auth + Socket) | ✅ |
+| 6 | `mobile/lib/screens/` (12 pantallas) | ✅ |
+
+**Módulos implementados**:
+- **MF-Code 28**: Menú público + Catálogos + Pedidos + Tracking realtime
+- **MF-Code 29**: Dashboard admin + KDS Cocina/Barra + Notificaciones
+- **MF-Code 30**: Reservas calendario + QR Scanner + Auth multi-tenant
+
+**Pantallas**: Splash → Login → Home → Menú → Carrito → Tracking → Dashboard → KDS → Mesas → Reservas → Notificaciones → QR Scanner
+
+---
+
 ## Resumen
 
 | Micro-fase | Archivos | Estado |
@@ -113,6 +134,7 @@
 | 1.5 | 6 | ✅ |
 | 1.6 | 6 | ✅ |
 | 1.7 | 6 | ✅ |
-| **Total** | **42** | **✅ COMPLETO** |
+| **MF-Code 28-30** | **20** | **✅ Flutter Mobile App** |
+| **Total** | **62** | **✅ COMPLETO** |
 
-**Documentacion completa. Proyecto listo para implementacion.**
+**Documentación completa + App Flutter. Proyecto listo para implementación.**
