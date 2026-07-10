@@ -1,0 +1,20 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy socket server
+COPY src/lib/socket-server.ts ./
+COPY src/lib/prisma.ts ./lib/
+COPY src/lib/auth-context.ts ./lib/
+
+# Generate Prisma client
+COPY prisma ./prisma/
+RUN npx prisma generate
+
+EXPOSE 3001
+
+CMD ["node", "socket-server.ts"]

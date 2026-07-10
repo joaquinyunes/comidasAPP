@@ -76,6 +76,7 @@ model Usuario {
   pedidosCreados Pedido[]        @relation("CreadorPedidos")
   auditLogs      AuditLog[]
   empleados      Empleado[]
+  notificaciones Notificacion[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -649,6 +650,47 @@ model OrdenCompraItem {
 // MARKETING Y FIDELIZACION
 // ============================================
 
+model Campana {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  nombre        String   @db.VarChar(100)
+  descripcion   String?  @db.Text
+  tipo          String   @db.VarChar(50)
+  estado        String   @default("borrador") @db.VarChar(50)
+  fechaInicio   DateTime @map("fecha_inicio")
+  fechaFin      DateTime? @map("fecha_fin")
+  publicoObjetivo Json?  @map("publico_objetivo")
+  contenido     Json?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@map("campanas")
+}
+
+model Cupon {
+  id                  String   @id @default(uuid()) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  codigo              String   @unique @db.VarChar(20)
+  descripcion         String   @db.VarChar(200)
+  tipo                String   @db.VarChar(50)
+  valor               Decimal  @db.Decimal(10, 2)
+  fechaInicio         DateTime @map("fecha_inicio")
+  fechaFin            DateTime @map("fecha_fin")
+  usosMaximos         Int      @map("usos_maximos")
+  usosActuales        Int      @default(0) @map("usos_actuales")
+  usosPorCliente      Int      @default(1) @map("usos_por_cliente")
+  minimoCompra        Decimal  @default(0) @map("minimo_compra") @db.Decimal(10, 2)
+  productosAplicables String[] @default([]) @map("productos_aplicables")
+  categoriasAplicables String[] @default([]) @map("categorias_aplicables")
+  activo              Boolean  @default(true)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@index([tenantId, activo])
+  @@map("cupones")
+}
+
 model PuntosHistorial {
   id         String   @id @default(uuid()) @db.Uuid
   tenantId   String   @map("tenant_id") @db.Uuid
@@ -663,6 +705,28 @@ model PuntosHistorial {
 
   @@index([tenantId, clienteId])
   @@map("puntos_historial")
+}
+
+// ============================================
+// NOTIFICACIONES
+// ============================================
+
+model Notificacion {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  usuarioId String?  @map("usuario_id") @db.Uuid
+  tipo      String   @db.VarChar(50)
+  titulo    String   @db.VarChar(200)
+  mensaje   String   @db.Text
+  leida     Boolean  @default(false)
+  metadata  Json?    @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([tenantId, usuarioId, leida])
+  @@index([tenantId, createdAt])
+  @@map("notificaciones")
 }
 
 // ============================================

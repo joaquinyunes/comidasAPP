@@ -1,95 +1,126 @@
-import { NextResponse } from "next/server";
-import type { MesaEstado } from "@/types";
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { MesaSchema, SectorSchema, validateInput } from "@/lib/validation";
+import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================
-// GET /api/mesas - Listar mesas
+// GET /api/mesas — Listar mesas
 // ============================================
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const sucursalId = searchParams.get("sucursalId");
+export async function GET(request: NextRequest) {
+  try {
+    const context = await getTenantContext(request);
+    if (!context) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
-  // TODO: Reemplazar con Prisma
-  const mesas = [
-    {
-      id: "1",
-      numero: "1",
-      capacidad: 4,
-      estado: "libre" as MesaEstado,
-      posicionX: 100,
-      posicionY: 150,
-      sector: "Salón Principal",
-    },
-    {
-      id: "2",
-      numero: "2",
-      capacidad: 2,
-      estado: "comiendo" as MesaEstado,
-      posicionX: 200,
-      posicionY: 150,
-      sector: "Salón Principal",
-      mozo: "Carlos",
-      tiempoSentado: 45,
-      totalConsumido: 18500,
-    },
-    {
-      id: "3",
-      numero: "3",
-      capacidad: 6,
-      estado: "esperando_pedido" as MesaEstado,
-      posicionX: 300,
-      posicionY: 150,
-      sector: "Salón Principal",
-      mozo: "María",
-    },
-    {
-      id: "4",
-      numero: "4",
-      capacidad: 4,
-      estado: "en_cocina" as MesaEstado,
-      posicionX: 100,
-      posicionY: 250,
-      sector: "Terraza",
-      mozo: "Carlos",
-    },
-    {
-      id: "5",
-      numero: "5",
-      capacidad: 2,
-      estado: "esperando_cuenta" as MesaEstado,
-      posicionX: 200,
-      posicionY: 250,
-      sector: "Terraza",
-      mozo: "María",
-      tiempoSentado: 82,
-      totalConsumido: 32000,
-    },
-    {
-      id: "6",
-      numero: "6",
-      capacidad: 8,
-      estado: "reservada" as MesaEstado,
-      posicionX: 300,
-      posicionY: 250,
-      sector: "Terraza",
-    },
-  ];
+    const { searchParams } = new URL(request.url);
+    const sectorId = searchParams.get("sectorId") || undefined;
+    const estado = searchParams.get("estado") || undefined;
+    const activa = searchParams.get("activa") !== "false";
 
-  return NextResponse.json(mesas);
+    const where: Record<string, unknown> = {
+      tenantId: context.tenantId,
+      activa,
+    };
+
+    if (context.sucursalId) {
+      where.sucursalId = context.sucursalId;
+    }
+
+    if (sectorId) where.sectorId = sectorId;
+    if (estado) where.estado = estado;
+
+    const mesas = await prisma.mesa.findMany({
+      where,
+      include: {
+        sector: true,
+        pedidos: {
+          where: { estado: { in: ["recibido", "aceptado", "en_preparacion", "listo", "entregado", "esperando_cuenta"] } },
+          take: 1,
+          orderBy: { createdAt: "desc" },
+        },
+      },
+      orderBy: [{ sector: { orden: "asc" } }, { numero: "asc" }],
+    });
+
+    return NextResponse.json({ data: mesas });
+  } catch (error) {
+    console.error("Error GET /api/mesas:", error);
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
 }
 
 // ============================================
-// POST /api/mesas - Crear mesa
+// POST /api/mesas — Crear mesa
 // ============================================
-export async function POST(request: Request) {
-  const body = await request.json();
+export async function POST(request: NextRequest) {
+  try {
+    const context = await getTenantContext(request);
+    if (!context) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
-  // TODO: Validar con Zod y guardar en Prisma
-  const nuevaMesa = {
-    id: crypto.randomUUID(),
-    ...body,
-    estado: "libre",
-    qrCode: `MESA-${body.numero}-${crypto.randomUUID().slice(0, 8)}`,
-  };
+    const body = await request.json();
+    const validation = validateInput(MesaSchema, body);
 
-  return NextResponse.json(nuevaMesa, { status: 201 });
+    if (!validation.success) {
+      return NextResponse.json({ error: "Datos inválidos", details: validation.errors }, { status: 400 });
+    }
+
+    const { numero, capacidad, sectorId, posicionX, posicionY, activa } = validation.data;
+
+    // Verificar que el sector existe y pertenece al tenant
+    const sector = await prisma.sector.findFirst({
+      where: { id: sectorId, tenantId: context.tenantId },
+    });
+
+    if (!sector) {
+      return NextResponse.json({ error: "Sector no encontrado" }, { status: 404 });
+    }
+
+    // Verificar número único en la sucursal
+    const existing = await prisma.mesa.findFirst({
+      where: {
+        tenantId: context.tenantId,
+        sucursalId: sector.sucursalId,
+        numero,
+      },
+    });
+
+    if (existing) {
+      return NextResponse.json({ error: "Ya existe una mesa con ese número en esta sucursal" }, { status: 409 });
+    }
+
+    const mesa = await prisma.mesa.create({
+      data: {
+        tenantId: context.tenantId,
+        sucursalId: sector.sucursalId,
+        sectorId,
+        numero,
+        capacidad,
+        posicionX,
+        posicionY,
+        activa,
+        estado: "libre",
+      },
+      include: { sector: true },
+    });
+
+    // Log de auditoría
+    await prisma.auditLog.create({
+      data: {
+        tenantId: context.tenantId,
+        usuarioId: context.usuarioId,
+        accion: "CREAR",
+        entidad: "Mesa",
+        entidadId: mesa.id,
+        valorNuevo: mesa as any,
+      },
+    });
+
+    return NextResponse.json({ success: true, mesa }, { status: 201 });
+  } catch (error) {
+    console.error("Error POST /api/mesas:", error);
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
 }
