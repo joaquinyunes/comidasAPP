@@ -1,5 +1,5 @@
 import { beforeAll, afterAll, vi } from "vitest";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/lib/prisma";
 
 const prisma = new PrismaClient();
 
