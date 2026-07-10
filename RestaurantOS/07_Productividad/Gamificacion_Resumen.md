@@ -13,3 +13,8 @@ Que el mozo y el cocinero vean reflejado su buen trabajo en números concretos, 
 
 ## Valor
 Equipo que se ve reconocido rinde mejor y se queda.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/gamificacion/tablero` agrega ranking de mozos por pedidos, anulaciones por usuario (cero errores) y tiempo promedio de cocción.
+- **UI**: `/dashboard/gamificacion` (`PanelGamificacion`).
+- **Nota**: usa datos existentes (Pedido, Anulacion, PedidoItem); sin schema nuevo.

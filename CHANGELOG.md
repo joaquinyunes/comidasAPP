@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-10 — Implementación de micro-fase 2.18
+
+Se pasa la micro-fase 2.18 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.18 — Gamificación Operativa
+- API: `/api/gamificacion/tablero` (ranking de mozos, cero errores, tiempo promedio).
+- UI: `/dashboard/gamificacion` (`PanelGamificacion`).
+
 ## 2026-07-09 — Implementación de micro-fase 2.17
 
 Se pasa la micro-fase 2.17 del Bloque 2 de "documentada" a "implementada" (API + UI).
