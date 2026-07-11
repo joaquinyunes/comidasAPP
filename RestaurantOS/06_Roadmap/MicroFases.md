@@ -468,7 +468,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 2.3 | 6 | ✅ |
 | 2.4 | 6 | ✅ |
 | 2.5 | 6 | ✅ |
-| 2.6 | 6 | 📋 |
+| 2.6 | 6 | ✅ |
 | 2.7 | 6 | 📋 |
 | 2.8 | 6 | 📋 |
 | 2.9 | 6 | 📋 |

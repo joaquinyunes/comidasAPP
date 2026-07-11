@@ -337,6 +337,7 @@ model PedidoItem {
   horaListo      DateTime? @map("hora_listo")
   horaEntregado  DateTime? @map("hora_entregado")
   anulado        Boolean  @default(false)
+  urgente        Boolean  @default(false)
   motivoAnulacion String? @map("motivo_anulacion")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")

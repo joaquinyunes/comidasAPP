@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-07-12 — Implementación de micro-fase 2.6
+
+Se pasa la micro-fase 2.6 del Bloque 2 de "documentada" a "implementada" (API + UI + datos).
+
+### Micro-fase 2.6 — Eficiencia dentro de la Cocina
+- Modelo `PedidoItem.urgente` (Boolean) para código de urgencia.
+- API: `/api/cocina/estaciones` (agrupación por estación, urgentes primero), `/api/cocina/tiempos-coccion` (promedio por producto), `/api/cocina/items/[id]/urgente` (toggle), `/api/cocina/items/[id]/pausa` (golpe de campana / pausa).
+- UI: `/dashboard/cocina` (`PanelCocinaEficiencia`).
+
+### Infraestructura
+- `prisma/schema.prisma`: campo `urgente` en `PedidoItem` + migración regenerada.
+
 ## 2026-07-12 — Implementación de micro-fases 2.4 y 2.5
 
 Se pasan las micro-fases 2.4 y 2.5 del Bloque 2 de "documentada" a "implementada" (API + UI + datos).

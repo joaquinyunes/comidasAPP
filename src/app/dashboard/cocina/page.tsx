@@ -1,24 +1,11 @@
-"use client";
+import PanelCocinaEficiencia from "@/components/cocina/PanelCocinaEficiencia";
 
-import { KDSCompleto } from "@/components/kds-completo";
-
-export default function CocinaPage() {
-  const handleItemListo = (pedidoId: string, itemId: string) => {
-    console.log("Item listo:", { pedidoId, itemId });
-    // TODO: Enviar vía WebSocket + actualizar stock
-  };
-
-  const handlePedidoListo = (pedidoId: string) => {
-    console.log("Pedido listo para entregar:", pedidoId);
-    // TODO: Notificar al mozo vía WebSocket
-  };
-
+export default function PaginaCocina() {
   return (
-    <KDSCompleto
-      tipo="cocina"
-      sucursalId="demo-sucursal"
-      onItemListo={handleItemListo}
-      onPedidoListo={handlePedidoListo}
-    />
+    <div className="mx-auto max-w-5xl p-6">
+      <h1 className="mb-1 text-2xl font-bold">Eficiencia en Cocina</h1>
+      <p className="mb-6 text-sm text-zinc-500">Micro-fase 2.6 — agrupación por estación, tiempo de cocción, código de urgencia y pausa.</p>
+      <PanelCocinaEficiencia />
+    </div>
   );
 }

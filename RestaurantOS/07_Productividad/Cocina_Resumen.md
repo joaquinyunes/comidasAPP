@@ -13,3 +13,9 @@ Que la cocina trabaje como trabaja de verdad: por estación, en lote, mirando el
 
 ## Valor
 Menos caos en cocina = más pizzas salidas por hora con la misma gente.
+
+## Implementación (estado: ✅)
+- **Modelo**: `PedidoItem.urgente` (Boolean) para código de urgencia.
+- **API**: `GET /api/cocina/estaciones` (agrupación por estación, urgentes primero), `GET /api/cocina/tiempos-coccion` (promedio por producto), `POST /api/cocina/items/[id]/urgente` (toggle), `POST /api/cocina/items/[id]/pausa` (golpe de campana / pausa).
+- **UI**: `/dashboard/cocina` (`PanelCocinaEficiencia`) con auto-refresh.
+- **Nota**: la pausa usa `estado = "en_pausa"` y reanuda a `en_preparacion`; el semáforo prioriza `urgente` y antigüedad de `horaEnviado`.
