@@ -50,6 +50,7 @@ model Sucursal {
   reservas     Reserva[]
   stock        StockPorSucursal[]
   ordenesCompra OrdenCompra[]
+  equipos      Equipo[]
 
   @@index([tenantId])
   @@map("sucursales")
@@ -210,6 +211,8 @@ model Producto {
   disponible          Boolean  @default(true)
   destacado           Boolean  @default(false)
   tipo                String   @default("plato") @db.VarChar(50)
+  estacion            String?  @db.VarChar(50)
+  idiomas             Json     @default("{}")
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
   deletedAt           DateTime? @map("deleted_at")
@@ -295,6 +298,7 @@ model Pedido {
   creadoPorId String?  @map("creado_por_id") @db.Uuid
   estado      String   @default("recibido") @db.VarChar(50)
   tipo        String   @default("mesa") @db.VarChar(50)
+  horaProgramada DateTime? @map("hora_programada")
   notas       String?
   total       Decimal  @default(0) @db.Decimal(10, 2)
   createdAt   DateTime @default(now()) @map("created_at")
@@ -308,6 +312,8 @@ model Pedido {
   items       PedidoItem[]
   eventos     PedidoEvento[]
   pagos       Pago[]
+  asignacionesReparto AsignacionReparto[]
+  feedbacks   Feedback[]
 
   @@index([tenantId, sucursalId, estado])
   @@index([tenantId, mesaId])
@@ -324,12 +330,18 @@ model PedidoItem {
   subtotal       Decimal  @db.Decimal(10, 2)
   notas          String?
   estado         String   @default("recibido") @db.VarChar(50)
+  horaEnviado    DateTime? @map("hora_enviado")
+  horaListo      DateTime? @map("hora_listo")
+  horaEntregado  DateTime? @map("hora_entregado")
+  anulado        Boolean  @default(false)
+  motivoAnulacion String? @map("motivo_anulacion")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   pedido   Pedido   @relation(fields: [pedidoId], references: [id])
   producto Producto @relation(fields: [productoId], references: [id])
   eventos  PedidoEvento[]
+  anulaciones Anulacion[]
 
   @@index([pedidoId])
   @@map("pedido_items")
@@ -443,6 +455,7 @@ model Empleado {
   usuario  Usuario  @relation(fields: [usuarioId], references: [id])
   turnos   Turno[]
   asistencia Asistencia[]
+  asignacionesReparto AsignacionReparto[]
 
   @@index([tenantId, sucursalId])
   @@map("empleados")
@@ -600,6 +613,7 @@ model StockMovimiento {
   tipo          String   @db.VarChar(50)
   cantidad      Decimal  @db.Decimal(10, 3)
   motivo        String?
+  origen        String?  @db.VarChar(50)
   pedidoId      String?  @map("pedido_id") @db.Uuid
   usuarioId     String?  @map("usuario_id") @db.Uuid
   createdAt     DateTime @default(now()) @map("created_at")
@@ -751,4 +765,241 @@ model AuditLog {
   @@index([tenantId, entidad, entidadId])
   @@index([tenantId, createdAt])
   @@map("audit_log")
+}
+
+// ============================================
+// BLOQUE 2 — PRODUCTIVIDAD OPERATIVA Y VENTA
+// (micro-fases 2.1 a 2.23, ver 07_Productividad/)
+// ============================================
+
+// --- 2.1 Checklist de apertura/cierre + 2.2 fichaje ---
+model ChecklistPlantilla {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  sucursalId String?  @map("sucursal_id") @db.Uuid
+  tipo       String   @db.VarChar(20) // APERTURA | CIERRE
+  nombre     String   @db.VarChar(100)
+  activo     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  items     ChecklistItem[]
+  ejecuciones ChecklistEjecucion[]
+
+  @@index([tenantId, tipo])
+  @@map("checklist_plantillas")
+}
+
+model ChecklistItem {
+  id           String  @id @default(uuid()) @db.Uuid
+  tenantId     String  @map("tenant_id") @db.Uuid
+  plantillaId  String  @map("plantilla_id") @db.Uuid
+  descripcion  String
+  obligatorio  Boolean @default(true)
+  orden        Int     @default(0)
+
+  plantilla  ChecklistPlantilla     @relation(fields: [plantillaId], references: [id])
+  ejecuciones ChecklistEjecucionItem[]
+
+  @@index([plantillaId])
+  @@map("checklist_items")
+}
+
+model ChecklistEjecucion {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  plantillaId String   @map("plantilla_id") @db.Uuid
+  sucursalId  String   @map("sucursal_id") @db.Uuid
+  turnoId     String?  @map("turno_id") @db.Uuid
+  usuarioId   String   @map("usuario_id") @db.Uuid
+  completo    Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  plantilla ChecklistPlantilla     @relation(fields: [plantillaId], references: [id])
+  items     ChecklistEjecucionItem[]
+
+  @@index([tenantId, sucursalId])
+  @@map("checklist_ejecuciones")
+}
+
+model ChecklistEjecucionItem {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  ejecucionId    String   @map("ejecucion_id") @db.Uuid
+  itemId         String   @map("item_id") @db.Uuid
+  valor          String?  // ej. temperatura, monto de caja
+  marcado        Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  ejecucion ChecklistEjecucion @relation(fields: [ejecucionId], references: [id])
+  item      ChecklistItem       @relation(fields: [itemId], references: [id])
+
+  @@unique([ejecucionId, itemId])
+  @@map("checklist_ejecucion_items")
+}
+
+// --- 2.2 Anulación trazable ---
+model Anulacion {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  pedidoItemId  String   @map("pedido_item_id") @db.Uuid
+  usuarioId     String   @map("usuario_id") @db.Uuid
+  motivo        String
+  motivoLibre   String?  @map("motivo_libre")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  pedidoItem PedidoItem @relation(fields: [pedidoItemId], references: [id])
+
+  @@index([tenantId, pedidoItemId])
+  @@map("anulaciones")
+}
+
+// --- 2.10 Zonas de reparto + 2.10.1 repartidor ---
+model ZonaReparto {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  sucursalId      String   @map("sucursal_id") @db.Uuid
+  nombre          String   @db.VarChar(100)
+  tiempoEstimadoMin Int    @map("tiempo_estimado_min")
+  poligono        Json?
+  activa          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId, sucursalId])
+  @@map("zonas_reparto")
+
+  asignaciones AsignacionReparto[]
+}
+
+model AsignacionReparto {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  pedidoId    String   @map("pedido_id") @db.Uuid
+  empleadoId  String   @map("empleado_id") @db.Uuid
+  zonaId      String?  @map("zona_id") @db.Uuid
+  estado      String   @default("asignado") @db.VarChar(50)
+  horaSalida  DateTime? @map("hora_salida")
+  horaEntrega DateTime? @map("hora_entrega")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  pedido   Pedido   @relation(fields: [pedidoId], references: [id])
+  empleado Empleado @relation(fields: [empleadoId], references: [id])
+  zona     ZonaReparto? @relation(fields: [zonaId], references: [id])
+
+  @@index([tenantId, empleadoId, estado])
+  @@map("asignaciones_reparto")
+}
+
+// --- 2.13 Mantenimiento de equipos ---
+model Equipo {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  sucursalId      String   @map("sucursal_id") @db.Uuid
+  nombre          String   @db.VarChar(100)
+  tipo            String?  @db.VarChar(50) // HORNO | HELADERA | FREEZER
+  ubicacion       String?
+  frecuenciaMantenimientoDias Int? @map("frecuencia_mantenimiento_dias")
+  ultimaIntervencion DateTime? @map("ultima_intervencion")
+  proximaIntervencion DateTime? @map("proxima_intervencion")
+  activo          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  sucursal      Sucursal            @relation(fields: [sucursalId], references: [id])
+  temperaturas  RegistroTemperatura[]
+  intervenciones EquipoIntervencion[]
+
+  @@index([tenantId, sucursalId])
+  @@map("equipos")
+}
+
+model RegistroTemperatura {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  equipoId   String   @map("equipo_id") @db.Uuid
+  sucursalId String   @map("sucursal_id") @db.Uuid
+  temperatura Decimal @db.Decimal(5, 2)
+  rangoMin    Decimal? @map("rango_min") @db.Decimal(5, 2)
+  rangoMax    Decimal? @map("rango_max") @db.Decimal(5, 2)
+  fueraDeRango Boolean @default(false) @map("fuera_de_rango")
+  usuarioId  String?  @map("usuario_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  equipo Equipo @relation(fields: [equipoId], references: [id])
+
+  @@index([tenantId, equipoId, createdAt])
+  @@map("registros_temperatura")
+}
+
+model EquipoIntervencion {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  equipoId     String   @map("equipo_id") @db.Uuid
+  tipo         String   @db.VarChar(50) // LIMPIEZA | SERVICE | REPARACION
+  descripcion  String?
+  costo        Decimal? @db.Decimal(10, 2)
+  proveedor    String?
+  usuarioId    String?  @map("usuario_id") @db.Uuid
+  realizadoEn  DateTime @default(now()) @map("realizado_en")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  equipo Equipo @relation(fields: [equipoId], references: [id])
+
+  @@index([tenantId, equipoId])
+  @@map("equipo_intervenciones")
+}
+
+// --- 2.16 Feedback de calidad ---
+model Feedback {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  sucursalId String   @map("sucursal_id") @db.Uuid
+  pedidoId   String?  @map("pedido_id") @db.Uuid
+  mesaId     String?  @map("mesa_id") @db.Uuid
+  calificacion String @db.VarChar(20) // FELIZ | NEUTRAL | TRISTE
+  motivo     String?
+  turnoId    String?  @map("turno_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  pedido Pedido? @relation(fields: [pedidoId], references: [id])
+
+  @@index([tenantId, sucursalId, calificacion])
+  @@index([tenantId, createdAt])
+  @@map("feedbacks")
+}
+
+// --- 2.19/2.20 Promociones y reglas de combo ---
+model Promocion {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  nombre      String   @db.VarChar(100)
+  descripcion String?
+  tipo        String   @db.VarChar(50) // COMBO | DESCUENTO | 2X1
+  condicion   Json     @default("{}") // reglas (ej. 2 pizzas grandes)
+  descuento   Json     @default("{}") // acción (ej. bebida 50%)
+  diaInicio   DateTime? @map("dia_inicio")
+  diaFin      DateTime? @map("dia_fin")
+  horaInicio  DateTime? @map("hora_inicio") @db.Time
+  horaFin     DateTime? @map("hora_fin") @db.Time
+  activa      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([tenantId, activa])
+  @@map("promociones")
+}
+
+// --- 2.23 Módulos / licencias por tenant ---
+model Modulo {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  clave       String   @db.VarChar(50) // DELIVERY | MULTISUCURSAL | PROVEEDORES
+  nombre      String   @db.VarChar(100)
+  activo      Boolean  @default(false)
+  limite      Int?     // ej. nº de sucursales permitidas
+  activadoEn  DateTime? @map("activado_en")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([tenantId, clave])
+  @@index([tenantId])
+  @@map("modulos")
 }
