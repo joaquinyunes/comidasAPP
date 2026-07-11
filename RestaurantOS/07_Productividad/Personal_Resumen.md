@@ -17,3 +17,10 @@ Que el local deje de depender de papel y memoria para el personal, y tenga traza
 
 ## Valor para el dueño
 Reduce pérdida de información operativa y da base para el resto de las micro-fases (rendimiento, trazabilidad, control).
+
+## Implementación (estado: ✅)
+- **Modelos**: `Asistencia` extendido con `tipo`, `sucursalId`, `breakInicio`, `breakFin`; `ChecklistPlantilla`, `ChecklistItem`, `ChecklistEjecucion`, `ChecklistEjecucionItem`.
+- **API**: `GET/POST /api/personal/checklists`, `GET/PUT/DELETE /api/personal/checklists/[id]`, `POST /api/personal/checklists/[id]/ejecutar`, `GET /api/personal/checklists/ejecuciones`, `GET/POST /api/personal/fichaje`, `GET /api/personal/rendimiento`.
+- **UI**: `src/app/dashboard/personal` + `src/components/personal/PanelPersonal.tsx` (fichaje, checklists, rendimiento).
+- **Validación**: schemas `ChecklistPlantillaSchema`, `ChecklistEjecucionSchema`, `FichajeSchema` en `src/lib/validation.ts`.
+- **Migración**: `prisma/migrations/0001_init_bloque2/migration.sql`.

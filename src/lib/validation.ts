@@ -340,6 +340,93 @@ export const ConfigTenantSchema = z.object({
 });
 
 // ============================================
+// BLOQUE 2 — MICRO-FASES 2.1 / 2.2 / 2.3
+// ============================================
+
+// 2.1 — Checklist de apertura/cierre
+export const ChecklistItemInputSchema = z.object({
+  descripcion: z.string().min(1).max(300).trim(),
+  obligatorio: z.boolean().default(true),
+  orden: z.number().int().min(0).default(0),
+});
+
+export const ChecklistPlantillaSchema = z.object({
+  tipo: z.enum(["APERTURA", "CIERRE"]),
+  nombre: z.string().min(1).max(100).trim(),
+  sucursalId: z.string().uuid().optional(),
+  items: z.array(ChecklistItemInputSchema).min(1, "Debe haber al menos un ítem"),
+});
+
+export const ChecklistEjecucionSchema = z.object({
+  plantillaId: z.string().uuid(),
+  sucursalId: z.string().uuid(),
+  turnoId: z.string().uuid().optional(),
+  items: z
+    .array(
+      z.object({
+        itemId: z.string().uuid(),
+        marcado: z.boolean().default(false),
+        valor: z.string().max(500).optional(),
+      })
+    )
+    .min(1),
+});
+
+// 2.1 — Fichaje (entrada/salida/break)
+export const FichajeSchema = z.object({
+  empleadoId: z.string().uuid(),
+  turnoId: z.string().uuid().optional(),
+  tipo: z.enum(["ENTRADA", "SALIDA", "BREAK_IN", "BREAK_OUT"]),
+});
+
+// 2.2 — Anulación trazable de ítem de pedido
+export const AnulacionSchema = z.object({
+  pedidoItemId: z.string().uuid(),
+  motivo: z.string().min(1).max(100).trim(),
+  motivoLibre: z.string().max(300).trim().optional(),
+});
+
+// 2.2 — Cola offline (LAN local / sync degradado)
+export const OfflineItemSchema = z.object({
+  ruta: z.string().min(1),
+  metodo: z.enum(["POST", "PUT", "DELETE", "PATCH"]).default("POST"),
+  payload: z.record(z.unknown()).default({}),
+  clientId: z.string().min(1),
+});
+
+export const OfflineSyncSchema = z.object({
+  items: z.array(OfflineItemSchema).min(1).max(100),
+});
+
+// 2.3 — Recetas centralizadas (catálogo por tenant)
+export const RecetaCentralizadaSchema = z.object({
+  productoId: z.string().uuid(),
+  nombre: z.string().max(255).trim().optional(),
+  porciones: z.number().int().positive().default(1),
+  instrucciones: z.string().max(2000).optional(),
+  ingredientes: z
+    .array(
+      z.object({
+        ingredienteId: z.string().uuid(),
+        cantidad: z.number().positive(),
+        unidad: z.string().min(1).max(50),
+        opcional: z.boolean().default(false),
+      })
+    )
+    .min(1),
+});
+
+// 2.3 — Configuración por sucursal (multi-sucursal)
+export const SucursalConfigSchema = z.object({
+  nombre: z.string().min(1).max(255).trim().optional(),
+  direccion: z.string().max(500).optional(),
+  telefono: z.string().max(50).optional(),
+  email: z.string().email().optional().nullable(),
+  horario: z.record(z.unknown()).optional(),
+  activa: z.boolean().optional(),
+});
+
+// ============================================
 // TIPOS EXPORTADOS
 // ============================================
 export type MesaInput = z.infer<typeof MesaSchema>;
@@ -357,3 +444,10 @@ export type CuponInput = z.infer<typeof CuponSchema>;
 export type AuditLogInput = z.infer<typeof AuditLogSchema>;
 export type PrediccionInput = z.infer<typeof PrediccionSchema>;
 export type ConfigTenantInput = z.infer<typeof ConfigTenantSchema>;
+export type ChecklistPlantillaInput = z.infer<typeof ChecklistPlantillaSchema>;
+export type ChecklistEjecucionInput = z.infer<typeof ChecklistEjecucionSchema>;
+export type FichajeInput = z.infer<typeof FichajeSchema>;
+export type AnulacionInput = z.infer<typeof AnulacionSchema>;
+export type OfflineSyncInput = z.infer<typeof OfflineSyncSchema>;
+export type RecetaCentralizadaInput = z.infer<typeof RecetaCentralizadaSchema>;
+export type SucursalConfigInput = z.infer<typeof SucursalConfigSchema>;

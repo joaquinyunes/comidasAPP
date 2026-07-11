@@ -130,44 +130,44 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.1 — Gestión de Personal y Turnos
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
-| 1 | `07_Productividad/Personal_Fichaje.md` | 📋 |
-| 2 | `07_Productividad/Personal_Checklist.md` | 📋 |
-| 3 | `07_Productividad/Personal_Capacitacion.md` | 📋 |
-| 4 | `07_Productividad/Personal_TurnosRendimiento.md` | 📋 |
-| 5 | `07_Productividad/Personal_Asistencia.md` | 📋 |
-| 6 | `07_Productividad/Personal_Resumen.md` | 📋 |
+| 1 | `07_Productividad/Personal_Fichaje.md` | ✅ |
+| 2 | `07_Productividad/Personal_Checklist.md` | ✅ |
+| 3 | `07_Productividad/Personal_Capacitacion.md` | ✅ |
+| 4 | `07_Productividad/Personal_TurnosRendimiento.md` | ✅ |
+| 5 | `07_Productividad/Personal_Asistencia.md` | ✅ |
+| 6 | `07_Productividad/Personal_Resumen.md` | ✅ |
 
 ---
 
 ## Micro-fase 2.2 — Reducción de Fricción Física
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
-| 1 | `07_Productividad/Friccion_ImpresionComanda.md` | 📋 |
-| 2 | `07_Productividad/Friccion_OfflineDegradado.md` | 📋 |
-| 3 | `07_Productividad/Friccion_AnulacionTrazable.md` | 📋 |
-| 4 | `07_Productividad/Friccion_HardwareResp.md` | 📋 |
-| 5 | `07_Productividad/Friccion_LANLocal.md` | 📋 |
-| 6 | `07_Productividad/Friccion_Resumen.md` | 📋 |
+| 1 | `07_Productividad/Friccion_ImpresionComanda.md` | ✅ |
+| 2 | `07_Productividad/Friccion_OfflineDegradado.md` | ✅ |
+| 3 | `07_Productividad/Friccion_AnulacionTrazable.md` | ✅ |
+| 4 | `07_Productividad/Friccion_HardwareResp.md` | ✅ |
+| 5 | `07_Productividad/Friccion_LANLocal.md` | ✅ |
+| 6 | `07_Productividad/Friccion_Resumen.md` | ✅ |
 
 ---
 
 ## Micro-fase 2.3 — Multi-sucursal Consolidado
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
-| 1 | `07_Productividad/MultiSucursal_Dashboard.md` | 📋 |
-| 2 | `07_Productividad/MultiSucursal_RecetasCentralizadas.md` | 📋 |
-| 3 | `07_Productividad/MultiSucursal_StockIndependiente.md` | 📋 |
-| 4 | `07_Productividad/MultiSucursal_Comparativas.md` | 📋 |
-| 5 | `07_Productividad/MultiSucursal_Configuracion.md` | 📋 |
-| 6 | `07_Productividad/MultiSucursal_Resumen.md` | 📋 |
+| 1 | `07_Productividad/MultiSucursal_Dashboard.md` | ✅ |
+| 2 | `07_Productividad/MultiSucursal_RecetasCentralizadas.md` | ✅ |
+| 3 | `07_Productividad/MultiSucursal_StockIndependiente.md` | ✅ |
+| 4 | `07_Productividad/MultiSucursal_Comparativas.md` | ✅ |
+| 5 | `07_Productividad/MultiSucursal_Configuracion.md` | ✅ |
+| 6 | `07_Productividad/MultiSucursal_Resumen.md` | ✅ |
 
 ---
 
@@ -463,9 +463,9 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 1.6 | 6 | ✅ |
 | 1.7 | 6 | ✅ |
 | **MF-Code 28-30** | **20** | **✅ Flutter Mobile App** |
-| 2.1 | 6 | 📋 |
-| 2.2 | 6 | 📋 |
-| 2.3 | 6 | 📋 |
+| 2.1 | 6 | ✅ |
+| 2.2 | 6 | ✅ |
+| 2.3 | 6 | ✅ |
 | 2.4 | 6 | 📋 |
 | 2.5 | 6 | 📋 |
 | 2.6 | 6 | 📋 |
@@ -488,4 +488,4 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 2.23 | 6 | 📋 |
 | **Total docs** | **62 + 138** | **Bloque 1 completo · Bloque 2 documentado** |
 
-**Bloque 1: documentación base + App Flutter (lista para implementación). Bloque 2: 23 micro-fases de productividad operativa y funciones de venta, documentadas en `07_Productividad/` y pendientes de implementación de código (modelos Prisma y endpoints).**
+**Bloque 1: documentación base + App Flutter (lista para implementación). Bloque 2: 23 micro-fases de productividad operativa y funciones de venta, documentadas en `07_Productividad/`. Las micro-fases 2.1–2.3 ya están implementadas (API + UI + modelos Prisma y migración). Las restantes (2.4–2.23) siguen pendientes de implementación de código.**

@@ -17,3 +17,12 @@ Eliminar los pasos manuales que hoy frican al mozo y a la cocina: avisar a mano,
 
 ## Valor
 Menos errores, menos tiempo muerto, y operación que no se detiene por un fallo técnico.
+
+## Implementación (estado: ✅)
+- **Modelos**: `Anulacion` + `PedidoItem.anulado` / `motivoAnulacion`; eventos `PedidoEvento` (ANULACION, IMPRESION_COMANDA).
+- **API**:
+  - Anulación trazable: `POST /api/pedidos/[id]/items/[itemId]/anular`, `GET /api/pedidos/[id]/items/[itemId]/anulaciones`.
+  - Impresión: `GET /api/cocina/comandas`, `POST /api/cocina/comandas/[id]/imprimir` (genera ticket de comanda).
+  - Offline/LAN: `GET /api/friccion/estado` (health), `POST /api/friccion/sync` (vacía cola offline de anulaciones).
+- **UI**: `src/app/dashboard/friccion` + `src/components/friccion/PanelFriccion.tsx` (anulación, indicador online/offline, cola y ticket).
+- **Validación**: `AnulacionSchema`, `OfflineSyncSchema` en `src/lib/validation.ts`.

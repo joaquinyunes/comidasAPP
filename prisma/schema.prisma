@@ -51,6 +51,7 @@ model Sucursal {
   stock        StockPorSucursal[]
   ordenesCompra OrdenCompra[]
   equipos      Equipo[]
+  asistencias  Asistencia[]
 
   @@index([tenantId])
   @@map("sucursales")
@@ -484,13 +485,18 @@ model Asistencia {
   tenantId       String    @map("tenant_id") @db.Uuid
   empleadoId     String    @map("empleado_id") @db.Uuid
   turnoId        String?   @map("turno_id") @db.Uuid
+  sucursalId     String?   @map("sucursal_id") @db.Uuid
+  tipo           String?   @map("tipo") @db.VarChar(20) // ENTRADA | SALIDA | BREAK_IN | BREAK_OUT
   entrada        DateTime?
   salida         DateTime?
+  breakInicio    DateTime? @map("break_inicio")
+  breakFin      DateTime? @map("break_fin")
   horasTrabajadas Decimal? @map("horas_trabajadas") @db.Decimal(5, 2)
   createdAt      DateTime  @default(now()) @map("created_at")
 
-  empleado Empleado @relation(fields: [empleadoId], references: [id])
-  turno    Turno?   @relation(fields: [turnoId], references: [id])
+  empleado  Empleado  @relation(fields: [empleadoId], references: [id])
+  turno     Turno?    @relation(fields: [turnoId], references: [id])
+  sucursal  Sucursal? @relation(fields: [sucursalId], references: [id])
 
   @@index([tenantId, empleadoId])
   @@map("asistencia")

@@ -13,3 +13,9 @@ Que un dueño con varios locales tenga el control central (recetas, precios, vis
 
 ## Valor
 Escalar a cadena sin perder control ni duplicar trabajo de catálogo.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/multisucursal/dashboard` (visión consolidada), `GET/POST /api/multisucursal/recetas` (catálogo centralizado), `GET /api/multisucursal/stock` (inventario por sucursal + bajo stock), `GET /api/multisucursal/comparativas` (benchmarks), `GET /api/multisucursal/sucursales` + `PUT /api/multisucursal/sucursales/[id]` (config por sucursal).
+- **UI**: `src/app/dashboard/sucursales` (ya existente) usa `src/components/multi-sucursal/ControlCentral.tsx` con pestañas dashboard / recetas / stock / comparativas / config.
+- **Validación**: `RecetaCentralizadaSchema`, `SucursalConfigSchema` en `src/lib/validation.ts`.
+- **Nota**: respeta autonomía de stock por sucursal (`StockPorSucursal`) mientras comparte recetas/precios a nivel tenant.
