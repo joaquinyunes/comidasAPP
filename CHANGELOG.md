@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-11 — Implementación de micro-fase 2.19
+
+Se pasa la micro-fase 2.19 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.19 — Experiencia Cliente Digital
+- API: `/api/cliente-digital/resumen` (alertas de feedback, combos, QR de mesas).
+- UI: `/dashboard/cliente-digital` (`PanelClienteDigital`).
+
 ## 2026-07-10 — Implementación de micro-fase 2.18
 
 Se pasa la micro-fase 2.18 del Bloque 2 de "documentada" a "implementada" (API + UI).

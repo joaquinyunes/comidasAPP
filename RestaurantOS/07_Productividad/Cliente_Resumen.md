@@ -13,3 +13,8 @@ Funciones de UI/producto que el cliente usa directamente y que se programan una 
 
 ## Valor
 Una experiencia de cliente que se vende sola en la demo y que no requiere reprogramar por cliente.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/cliente-digital/resumen` agrega alertas de feedback (`Feedback` tristes), combos activos (`Promocion` tipo COMBO) y mesas con QR generado.
+- **UI**: `/dashboard/cliente-digital` (`PanelClienteDigital`).
+- **Nota**: se apoya en modelos `Feedback`, `Promocion` y el campo `Mesa.qrCode`; sin schema nuevo.
