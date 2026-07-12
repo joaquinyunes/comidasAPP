@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-12 — Implementación de micro-fase 2.7
+
+Se pasa la micro-fase 2.7 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.7 — El Trabajo del Mozo en el Salón
+- API: `/api/mozo/mapa-semaforo`, `/api/mozo/alergias`, `/api/mozo/disponibilidad`, `/api/mozo/historial-mesa`, `/api/mozo/cuenta`.
+- UI: `/dashboard/mozo` (`PanelMozo`) con mapa semáforo, alertas de alergia bloqueantes, disponibilidad en tiempo real y ayuda con la cuenta.
+
 ## 2026-07-12 — Implementación de micro-fase 2.6
 
 Se pasa la micro-fase 2.6 del Bloque 2 de "documentada" a "implementada" (API + UI + datos).
