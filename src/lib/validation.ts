@@ -426,6 +426,21 @@ export const SucursalConfigSchema = z.object({
   activa: z.boolean().optional(),
 });
 
+// 2.4 — Fidelización: registro de visita en mesa
+export const VisitaMesaSchema = z.object({
+  clienteId: z.string().uuid().optional(),
+  mesaId: z.string().uuid(),
+  sucursalId: z.string().uuid().optional(),
+  personas: z.number().int().positive().max(50).optional(),
+  monto: z.number().nonnegative().optional(),
+});
+
+// 2.4 — Reconocimiento por QR (vincular cliente a mesa)
+export const ReconocimientoSchema = z.object({
+  mesaId: z.string().uuid(),
+  clienteId: z.string().uuid(),
+});
+
 // ============================================
 // TIPOS EXPORTADOS
 // ============================================
@@ -451,3 +466,5 @@ export type AnulacionInput = z.infer<typeof AnulacionSchema>;
 export type OfflineSyncInput = z.infer<typeof OfflineSyncSchema>;
 export type RecetaCentralizadaInput = z.infer<typeof RecetaCentralizadaSchema>;
 export type SucursalConfigInput = z.infer<typeof SucursalConfigSchema>;
+export type VisitaMesaInput = z.infer<typeof VisitaMesaSchema>;
+export type ReconocimientoInput = z.infer<typeof ReconocimientoSchema>;

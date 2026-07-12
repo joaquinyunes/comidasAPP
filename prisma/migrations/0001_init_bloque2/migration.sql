@@ -582,6 +582,20 @@ CREATE TABLE "audit_log" (
 );
 
 -- CreateTable
+CREATE TABLE "visitas_mesa" (
+    "id" UUID NOT NULL,
+    "tenant_id" UUID NOT NULL,
+    "cliente_id" UUID,
+    "mesa_id" UUID NOT NULL,
+    "sucursal_id" UUID NOT NULL,
+    "personas" INTEGER,
+    "monto" DECIMAL(10,2),
+    "fecha" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "visitas_mesa_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "checklist_plantillas" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
@@ -901,6 +915,12 @@ CREATE INDEX "audit_log_tenant_id_entidad_entidad_id_idx" ON "audit_log"("tenant
 CREATE INDEX "audit_log_tenant_id_created_at_idx" ON "audit_log"("tenant_id", "created_at");
 
 -- CreateIndex
+CREATE INDEX "visitas_mesa_tenant_id_mesa_id_idx" ON "visitas_mesa"("tenant_id", "mesa_id");
+
+-- CreateIndex
+CREATE INDEX "visitas_mesa_tenant_id_cliente_id_idx" ON "visitas_mesa"("tenant_id", "cliente_id");
+
+-- CreateIndex
 CREATE INDEX "checklist_plantillas_tenant_id_tipo_idx" ON "checklist_plantillas"("tenant_id", "tipo");
 
 -- CreateIndex
@@ -1088,6 +1108,15 @@ ALTER TABLE "notificaciones" ADD CONSTRAINT "notificaciones_usuario_id_fkey" FOR
 
 -- AddForeignKey
 ALTER TABLE "audit_log" ADD CONSTRAINT "audit_log_usuario_id_fkey" FOREIGN KEY ("usuario_id") REFERENCES "usuarios"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "visitas_mesa" ADD CONSTRAINT "visitas_mesa_cliente_id_fkey" FOREIGN KEY ("cliente_id") REFERENCES "clientes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "visitas_mesa" ADD CONSTRAINT "visitas_mesa_mesa_id_fkey" FOREIGN KEY ("mesa_id") REFERENCES "mesas"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "visitas_mesa" ADD CONSTRAINT "visitas_mesa_sucursal_id_fkey" FOREIGN KEY ("sucursal_id") REFERENCES "sucursales"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "checklist_items" ADD CONSTRAINT "checklist_items_plantilla_id_fkey" FOREIGN KEY ("plantilla_id") REFERENCES "checklist_plantillas"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

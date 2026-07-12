@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-07-12 — Implementación de micro-fases 2.4 y 2.5
+
+Se pasan las micro-fases 2.4 y 2.5 del Bloque 2 de "documentada" a "implementada" (API + UI + datos).
+
+### Micro-fase 2.4 — Fidelización Operativa
+- Modelo `VisitaMesa` (historial por mesa/cliente) + back-relations en `Cliente`, `Mesa`, `Sucursal`.
+- API: `/api/fidelizacion/clientes-recurrentes`, `/visitas` (registra visita y suma puntos/nivel), `/historial-mesa`, `/reconocimiento` (QR + sugerencias), `/sugerencias-mozo`, `/logistica`.
+- UI: `/dashboard/fidelizacion` (`PanelFidelizacion`).
+- Validación: `VisitaMesaSchema`, `ReconocimientoSchema`.
+
+### Micro-fase 2.5 — Operativo: Comunicación Cocina-Mozos
+- API: `/api/operativo/alertas` (semáforo de pase), `/pase` (mozo confirma entrega), `/comandas-estructuradas` (por estación), `/stock-tiempo-real` (quiebres), `/confirmacion-voz`.
+- UI: `/dashboard/operativo` (`PanelOperativo`) con auto-refresh.
+- Eventos `PedidoEvento`: `PASE_MOZO`, `CONFIRMACION_VOZ`.
+
+### Infraestructura
+- `prisma/schema.prisma`: modelo `VisitaMesa` + relaciones.
+- Migración regenerada: `prisma/migrations/0001_init_bloque2/migration.sql`.
+- Navegación del dashboard actualizada (Fidelización, Operativo).
+
 ## 2026-07-12 — Implementación de micro-fases 2.1, 2.2 y 2.3
 
 Se pasan las primeras 3 micro-fases del Bloque 2 de "documentada" a "implementada" (API + UI + modelo de datos).

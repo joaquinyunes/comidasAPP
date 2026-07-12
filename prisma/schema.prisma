@@ -52,6 +52,7 @@ model Sucursal {
   ordenesCompra OrdenCompra[]
   equipos      Equipo[]
   asistencias  Asistencia[]
+  visitasMesas VisitaMesa[]
 
   @@index([tenantId])
   @@map("sucursales")
@@ -166,6 +167,7 @@ model Mesa {
   sector   Sector   @relation(fields: [sectorId], references: [id])
   pedidos  Pedido[]
   reservas Reserva[]
+  visitasMesas VisitaMesa[]
 
   @@index([tenantId, sucursalId, estado])
   @@map("mesas")
@@ -531,6 +533,7 @@ model Cliente {
   reservas        Reserva[]
   favoritos       ClienteFavorito[]
   puntosHistorial PuntosHistorial[]
+  visitasMesas    VisitaMesa[]
 
   @@index([tenantId])
   @@map("clientes")
@@ -777,6 +780,26 @@ model AuditLog {
 // BLOQUE 2 — PRODUCTIVIDAD OPERATIVA Y VENTA
 // (micro-fases 2.1 a 2.23, ver 07_Productividad/)
 // ============================================
+
+// --- 2.4 Fidelización: historial de visitas por mesa ---
+model VisitaMesa {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  clienteId  String?  @map("cliente_id") @db.Uuid
+  mesaId     String   @map("mesa_id") @db.Uuid
+  sucursalId String   @map("sucursal_id") @db.Uuid
+  personas   Int?
+  monto      Decimal? @db.Decimal(10, 2)
+  fecha      DateTime @default(now())
+
+  cliente  Cliente? @relation(fields: [clienteId], references: [id])
+  mesa     Mesa    @relation(fields: [mesaId], references: [id])
+  sucursal Sucursal @relation(fields: [sucursalId], references: [id])
+
+  @@index([tenantId, mesaId])
+  @@index([tenantId, clienteId])
+  @@map("visitas_mesa")
+}
 
 // --- 2.1 Checklist de apertura/cierre + 2.2 fichaje ---
 model ChecklistPlantilla {

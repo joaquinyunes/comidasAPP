@@ -13,3 +13,9 @@ Que cocina y mozos dejen de depender del grito y la memoria: la comanda viaja so
 
 ## Valor
 Menos errores de comunicación = menos platos mal hechos y mesas esperando.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/operativo/alertas` (semáforo de pase por tiempo de espera), `POST /api/operativo/pase` (mozo confirma entrega, cierra pedido si corresponde), `GET /api/operativo/comandas-estructuradas` (vista cocina agrupada por estación), `GET /api/operativo/stock-tiempo-real` (quiebres visibles), `POST /api/operativo/confirmacion-voz` (evento de confirmación).
+- **UI**: `/dashboard/operativo` (`PanelOperativo`) — alertas con auto-refresh, comandas por estación, stock en tiempo real y confirmación de voz.
+- **Eventos**: `PedidoEvento` tipos `PASE_MOZO` y `CONFIRMACION_VOZ` para trazabilidad.
+- **Nota**: usa `PedidoItem.horaListo`/`horaEntregado` y `producto.estacion` para derivar el semáforo y agrupar comandas.

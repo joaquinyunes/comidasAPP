@@ -172,30 +172,30 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.4 — Fidelización Operativa
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
-| 1 | `07_Productividad/Fidelizacion_ClienteRecurrente.md` | 📋 |
-| 2 | `07_Productividad/Fidelizacion_HistorialMesa.md` | 📋 |
-| 3 | `07_Productividad/Fidelizacion_ReconocimientoQR.md` | 📋 |
-| 4 | `07_Productividad/Fidelizacion_SugerenciasMozo.md` | 📋 |
-| 5 | `07_Productividad/Fidelizacion_Logistica.md` | 📋 |
-| 6 | `07_Productividad/Fidelizacion_Resumen.md` | 📋 |
+| 1 | `07_Productividad/Fidelizacion_ClienteRecurrente.md` | ✅ |
+| 2 | `07_Productividad/Fidelizacion_HistorialMesa.md` | ✅ |
+| 3 | `07_Productividad/Fidelizacion_ReconocimientoQR.md` | ✅ |
+| 4 | `07_Productividad/Fidelizacion_SugerenciasMozo.md` | ✅ |
+| 5 | `07_Productividad/Fidelizacion_Logistica.md` | ✅ |
+| 6 | `07_Productividad/Fidelizacion_Resumen.md` | ✅ |
 
 ---
 
 ## Micro-fase 2.5 — Operativo: Comunicación Cocina-Mozos
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
-| 1 | `07_Productividad/Operativo_AlertasActivas.md` | 📋 |
-| 2 | `07_Productividad/Operativo_SemaforoPase.md` | 📋 |
-| 3 | `07_Productividad/Operativo_ComandaEstructurada.md` | 📋 |
-| 4 | `07_Productividad/Operativo_StockTiempoReal.md` | 📋 |
-| 5 | `07_Productividad/Operativo_ConfirmacionVoz.md` | 📋 |
-| 6 | `07_Productividad/Operativo_Resumen.md` | 📋 |
+| 1 | `07_Productividad/Operativo_AlertasActivas.md` | ✅ |
+| 2 | `07_Productividad/Operativo_SemaforoPase.md` | ✅ |
+| 3 | `07_Productividad/Operativo_ComandaEstructurada.md` | ✅ |
+| 4 | `07_Productividad/Operativo_StockTiempoReal.md` | ✅ |
+| 5 | `07_Productividad/Operativo_ConfirmacionVoz.md` | ✅ |
+| 6 | `07_Productividad/Operativo_Resumen.md` | ✅ |
 
 ---
 
@@ -466,8 +466,8 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 2.1 | 6 | ✅ |
 | 2.2 | 6 | ✅ |
 | 2.3 | 6 | ✅ |
-| 2.4 | 6 | 📋 |
-| 2.5 | 6 | 📋 |
+| 2.4 | 6 | ✅ |
+| 2.5 | 6 | ✅ |
 | 2.6 | 6 | 📋 |
 | 2.7 | 6 | 📋 |
 | 2.8 | 6 | 📋 |
@@ -488,4 +488,4 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 2.23 | 6 | 📋 |
 | **Total docs** | **62 + 138** | **Bloque 1 completo · Bloque 2 documentado** |
 
-**Bloque 1: documentación base + App Flutter (lista para implementación). Bloque 2: 23 micro-fases de productividad operativa y funciones de venta, documentadas en `07_Productividad/`. Las micro-fases 2.1–2.3 ya están implementadas (API + UI + modelos Prisma y migración). Las restantes (2.4–2.23) siguen pendientes de implementación de código.**
+**Bloque 1: documentación base + App Flutter (lista para implementación). Bloque 2: 23 micro-fases de productividad operativa y funciones de venta, documentadas en `07_Productividad/`. Las micro-fases 2.1–2.5 ya están implementadas (API + UI + modelos Prisma y migración). Las restantes (2.6–2.23) siguen pendientes de implementación de código.**
