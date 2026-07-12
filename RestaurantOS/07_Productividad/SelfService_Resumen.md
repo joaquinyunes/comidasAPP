@@ -13,3 +13,8 @@ Que el dueño deje el sistema andando y lo mantenga sin un programador: menú dr
 
 ## Valor
 El producto se vende y configura solo; vos no vas a cada local.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/selfservice/resumen` agrega categorías, productos, roles, promociones activas y módulos activos, y calcula `listoParaVender`.
+- **UI**: `/dashboard/selfservice` (`PanelSelfService`).
+- **Nota**: usa modelos `CategoriaMenu`, `Producto`, `Rol`, `Promocion`, `Modulo`; sin schema nuevo.

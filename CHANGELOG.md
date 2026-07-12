@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-12 — Implementación de micro-fase 2.20
+
+Se pasa la micro-fase 2.20 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.20 — Configuración Self-service del Dueño
+- API: `/api/selfservice/resumen` (categorías, productos, roles, promociones, módulos, listo-para-vender).
+- UI: `/dashboard/selfservice` (`PanelSelfService`).
+- Navegación del dashboard actualizada con Feedback, Resiliencia, Gamificación, Cliente Digital y Self-service.
+
 ## 2026-07-11 — Implementación de micro-fase 2.19
 
 Se pasa la micro-fase 2.19 del Bloque 2 de "documentada" a "implementada" (API + UI).
