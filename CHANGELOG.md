@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-12 — Implementación de micro-fase 2.8
+
+Se pasa la micro-fase 2.8 del Bloque 2 de "documentada" a "implementada" (API + UI pública).
+
+### Micro-fase 2.8 — Autogestión del Cliente
+- API pública: `/api/cliente/menu`, `/api/cliente/producto/[id]/opciones`, `POST /api/cliente/pedido`, `GET /api/cliente/pedido/[id]`, `GET /api/cliente/pedido/[id]/estado`.
+- UI pública: `/cliente/[mesaId]` (`PanelAutoCliente`) — menú solo-disponible, carrito y seguimiento en vivo.
+- Validación: `ClientePedidoSchema` en `src/lib/validation.ts`.
+- Navegación del dashboard actualizada (Cocina, Mozo).
+
 ## 2026-07-12 — Implementación de micro-fase 2.7
 
 Se pasa la micro-fase 2.7 del Bloque 2 de "documentada" a "implementada" (API + UI).

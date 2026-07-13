@@ -468,3 +468,17 @@ export type RecetaCentralizadaInput = z.infer<typeof RecetaCentralizadaSchema>;
 export type SucursalConfigInput = z.infer<typeof SucursalConfigSchema>;
 export type VisitaMesaInput = z.infer<typeof VisitaMesaSchema>;
 export type ReconocimientoInput = z.infer<typeof ReconocimientoSchema>;
+
+// Cliente autogestión: pedido desde el salón
+export const ClientePedidoItemSchema = z.object({
+  productoId: z.string().uuid("ID de producto inválido"),
+  cantidad: z.number().int().positive().max(20).default(1),
+  notas: z.string().max(200).trim().optional(),
+});
+export const ClientePedidoSchema = z.object({
+  mesaId: z.string().uuid("ID de mesa inválido"),
+  clienteId: z.string().uuid().optional(),
+  items: z.array(ClientePedidoItemSchema).min(1, "El pedido debe tener al menos un item").max(30),
+});
+export type ClientePedidoItemInput = z.infer<typeof ClientePedidoItemSchema>;
+export type ClientePedidoInput = z.infer<typeof ClientePedidoSchema>;

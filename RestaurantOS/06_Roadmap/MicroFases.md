@@ -470,7 +470,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 2.5 | 6 | ✅ |
 | 2.6 | 6 | ✅ |
 | 2.7 | 6 | ✅ |
-| 2.8 | 6 | 📋 |
+| 2.8 | 6 | ✅ |
 | 2.9 | 6 | 📋 |
 | 2.10 | 6 | 📋 |
 | 2.11 | 6 | 📋 |
@@ -488,4 +488,4 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 2.23 | 6 | 📋 |
 | **Total docs** | **62 + 138** | **Bloque 1 completo · Bloque 2 documentado** |
 
-**Bloque 1: documentación base + App Flutter (lista para implementación). Bloque 2: 23 micro-fases de productividad operativa y funciones de venta, documentadas en `07_Productividad/`. Las micro-fases 2.1–2.5 ya están implementadas (API + UI + modelos Prisma y migración). Las restantes (2.6–2.23) siguen pendientes de implementación de código.**
+**Bloque 1: documentación base + App Flutter (lista para implementación). Bloque 2: 23 micro-fases de productividad operativa y funciones de venta, documentadas en `07_Productividad/`. Las micro-fases 2.1–2.8 ya están implementadas (API + UI + modelos Prisma y migración). Las restantes (2.9–2.23) siguen pendientes de implementación de código.**
