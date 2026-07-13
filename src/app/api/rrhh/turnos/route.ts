@@ -36,7 +36,6 @@ export async function GET(request: NextRequest) {
           empleado: {
             include: { usuario: { select: { id: true, nombre: true } } },
           },
-          sucursal: { select: { id: true, nombre: true } },
           asistencia: true,
         },
         orderBy: [{ fecha: "asc" }, { horaInicio: "asc" }],
@@ -106,7 +105,6 @@ export async function POST(request: NextRequest) {
       },
       include: {
         empleado: { include: { usuario: { select: { nombre: true } } } },
-        sucursal: true,
       },
     });
 

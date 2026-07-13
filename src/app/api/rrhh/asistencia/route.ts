@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "No hay entrada registrada para hoy" }, { status: 404 });
       }
 
-      const horasTrabajadas = (now.getTime() - new Date(asistencia.entrada).getTime()) / (1000 * 60 * 60);
+      const horasTrabajadas = (now.getTime() - new Date(asistencia.entrada!).getTime()) / (1000 * 60 * 60);
 
       const updated = await prisma.asistencia.update({
         where: { id: asistencia.id },

@@ -1,7 +1,7 @@
 import { Server as HttpServer } from "http";
 import { Server, Socket } from "socket.io";
 import { verify } from "jsonwebtoken";
-import { prisma } from "./lib/prisma";
+import { prisma } from "./prisma";
 
 const JWT_SECRET = process.env.JWT_SECRET || "tu-secreto-super-seguro-cambiar-en-produccion";
 
@@ -94,7 +94,7 @@ export function initializeSocketServer(httpServer: HttpServer) {
 
         await prisma.auditLog.create({
           data: {
-            tenantId,
+            tenantId: tenantId!,
             usuarioId,
             accion: "ACTUALIZAR_ESTADO_SOCKET",
             entidad: "Mesa",

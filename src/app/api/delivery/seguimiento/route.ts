@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const asignaciones = await prisma.asignacionReparto.findMany({
     where: { tenantId: ctx.tenantId },
     include: {
-      empleado: { select: { id: true, nombre: true } },
+      empleado: { select: { id: true, usuario: { select: { nombre: true } } } },
       zona: { select: { nombre: true, tiempoEstimadoMin: true } },
       pedido: { select: { id: true, total: true, mesa: { select: { numero: true } }, cliente: { select: { nombre: true } } } },
     },
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       asignaciones: asignaciones.map((a) => ({
         id: a.id,
         estado: a.estado,
-        empleado: a.empleado?.nombre ?? "—",
+        empleado: a.empleado?.usuario?.nombre ?? "—",
         zona: a.zona?.nombre ?? "—",
         cliente: a.pedido.cliente?.nombre ?? (a.pedido.mesa ? `Mesa ${a.pedido.mesa.numero}` : "—"),
         total: Number(a.pedido.total),

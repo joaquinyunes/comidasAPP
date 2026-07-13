@@ -35,8 +35,6 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         plantilla: { select: { id: true, nombre: true, tipo: true } },
-        sucursal: { select: { id: true, nombre: true } },
-        usuario: { select: { id: true, nombre: true } },
         _count: { select: { items: true } },
       },
       orderBy: { createdAt: "desc" },

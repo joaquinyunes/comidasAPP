@@ -14,7 +14,7 @@ async function validarAPIKey(request: NextRequest): Promise<{ tenantId: string; 
   // Por ahora: mock validation
   const apiKeys: Record<string, { tenantId: string; scopes: string[] }> = {
     "demo-key-123": {
-      tenantId: "tenant-demo-001",
+      tenantId: "390af144-25d4-41c8-a026-21e27a4c9fbc",
       scopes: ["productos:leer", "pedidos:crear", "pedidos:leer", "clientes:leer"],
     },
   };

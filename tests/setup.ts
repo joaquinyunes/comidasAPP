@@ -1,7 +1,5 @@
 import { beforeAll, afterAll, vi } from "vitest";
-import { PrismaClient } from "@/lib/prisma";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 beforeAll(async () => {
   // Configurar variables de entorno para tests

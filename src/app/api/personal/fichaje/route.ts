@@ -116,7 +116,6 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         usuario: { select: { id: true, nombre: true } },
-        sucursal: { select: { id: true, nombre: true } },
         asistencia: {
           where: { entrada: { gte: hoy } },
           orderBy: { entrada: "desc" },
@@ -144,7 +143,7 @@ export async function GET(request: NextRequest) {
         empleadoId: e.id,
         nombre: e.usuario.nombre,
         cargo: e.cargo,
-        sucursal: e.sucursal?.nombre,
+        sucursalId: e.sucursalId,
         estado,
         entrada: a?.entrada ?? null,
         breakInicio: a?.breakInicio ?? null,

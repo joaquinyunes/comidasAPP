@@ -11,13 +11,12 @@ export async function GET(req: NextRequest) {
   const [anulaciones, eventos] = await Promise.all([
     prisma.anulacion.findMany({
       where: { tenantId: ctx.tenantId },
-      include: { pedidoItem: { select: { producto: { select: { nombre: true } }, cantidad: true } }, usuario: { select: { nombre: true } } },
+      include: { pedidoItem: { select: { producto: { select: { nombre: true } }, cantidad: true } } },
       orderBy: { createdAt: "desc" },
       take: 30,
     }),
     prisma.pedidoEvento.findMany({
       where: { tenantId: ctx.tenantId },
-      include: { usuario: { select: { nombre: true } } },
       orderBy: { createdAt: "desc" },
       take: 30,
     }),
@@ -29,8 +28,8 @@ export async function GET(req: NextRequest) {
     porUsuario[k] = porUsuario[k] ?? { anulaciones: 0, eventos: 0 };
     porUsuario[k][tipo] += 1;
   };
-  anulaciones.forEach((a) => sumar(a.usuario?.nombre ?? null, "anulaciones"));
-  eventos.forEach((e) => sumar(e.usuario?.nombre ?? null, "eventos"));
+  anulaciones.forEach((a) => sumar(a.usuarioId ?? null, "anulaciones"));
+  eventos.forEach((e) => sumar(e.usuarioId ?? null, "eventos"));
 
   return NextResponse.json({
     data: {
@@ -39,10 +38,10 @@ export async function GET(req: NextRequest) {
         producto: a.pedidoItem.producto.nombre,
         cantidad: a.pedidoItem.cantidad,
         motivo: a.motivo,
-        usuario: a.usuario?.nombre ?? "—",
+        usuario: a.usuarioId ?? "—",
         fecha: a.createdAt,
       })),
-      eventos: eventos.map((e) => ({ id: e.id, evento: e.evento, usuario: e.usuario?.nombre ?? "—", fecha: e.createdAt })),
+      eventos: eventos.map((e) => ({ id: e.id, evento: e.evento, usuario: e.usuarioId ?? "—", fecha: e.createdAt })),
       porUsuario,
     },
   });

@@ -12,7 +12,6 @@ export async function GET(req: NextRequest) {
 
   const feedbacks = await prisma.feedback.findMany({
     where: { tenantId: ctx.tenantId, createdAt: { gte: desde } },
-    include: { mesa: { select: { numero: true } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -22,7 +21,7 @@ export async function GET(req: NextRequest) {
   const tristes = feedbacks
     .filter((f) => f.calificacion === "TRISTE")
     .slice(0, 10)
-    .map((f) => ({ id: f.id, motivo: f.motivo, mesa: f.mesa?.numero ?? null, fecha: f.createdAt }));
+    .map((f) => ({ id: f.id, motivo: f.motivo, mesa: f.mesaId ?? null, fecha: f.createdAt }));
 
   const total = feedbacks.length;
   const felizPct = total ? Math.round(((porCalificacion.FELIZ ?? 0) / total) * 100) : 0;

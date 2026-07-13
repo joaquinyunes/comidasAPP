@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { NextRequest } from "next/server";
-import { GET, POST } from "@/app/api/auth/login/route";
+import { POST, DELETE } from "@/app/api/auth/login/route";
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
 import { sign } from "jsonwebtoken";
@@ -165,7 +165,7 @@ describe("Auth API", () => {
         method: "DELETE",
       });
 
-      const response = await DELETE(request);
+      const response = await DELETE();
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -199,7 +199,9 @@ describe("Validation Schemas", () => {
 
     const result = validateInput(MesaSchema, invalidMesa);
     expect(result.success).toBe(false);
-    expect(result.errors).toContain("numero: String must contain at least 1 character(s)");
+    if (!result.success) {
+      expect(result.errors).toContain("numero: String must contain at least 1 character(s)");
+    }
   });
 
   it("should validate ReservaSchema", async () => {
@@ -250,8 +252,8 @@ describe("Utils", () => {
   it("should sanitize strings", async () => {
     const { sanitizeString } = await import("@/lib/validation");
 
-    expect(sanitizeString("<script>alert(1)</script>")).toBe("<script>alert(1)</script>");
-    expect(sanitizeString('"hello"')).toBe(""hello"");
+    expect(sanitizeString("<script>alert(1)</script>")).toBe("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(sanitizeString('"hello"')).toBe("&quot;hello&quot;");
     expect(sanitizeString("  hello  ")).toBe("hello");
   });
 

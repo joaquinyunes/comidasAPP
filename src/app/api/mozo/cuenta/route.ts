@@ -14,12 +14,12 @@ export async function GET(req: NextRequest) {
 
   const pedidos = await prisma.pedido.findMany({
     where: { mesaId, tenantId: ctx.tenantId, estado: { in: ["abierto", "en_proceso"] } },
-    include: { pedidoItems: { select: { id: true, subtotal: true, estado: true, anulado: true, producto: { select: { nombre: true } } } } },
+    include: { items: { select: { id: true, subtotal: true, estado: true, anulado: true, producto: { select: { nombre: true } } } } },
   });
 
   let subtotal = 0;
   for (const p of pedidos) {
-    for (const it of p.pedidoItems) {
+    for (const it of p.items) {
       if (!it.anulado) subtotal += Number(it.subtotal);
     }
   }

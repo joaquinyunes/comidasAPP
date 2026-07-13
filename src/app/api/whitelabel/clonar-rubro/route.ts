@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
   const catMap: Record<string, string> = {};
   for (const c of catsOrigen) {
-    const { id, tenantId, createdAt, updatedAt, ...rest } = c;
+    const { id, tenantId, createdAt, ...rest } = c;
     const creada = await prisma.categoriaMenu.create({ data: { ...rest, tenantId: objetivo } });
     catMap[id] = creada.id;
   }
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   let nProd = 0;
   for (const p of prodsOrigen) {
     const { id, tenantId, categoriaId, createdAt, updatedAt, ...rest } = p;
-    await prisma.producto.create({ data: { ...rest, tenantId: objetivo, categoriaId: categoriaId ? catMap[categoriaId] : null } });
+    await prisma.producto.create({ data: { ...rest, tenantId: objetivo, categoriaId: (categoriaId ? catMap[categoriaId] : null) as string } as any });
     nProd += 1;
   }
 

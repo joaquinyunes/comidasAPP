@@ -51,13 +51,14 @@ export async function POST(req: NextRequest) {
   const pedido = await prisma.pedido.create({
     data: {
       tenantId: mesa.tenantId,
+      sucursalId: mesa.sucursalId,
       mesaId,
       clienteId: clienteId ?? null,
       estado: "abierto",
       total,
-      pedidoItems: { create: pedidoItems },
+      items: { create: pedidoItems },
     },
-    include: { pedidoItems: { select: { id: true, productoId: true, cantidad: true, estado: true } } },
+    include: { items: { select: { id: true, productoId: true, cantidad: true, estado: true } } },
   });
 
   return NextResponse.json({
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
       pedidoId: pedido.id,
       estado: pedido.estado,
       total,
-      items: pedido.pedidoItems,
+      items: pedido.items,
       mensaje: "Pedido confirmado. Lo preparan en cocina.",
     },
   }, { status: 201 });

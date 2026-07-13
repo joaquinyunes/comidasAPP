@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { NextRequest } from "next/server";
-import { GET, POST } from "@/app/api/auth/login/route";
+import { POST } from "@/app/api/auth/login/route";
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
 import { sign } from "jsonwebtoken";
@@ -167,7 +167,7 @@ describe("Auth API", () => {
 
       // Need to import DELETE from the route
       const { DELETE } = await import("@/app/api/auth/login/route");
-      const response = await DELETE(request);
+      const response = await DELETE();
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -178,7 +178,7 @@ describe("Auth API", () => {
 
 describe("Validation Schemas", () => {
   // Tests for validation schemas
-  it("should validate Mesa schema", () => {
+  it("should validate Mesa schema", async () => {
     const { MesaSchema } = await import("@/lib/validation");
     const result = MesaSchema.safeParse({
       numero: "1",
@@ -188,7 +188,7 @@ describe("Validation Schemas", () => {
     expect(result.success).toBe(true);
   });
 
-  it("should reject invalid Mesa schema", () => {
+  it("should reject invalid Mesa schema", async () => {
     const { MesaSchema } = await import("@/lib/validation");
     const result = MesaSchema.safeParse({
       numero: "",
@@ -197,7 +197,7 @@ describe("Validation Schemas", () => {
     expect(result.success).toBe(false);
   });
 
-  it("should validate Producto schema", () => {
+  it("should validate Producto schema", async () => {
     const { ProductoSchema } = await import("@/lib/validation");
     const result = ProductoSchema.safeParse({
       nombre: "Pizza Test",
@@ -207,7 +207,7 @@ describe("Validation Schemas", () => {
     expect(result.success).toBe(true);
   });
 
-  it("should reject invalid Producto schema", () => {
+  it("should reject invalid Producto schema", async () => {
     const { ProductoSchema } = await import("@/lib/validation");
     const result = ProductoSchema.safeParse({
       nombre: "",

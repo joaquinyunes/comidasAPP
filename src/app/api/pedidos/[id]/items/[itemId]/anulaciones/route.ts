@@ -25,7 +25,6 @@ export async function GET(
 
     const anulaciones = await prisma.anulacion.findMany({
       where: { pedidoItemId: itemId, tenantId: context.tenantId },
-      include: { usuario: { select: { id: true, nombre: true } } },
       orderBy: { createdAt: "desc" },
     });
 

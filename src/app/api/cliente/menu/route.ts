@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   if (!mesa) return NextResponse.json({ error: "Mesa no encontrada" }, { status: 404 });
 
   const productos = await prisma.producto.findMany({
-    where: { tenantId: mesa.tenantId, activo: true, disponible: true },
+    where: { tenantId: mesa.tenantId, disponible: true },
     select: {
       id: true,
       nombre: true,

@@ -3,7 +3,7 @@ import { Server } from "socket.io";
 import { initializeSocketServer } from "@/lib/socket-server";
 
 const httpServer = createServer();
-const io = new Server(httpServer, {
+const io = new Server(httpServer as any, {
   cors: {
     origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     methods: ["GET", "POST"],
@@ -12,7 +12,7 @@ const io = new Server(httpServer, {
 });
 
 // Inicializar socket server
-initializeSocketServer(io);
+initializeSocketServer(io as any);
 
 const PORT = process.env.SOCKET_PORT || 3001;
 

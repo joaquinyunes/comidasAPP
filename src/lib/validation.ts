@@ -38,55 +38,12 @@ export const PedidoSchema = z.object({
   notas: z.string().max(500).trim().optional(),
 });
 
-// Reserva
-export const ReservaSchema = z.object({
-  clienteNombre: z.string().min(1).max(100).trim(),
-  clienteTelefono: z.string().min(8).max(20).trim(),
-  fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato de fecha inválido (YYYY-MM-DD)"),
-  hora: z.string().regex(/^\d{2}:\d{2}$/, "Formato de hora inválido (HH:MM)"),
-  cantidad: z.number().int().min(1).max(50),
-  sector: z.string().max(50).trim(),
-  notas: z.string().max(300).trim().optional(),
-});
-
 // Caja
 export const CajaSchema = z.object({
   tipo: z.enum(["apertura", "cierre", "ingreso", "egreso"]),
   monto: z.number(),
   descripcion: z.string().min(1).max(200).trim(),
   metodoPago: z.enum(["efectivo", "tarjeta_credito", "tarjeta_debito", "qr", "transferencia"]).optional(),
-});
-
-// Proveedor
-export const ProveedorSchema = z.object({
-  nombre: z.string().min(1).max(100).trim(),
-  cuit: z.string().regex(/^\d{2}-\d{8}-\d{1}$/, "CUIT inválido (XX-XXXXXXXX-X)"),
-  telefono: z.string().min(8).max(20).trim(),
-  email: z.string().email("Email inválido"),
-  direccion: z.string().max(200).trim(),
-  categorias: z.array(z.string().max(50)).max(10),
-});
-
-// Empleado
-export const EmpleadoSchema = z.object({
-  nombre: z.string().min(1).max(50).trim(),
-  apellido: z.string().min(1).max(50).trim(),
-  dni: z.string().regex(/^\d{2}\.\d{3}\.\d{3}$/, "DNI inválido (XX.XXX.XXX)"),
-  telefono: z.string().min(8).max(20).trim(),
-  email: z.string().email("Email inválido"),
-  rol: z.string().max(50).trim(),
-  sector: z.string().max(50).trim(),
-});
-
-// Cupón
-export const CuponSchema = z.object({
-  codigo: z.string().min(3).max(20).regex(/^[A-Z0-9-]+$/, "Solo mayúsculas, números y guiones"),
-  descripcion: z.string().min(1).max(200).trim(),
-  tipo: z.enum(["porcentaje", "monto_fijo", "2x1"]),
-  valor: z.number().min(0),
-  fechaInicio: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  fechaFin: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  usosMaximos: z.number().int().positive(),
 });
 
 // ============================================
@@ -191,6 +148,18 @@ export const IngredienteSchema = z.object({
   stockMaximo: z.number().nonnegative().optional(),
   proveedorId: z.string().uuid().optional(),
   activo: z.boolean().default(true),
+});
+
+// Inventario - Movimiento de stock
+export const StockMovimientoSchema = z.object({
+  tipo: z.string().min(1).max(50).trim(),
+  cantidad: z.number().positive("La cantidad debe ser positiva"),
+  motivo: z.string().max(300).trim().optional(),
+  origen: z.string().max(50).trim().optional(),
+  ingredienteId: z.string().uuid(),
+  sucursalId: z.string().uuid(),
+  pedidoId: z.string().uuid().optional(),
+  usuarioId: z.string().uuid().optional(),
 });
 
 // Inventario - Stock por sucursal
@@ -300,9 +269,9 @@ export const AuditLogSchema = z.object({
   accion: z.string().min(1).max(100),
   entidad: z.string().min(1).max(100),
   entidadId: z.string().uuid().optional(),
-  valorAnterior: z.record(z.unknown()).optional(),
-  valorNuevo: z.record(z.unknown()).optional(),
-  ipAddress: z.string().ip().optional(),
+  valorAnterior: z.record(z.string(), z.unknown()).optional(),
+  valorNuevo: z.record(z.string(), z.unknown()).optional(),
+  ipAddress: z.string().optional(),
   userAgent: z.string().optional(),
 });
 
@@ -310,7 +279,7 @@ export const AuditLogSchema = z.object({
 export const PrediccionSchema = z.object({
   tipo: z.enum(["ventas", "stock", "demanda", "personal"]),
   modelo: z.string().max(50),
-  parametros: z.record(z.unknown()),
+    parametros: z.record(z.string(), z.unknown()),
   horizonteDias: z.number().int().min(1).max(90),
 });
 
@@ -390,7 +359,7 @@ export const AnulacionSchema = z.object({
 export const OfflineItemSchema = z.object({
   ruta: z.string().min(1),
   metodo: z.enum(["POST", "PUT", "DELETE", "PATCH"]).default("POST"),
-  payload: z.record(z.unknown()).default({}),
+  payload: z.record(z.string(), z.unknown()).default({}),
   clientId: z.string().min(1),
 });
 
@@ -422,7 +391,7 @@ export const SucursalConfigSchema = z.object({
   direccion: z.string().max(500).optional(),
   telefono: z.string().max(50).optional(),
   email: z.string().email().optional().nullable(),
-  horario: z.record(z.unknown()).optional(),
+  horario: z.record(z.string(), z.unknown()).optional(),
   activa: z.boolean().optional(),
 });
 

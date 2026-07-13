@@ -10,8 +10,8 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       id: true,
       estado: true,
       total: true,
-      creadoEn: true,
-      pedidoItems: {
+      createdAt: true,
+      items: {
         select: {
           id: true,
           estado: true,
@@ -30,8 +30,8 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       pedidoId: pedido.id,
       estado: pedido.estado,
       total: Number(pedido.total),
-      creadoEn: pedido.creadoEn,
-      items: pedido.pedidoItems.map((it) => ({
+      createdAt: pedido.createdAt,
+      items: pedido.items.map((it) => ({
         nombre: it.producto.nombre,
         cantidad: it.cantidad,
         estado: it.estado,

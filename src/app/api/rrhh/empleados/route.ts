@@ -35,7 +35,6 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           usuario: { select: { id: true, nombre: true, email: true, telefono: true, avatarUrl: true } },
-          sucursal: { select: { id: true, nombre: true } },
           _count: { select: { turnos: true, asistencia: true } },
         },
         orderBy: { createdAt: "desc" },
@@ -85,7 +84,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
     }
 
-    const existing = await prisma.empleado.findUnique({ where: { usuarioId } });
+    const existing = await prisma.empleado.findFirst({ where: { usuarioId, tenantId: context.tenantId } });
     if (existing) {
       return NextResponse.json({ error: "El usuario ya tiene un perfil de empleado" }, { status: 409 });
     }
@@ -97,7 +96,6 @@ export async function POST(request: NextRequest) {
       },
       include: {
         usuario: { select: { id: true, nombre: true, email: true } },
-        sucursal: { select: { id: true, nombre: true } },
       },
     });
 

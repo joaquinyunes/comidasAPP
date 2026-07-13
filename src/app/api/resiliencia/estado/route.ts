@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     prisma.pedido.count({ where: { tenantId: ctx.tenantId, createdAt: { gte: desde24h } } }),
     prisma.anulacion.count({ where: { tenantId: ctx.tenantId, createdAt: { gte: desde30d } } }),
     prisma.mesa.count({ where: { tenantId: ctx.tenantId, estado: "ocupada" } }),
-    prisma.producto.count({ where: { tenantId: ctx.tenantId, activo: true } }),
+    prisma.producto.count({ where: { tenantId: ctx.tenantId, disponible: true } }),
     prisma.pedido.findFirst({ where: { tenantId: ctx.tenantId }, orderBy: { createdAt: "desc" }, select: { createdAt: true } }),
   ]);
 

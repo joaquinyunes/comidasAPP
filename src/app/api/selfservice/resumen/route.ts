@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   const [categorias, productos, roles, promociones, modulos] = await Promise.all([
     prisma.categoriaMenu.count({ where: { tenantId: ctx.tenantId } }),
-    prisma.producto.count({ where: { tenantId: ctx.tenantId, activo: true } }),
+    prisma.producto.count({ where: { tenantId: ctx.tenantId, disponible: true } }),
     prisma.rol.count({ where: { tenantId: ctx.tenantId } }),
     prisma.promocion.count({ where: { tenantId: ctx.tenantId, activa: true } }),
     prisma.modulo.count({ where: { tenantId: ctx.tenantId, activo: true } }),

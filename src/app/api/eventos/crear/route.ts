@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   const total = Math.round(pedidoItems.reduce((a, b) => a + Number(b.subtotal), 0) * 100) / 100;
 
   const pedido = await prisma.pedido.create({
-    data: { tenantId: ctx.tenantId, sucursalId, mesaId: mesaId ?? null, clienteId: clienteId ?? null, tipo: "evento", horaProgramada: new Date(horaProgramada), notas: notas ?? null, total, pedidoItems: { create: pedidoItems } },
+    data: { tenantId: ctx.tenantId, sucursalId, mesaId: mesaId ?? null, clienteId: clienteId ?? null, tipo: "evento", horaProgramada: new Date(horaProgramada), notas: notas ?? null, total, items: { create: pedidoItems } },
   });
 
   return NextResponse.json({ data: { pedidoId: pedido.id, estado: pedido.estado } }, { status: 201 });

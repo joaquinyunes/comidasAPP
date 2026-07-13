@@ -15,11 +15,11 @@ const MENSAJES: Record<string, string> = {
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const pedido = await prisma.pedido.findUnique({
     where: { id: params.id },
-    select: { estado: true, pedidoItems: { select: { estado: true, anulado: true } } },
+    select: { estado: true, items: { select: { estado: true, anulado: true } } },
   });
   if (!pedido) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
 
-  const estados = pedido.pedidoItems.filter((i) => !i.anulado).map((i) => i.estado);
+  const estados = pedido.items.filter((i) => !i.anulado).map((i) => i.estado);
   const total = estados.length;
   const listos = estados.filter((e) => e === "listo" || e === "entregado").length;
   const progreso = total === 0 ? 0 : Math.round((listos / total) * 100);

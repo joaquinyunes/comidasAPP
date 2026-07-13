@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   const visitas = await prisma.visitaMesa.findMany({
     where: { mesaId, tenantId: ctx.tenantId },
     include: { cliente: { select: { id: true, nombre: true } } },
-    orderBy: { creadoEn: "desc" },
+    orderBy: { fecha: "desc" },
     take: 10,
   });
 
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       cliente: v.cliente?.nombre ?? "Sin cliente",
       personas: v.personas,
       monto: v.monto ? Number(v.monto) : null,
-      creadoEn: v.creadoEn,
+      createdAt: v.fecha,
     })),
   });
 }

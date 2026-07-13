@@ -28,8 +28,14 @@ function extractToken(request: NextRequest): string | null {
 
 function verifyToken(token: string): TenantContext | null {
   try {
-    const decoded = verify(token, JWT_SECRET) as TenantContext;
-    return decoded;
+    const decoded = verify(token, JWT_SECRET) as Record<string, unknown> & TenantContext;
+    return {
+      tenantId: decoded.tenantId as string,
+      sucursalId: decoded.sucursalId as string | undefined,
+      usuarioId: (decoded.usuarioId as string) ?? (decoded.userId as string),
+      roles: (decoded.roles as string[]) ?? [],
+      permisos: (decoded.permisos as string[]) ?? [],
+    };
   } catch {
     return null;
   }

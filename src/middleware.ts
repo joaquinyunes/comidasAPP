@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verify } from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
 // ============================================
 // MIDDLEWARE DE AUTENTICACIÓN Y RBAC
@@ -59,12 +59,13 @@ function extractToken(request: NextRequest): string | null {
   return null;
 }
 
-// Verificar y decodificar JWT
-function verifyToken(token: string): JWTPayload | null {
+// Verificar y decodificar JWT (edge-safe con jose)
+async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
-    const decoded = verify(token, JWT_SECRET) as JWTPayload;
-    return decoded;
-  } catch (error) {
+    const secret = new TextEncoder().encode(JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret);
+    return payload as unknown as JWTPayload;
+  } catch {
     return null;
   }
 }
@@ -124,7 +125,7 @@ function getRequiredPermission(pathname: string): string | null {
 // MIDDLEWARE PRINCIPAL
 // ============================================
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Permitir rutas públicas
@@ -160,7 +161,7 @@ export function middleware(request: NextRequest) {
   }
 
   // 4. Decodificar token
-  const payload = verifyToken(token);
+  const payload = await verifyToken(token);
 
   if (!payload) {
     // Token inválido

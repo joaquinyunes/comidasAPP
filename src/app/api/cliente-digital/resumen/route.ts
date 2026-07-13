@@ -11,7 +11,6 @@ export async function GET(req: NextRequest) {
   const [tristes, combos, mesasConQR] = await Promise.all([
     prisma.feedback.findMany({
       where: { tenantId: ctx.tenantId, calificacion: "TRISTE" },
-      include: { mesa: { select: { numero: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
@@ -24,7 +23,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     data: {
-      alertaFeedback: tristes.map((t) => ({ id: t.id, motivo: t.motivo, mesa: t.mesa?.numero ?? null })),
+      alertaFeedback: tristes.map((t) => ({ id: t.id, motivo: t.motivo, mesa: t.mesaId ?? null })),
       combos,
       mesasConQR,
     },

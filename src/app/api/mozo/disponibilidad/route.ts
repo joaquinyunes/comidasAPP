@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const sucursalId = searchParams.get("sucursalId") || ctx.sucursalId || undefined;
 
   const productos = await prisma.producto.findMany({
-    where: { tenantId: ctx.tenantId, activo: true },
+    where: { tenantId: ctx.tenantId, disponible: true },
     select: { id: true, nombre: true, disponible: true, categoria: { select: { nombre: true } } },
     orderBy: { nombre: "asc" },
   });

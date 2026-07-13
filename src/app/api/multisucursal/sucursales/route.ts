@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const sucursales = await prisma.sucursal.findMany({
       where: { tenantId: context.tenantId },
       include: {
-        _count: { select: { mesas: true, empleados: true, pedidos: true, sectores: true } },
+        _count: { select: { mesas: true, pedidos: true, sectores: true } },
       },
       orderBy: { createdAt: "asc" },
     });

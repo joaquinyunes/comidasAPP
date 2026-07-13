@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   if (!ctx) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
 
   const productos = await prisma.producto.findMany({
-    where: { tenantId: ctx.tenantId, activo: true, disponible: true },
+    where: { tenantId: ctx.tenantId, disponible: true },
     select: { id: true, nombre: true, destacado: true, idiomas: true, categoria: { select: { nombre: true } } },
     orderBy: { nombre: "asc" },
   });

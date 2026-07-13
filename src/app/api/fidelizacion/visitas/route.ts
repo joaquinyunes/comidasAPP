@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
           where: { id: actual.id },
           data: {
             totalVisitas: actual.totalVisitas + 1,
-            totalGastado: actual.totalGastado + (validation.data.monto ?? 0),
+            totalGastado: Number(actual.totalGastado) + (validation.data.monto ?? 0),
             ultimaVisita: new Date(),
             puntos: nuevosPuntos,
             nivel: nivelPorPuntos(nuevosPuntos),

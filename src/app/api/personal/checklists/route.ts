@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         _count: { select: { items: true, ejecuciones: true } },
-        sucursal: { select: { id: true, nombre: true } },
       },
       orderBy: [{ tipo: "asc" }, { nombre: "asc" }],
     });

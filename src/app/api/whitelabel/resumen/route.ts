@@ -12,12 +12,12 @@ export async function GET(req: NextRequest) {
   if (!ctx) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
 
   const [tenant, totalTenants, modulos] = await Promise.all([
-    prisma.tenant.findUnique({ where: { id: ctx.tenantId }, select: { id: true, nombre: true, subdominio: true, logoUrl: true } }),
+    prisma.tenant.findUnique({ where: { id: ctx.tenantId }, select: { id: true, nombre: true, slug: true, logoUrl: true } }),
     prisma.tenant.count(),
     prisma.modulo.findMany({ where: { tenantId: ctx.tenantId }, select: { clave: true, nombre: true, activo: true } }),
   ]);
 
-  const widgetSnippet = `<iframe src="https://${tenant?.subdominio ?? "tu-local"}.restaurantos.app/menu" width="100%" height="600" title="Pedí online"></iframe>`;
+  const widgetSnippet = `<iframe src="https://${tenant?.slug ?? "tu-local"}.restaurantos.app/menu" width="100%" height="600" title="Pedí online"></iframe>`;
 
   return NextResponse.json({
     data: {

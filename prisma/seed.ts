@@ -1,6 +1,7 @@
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { hash } from "bcryptjs";
+import { createHash } from "crypto";
 
 // ============================================
 // SEED DATA — RestaurantOS
@@ -21,8 +22,18 @@ export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-const TENANT_ID = "tenant-demo-001";
-const SUCURSAL_ID = "sucursal-demo-001";
+// El schema define los `id` como @db.Uuid, así que derivamos UUIDs válidos y
+// deterministas a partir de las claves de texto (para que el seed sea idempotente).
+function uid(key: string): string {
+  const h = createHash("md5").update(`seed::${key}`).digest();
+  h[6] = (h[6] & 0x0f) | 0x40; // version 4
+  h[8] = (h[8] & 0x3f) | 0x80; // variant RFC4122
+  const hex = h.toString("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
+}
+
+const TENANT_ID = uid("tenant-demo-001");
+const SUCURSAL_ID = uid("sucursal-demo-001");
 
 async function main() {
   console.log("🌱 Iniciando seed...");
@@ -73,11 +84,12 @@ async function main() {
   ];
 
   for (const rol of roles) {
+    const id = uid(rol.id);
     await prisma.rol.upsert({
-      where: { id: rol.id },
+      where: { id },
       update: {},
       create: {
-        id: rol.id,
+        id,
         tenantId: TENANT_ID,
         nombre: rol.nombre,
         permisos: rol.permisos,
@@ -100,11 +112,13 @@ async function main() {
   ];
 
   for (const user of usuarios) {
+    const userId = uid(user.id);
+    const rolId = uid(user.rolId);
     await prisma.usuario.upsert({
-      where: { id: user.id },
+      where: { id: userId },
       update: {},
       create: {
-        id: user.id,
+        id: userId,
         tenantId: TENANT_ID,
         email: user.email,
         passwordHash,
@@ -117,16 +131,16 @@ async function main() {
     await prisma.usuarioRol.upsert({
       where: {
         usuarioId_rolId_sucursalId: {
-          usuarioId: user.id,
-          rolId: user.rolId,
+          usuarioId: userId,
+          rolId: rolId,
           sucursalId: SUCURSAL_ID,
         },
       },
       update: {},
       create: {
-        id: `ur-${user.id}`,
-        usuarioId: user.id,
-        rolId: user.rolId,
+        id: uid(`ur-${user.id}`),
+        usuarioId: userId,
+        rolId: rolId,
         sucursalId: SUCURSAL_ID,
       },
     });
@@ -145,11 +159,12 @@ async function main() {
 
   for (let i = 0; i < sectores.length; i++) {
     const sector = sectores[i];
+    const id = uid(sector.id);
     await prisma.sector.upsert({
-      where: { id: sector.id },
+      where: { id },
       update: {},
       create: {
-        id: sector.id,
+        id,
         tenantId: TENANT_ID,
         sucursalId: SUCURSAL_ID,
         nombre: sector.nombre,
@@ -172,14 +187,15 @@ async function main() {
   ];
 
   for (const mesa of mesas) {
+    const id = uid(mesa.id);
     await prisma.mesa.upsert({
-      where: { id: mesa.id },
+      where: { id },
       update: {},
       create: {
-        id: mesa.id,
+        id,
         tenantId: TENANT_ID,
         sucursalId: SUCURSAL_ID,
-        sectorId: mesa.sectorId,
+        sectorId: uid(mesa.sectorId),
         numero: mesa.numero,
         capacidad: mesa.capacidad,
         posicionX: mesa.posicionX,
@@ -203,11 +219,12 @@ async function main() {
   ];
 
   for (const cat of categorias) {
+    const id = uid(cat.id);
     await prisma.categoriaMenu.upsert({
-      where: { id: cat.id },
+      where: { id },
       update: {},
       create: {
-        id: cat.id,
+        id,
         tenantId: TENANT_ID,
         nombre: cat.nombre,
         orden: cat.orden,
@@ -238,15 +255,16 @@ async function main() {
   ];
 
   for (const prod of productos) {
+    const id = uid(prod.id);
     await prisma.producto.upsert({
-      where: { id: prod.id },
+      where: { id },
       update: {},
       create: {
-        id: prod.id,
+        id,
         tenantId: TENANT_ID,
         nombre: prod.nombre,
         precio: prod.precio,
-        categoriaId: prod.categoriaId,
+        categoriaId: uid(prod.categoriaId),
         disponible: true,
       },
     });
@@ -268,11 +286,12 @@ async function main() {
   ];
 
   for (const ing of ingredientes) {
+    const id = uid(ing.id);
     await prisma.ingrediente.upsert({
-      where: { id: ing.id },
+      where: { id },
       update: {},
       create: {
-        id: ing.id,
+        id,
         tenantId: TENANT_ID,
         nombre: ing.nombre,
         unidadMedida: ing.unidadMedida,
@@ -293,11 +312,12 @@ async function main() {
   ];
 
   for (const cli of clientes) {
+    const id = uid(cli.id);
     await prisma.cliente.upsert({
-      where: { id: cli.id },
+      where: { id },
       update: {},
       create: {
-        id: cli.id,
+        id,
         tenantId: TENANT_ID,
         nombre: cli.nombre,
         telefono: cli.telefono,
@@ -318,11 +338,12 @@ async function main() {
   ];
 
   for (const prov of proveedores) {
+    const id = uid(prov.id);
     await prisma.proveedor.upsert({
-      where: { id: prov.id },
+      where: { id },
       update: {},
       create: {
-        id: prov.id,
+        id,
         tenantId: TENANT_ID,
         nombre: prov.nombre,
         contactoNombre: prov.contactoNombre,
@@ -346,13 +367,14 @@ async function main() {
   ];
 
   for (const emp of empleados) {
+    const id = uid(emp.id);
     await prisma.empleado.upsert({
-      where: { id: emp.id },
+      where: { id },
       update: {},
       create: {
-        id: emp.id,
+        id,
         tenantId: TENANT_ID,
-        usuarioId: emp.usuarioId,
+        usuarioId: uid(emp.usuarioId),
         sucursalId: emp.sucursalId,
         cargo: emp.cargo,
         estado: "activo",
@@ -380,7 +402,7 @@ async function main() {
       where: {
         sucursalId_ingredienteId_lote: {
           sucursalId: SUCURSAL_ID,
-          ingredienteId: stock.ingredienteId,
+          ingredienteId: uid(stock.ingredienteId),
           lote: "LOTE-DEFAULT",
         },
       },
@@ -388,7 +410,7 @@ async function main() {
       create: {
         tenantId: TENANT_ID,
         sucursalId: SUCURSAL_ID,
-        ingredienteId: stock.ingredienteId,
+        ingredienteId: uid(stock.ingredienteId),
         cantidadActual: stock.cantidad,
         lote: "LOTE-DEFAULT",
       },

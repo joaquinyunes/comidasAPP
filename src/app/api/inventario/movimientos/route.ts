@@ -163,8 +163,6 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           ingrediente: { select: { nombre: true, unidadMedida: true } },
-          sucursal: { select: { nombre: true } },
-          usuario: { select: { nombre: true } },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,

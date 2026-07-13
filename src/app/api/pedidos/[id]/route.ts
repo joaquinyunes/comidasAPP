@@ -26,7 +26,7 @@ export async function GET(
         cliente: true,
         mozo: { select: { nombre: true } },
         pagos: true,
-        eventos: { include: { usuario: { select: { nombre: true } } }, orderBy: { createdAt: "asc" } },
+        eventos: { orderBy: { createdAt: "asc" } },
       },
     });
 

@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     include: {
       pedidos: {
         where: { estado: { in: ["abierto", "en_proceso"] } },
-        include: { cliente: { select: { id: true, nombre: true, alergenos: true } } },
+        include: { cliente: { select: { id: true, nombre: true } } },
         take: 1,
       },
     },
@@ -25,10 +25,10 @@ export async function GET(req: NextRequest) {
   if (!mesa) return NextResponse.json({ error: "Mesa no encontrada" }, { status: 404 });
 
   const cliente = mesa.pedidos[0]?.cliente ?? null;
-  const alergenos = cliente?.alergenos ?? [];
+  const alergenos: string[] = [];
 
   const productos = await prisma.producto.findMany({
-    where: { tenantId: ctx.tenantId, activo: true },
+    where: { tenantId: ctx.tenantId, disponible: true },
     select: { id: true, nombre: true, alergenos: true },
   });
 

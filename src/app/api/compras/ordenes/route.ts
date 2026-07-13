@@ -32,7 +32,6 @@ export async function GET(request: NextRequest) {
           proveedor: true,
           sucursal: true,
           items: { include: { ingrediente: true } },
-          usuario: { select: { nombre: true } },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,

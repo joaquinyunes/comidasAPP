@@ -1,65 +1,77 @@
-import pino from "pino";
-
 const isDevelopment = process.env.NODE_ENV !== "production";
 
-const logger = pino({
-  level: process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info"),
-  transport: isDevelopment
-    ? {
-        target: "pino-pretty",
-        options: {
-          colorize: true,
-          translateTime: "SYS:standard",
-          ignore: "pid,hostname",
-        },
-      }
-    : undefined,
-  formatters: {
-    level: (label) => {
-      return { level: label };
-    },
-  },
-  base: {
-    service: "restaurantos",
-    env: process.env.NODE_ENV || "development",
-  },
-});
+function formatMessage(message: string, meta?: Record<string, unknown>): string {
+  if (meta && Object.keys(meta).length > 0) {
+    return `${message} ${JSON.stringify(meta)}`;
+  }
+  return message;
+}
+
+class Logger {
+  private childBindings: Record<string, unknown>;
+
+  constructor(bindings: Record<string, unknown> = {}) {
+    this.childBindings = bindings;
+  }
+
+  private merge(meta?: Record<string, unknown>): Record<string, unknown> | undefined {
+    const merged = { ...this.childBindings, ...(meta || {}) };
+    return Object.keys(merged).length > 0 ? merged : undefined;
+  }
+
+  debug(message: string, meta?: Record<string, unknown>) {
+    if (isDevelopment) console.debug(formatMessage(message, this.merge(meta)));
+  }
+
+  info(message: string, meta?: Record<string, unknown>) {
+    console.info(formatMessage(message, this.merge(meta)));
+  }
+
+  warn(message: string, meta?: Record<string, unknown>) {
+    console.warn(formatMessage(message, this.merge(meta)));
+  }
+
+  error(message: string, meta?: Record<string, unknown>) {
+    console.error(formatMessage(message, this.merge(meta)));
+  }
+
+  fatal(message: string, meta?: Record<string, unknown>) {
+    console.error(formatMessage(message, this.merge(meta)));
+  }
+
+  child(bindings: Record<string, unknown>) {
+    return new Logger({ ...this.childBindings, ...bindings });
+  }
+
+  request(method: string, url: string, meta?: Record<string, unknown>) {
+    this.info(`${method} ${url}`, { method, url, ...(meta || {}) });
+  }
+
+  response(statusCode: number, durationMs: number, meta?: Record<string, unknown>) {
+    this.info(`Response ${statusCode} in ${durationMs}ms`, { statusCode, durationMs, ...(meta || {}) });
+  }
+
+  db(query: string, durationMs: number, meta?: Record<string, unknown>) {
+    this.debug(`DB query in ${durationMs}ms`, { query, durationMs, ...(meta || {}) });
+  }
+
+  socket(event: string, tenantId?: string, meta?: Record<string, unknown>) {
+    this.info(`Socket: ${event}`, { event, tenantId, ...(meta || {}) });
+  }
+
+  audit(action: string, entity: string, entityId: string, meta?: Record<string, unknown>) {
+    this.info(`Audit: ${action} ${entity}`, { action, entity, entityId, ...(meta || {}) });
+  }
+
+  metric(name: string, value: number, tags?: Record<string, string>) {
+    this.info(`Metric: ${name}=${value}`, { metric: name, value, tags });
+  }
+}
+
+export const logger = new Logger();
 
 export function createChildLogger(bindings: Record<string, unknown>) {
   return logger.child(bindings);
 }
-
-export const logger = {
-  debug: (message: string, meta?: Record<string, unknown>) => logger.debug(meta, message),
-  info: (message: string, meta?: Record<string, unknown>) => logger.info(meta, message),
-  warn: (message: string, meta?: Record<string, unknown>) => logger.warn(meta, message),
-  error: (message: string, meta?: Record<string, unknown>) => logger.error(meta, message),
-  fatal: (message: string, meta?: Record<string, unknown>) => logger.fatal(meta, message),
-
-  child: createChildLogger,
-
-  // Métodos de conveniencia para requests
-  request: (method: string, url: string, meta?: Record<string, unknown>) =>
-    logger.info({ method, url, ...meta }, `${method} ${url}`),
-
-  response: (statusCode: number, durationMs: number, meta?: Record<string, unknown>) =>
-    logger.info({ statusCode, durationMs, ...meta }, `Response ${statusCode} in ${durationMs}ms`),
-
-  // Métodos para DB
-  db: (query: string, durationMs: number, meta?: Record<string, unknown>) =>
-    logger.debug({ query, durationMs, ...meta }, `DB query in ${durationMs}ms`),
-
-  // Métodos para WebSocket
-  socket: (event: string, tenantId?: string, meta?: Record<string, unknown>) =>
-    logger.info({ event, tenantId, ...meta }, `Socket: ${event}`),
-
-  // Métodos para auditoría
-  audit: (action: string, entity: string, entityId: string, meta?: Record<string, unknown>) =>
-    logger.info({ action, entity, entityId, ...meta }, `Audit: ${action} ${entity}`),
-
-  // Métricas
-  metric: (name: string, value: number, tags?: Record<string, string>) =>
-    logger.info({ metric: name, value, tags }, `Metric: ${name}=${value}`),
-};
 
 export default logger;

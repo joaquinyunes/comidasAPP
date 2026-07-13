@@ -14,7 +14,9 @@ describe("Validation", () => {
 
       const result = validateInput(schema, { nombre: "Juan", edad: 25 });
       expect(result.success).toBe(true);
-      expect(result.data).toEqual({ nombre: "Juan", edad: 25 });
+      if (result.success) {
+        expect(result.data).toEqual({ nombre: "Juan", edad: 25 });
+      }
     });
 
     it("should reject invalid data", () => {
@@ -24,16 +26,18 @@ describe("Validation", () => {
 
       const result = validateInput(schema, { email: "invalid" });
       expect(result.success).toBe(false);
-      expect(result.errors).toContain("email: Invalid email");
+      if (!result.success) {
+        expect(result.errors).toContain("email: Invalid email");
+      }
     });
   });
 
   describe("sanitizeString", () => {
     it("should escape HTML characters", () => {
-      expect(sanitizeString("<script>")).toBe("<script>");
-      expect(sanitizeString(">")).toBe(">");
-      expect(sanitizeString('"')).toBe(""");
-      expect(sanitizeString("'")).toBe("'");
+      expect(sanitizeString("<script>")).toBe("&lt;script&gt;");
+      expect(sanitizeString(">")).toBe("&gt;");
+      expect(sanitizeString('"')).toBe("&quot;");
+      expect(sanitizeString("'")).toBe("&#x27;");
     });
 
     it("should trim whitespace", () => {
