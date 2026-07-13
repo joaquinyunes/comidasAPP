@@ -13,3 +13,8 @@ Que el dueño tenga, en vivo y por separado, la verdad del local: qué se devuel
 
 ## Valor
 Pasar de "ver la caja a fin de mes" a corregir en la noche lo que sale mal, antes de que se repita.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/dueno/control-operativo` agrega platos devueltos (modelo `Anulacion`), tiempo promedio de servicio (`PedidoItem.horaListo - horaEnviado`), mermas/quiebres (`stockPorSucursal`), mesas desatendidas (mesas ocupadas sin pedido reciente) y ranking de mozos.
+- **UI**: `/dashboard/dueno` (`PanelControlDueno`).
+- **Nota**: todo se calcula sobre los últimos 30 días sin schema nuevo (usa modelos existentes).

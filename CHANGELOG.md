@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-12 — Implementación de micro-fase 2.9
+
+Se pasa la micro-fase 2.9 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.9 — Control Operativo del Dueño
+- API: `/api/dueno/control-operativo` (platos devueltos, tiempos de servicio, mermas, mesas desatendidas, ranking de mozos).
+- UI: `/dashboard/dueno` (`PanelControlDueno`).
+
 ## 2026-07-12 — Implementación de micro-fase 2.8
 
 Se pasa la micro-fase 2.8 del Bloque 2 de "documentada" a "implementada" (API + UI pública).

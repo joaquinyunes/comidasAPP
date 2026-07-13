@@ -200,7 +200,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.6 — Eficiencia dentro de la Cocina
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
@@ -214,7 +214,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.7 — El Trabajo del Mozo en el Salón
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
@@ -228,7 +228,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.8 — Autogestión del Cliente
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
@@ -242,7 +242,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.9 — Control Operativo del Dueño
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
@@ -471,7 +471,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 2.6 | 6 | ✅ |
 | 2.7 | 6 | ✅ |
 | 2.8 | 6 | ✅ |
-| 2.9 | 6 | 📋 |
+| 2.9 | 6 | ✅ |
 | 2.10 | 6 | 📋 |
 | 2.11 | 6 | 📋 |
 | 2.12 | 6 | 📋 |
@@ -488,4 +488,4 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 2.23 | 6 | 📋 |
 | **Total docs** | **62 + 138** | **Bloque 1 completo · Bloque 2 documentado** |
 
-**Bloque 1: documentación base + App Flutter (lista para implementación). Bloque 2: 23 micro-fases de productividad operativa y funciones de venta, documentadas en `07_Productividad/`. Las micro-fases 2.1–2.8 ya están implementadas (API + UI + modelos Prisma y migración). Las restantes (2.9–2.23) siguen pendientes de implementación de código.**
+**Bloque 1: documentación base + App Flutter (lista para implementación). Bloque 2: 23 micro-fases de productividad operativa y funciones de venta, documentadas en `07_Productividad/`. Las micro-fases 2.1–2.9 ya están implementadas (API + UI + modelos Prisma y migración). Las restantes (2.10–2.23) siguen pendientes de implementación de código.**
