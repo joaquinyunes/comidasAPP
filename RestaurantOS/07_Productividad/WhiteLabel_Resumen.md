@@ -13,3 +13,8 @@ Funciones que hacen el software vendible a muchos clientes sin tocar el código:
 
 ## Valor
 Una sola base de código vendida a 50 locales (y a otros rubros) con solo configuración.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/whitelabel/resumen` (marca, tenants, idiomas, monedas, módulos, snippet de widget), `POST /api/whitelabel/clonar-rubro` (copia categorías y productos de un tenant origen al actual).
+- **UI**: `/dashboard/whitelabel` (`PanelWhiteLabel`).
+- **Nota**: usa modelos `Tenant`, `CategoriaMenu`, `Producto` y `Modulo`; sin schema nuevo.
