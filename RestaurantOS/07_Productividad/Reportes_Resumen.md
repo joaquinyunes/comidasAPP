@@ -13,3 +13,8 @@ Funciones que hacen el producto demostrable y adoptable sin vos presente: report
 
 ## Valor
 Vendés y capacitás a distancia, sin estar en el local.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/reportes/resumen` agrega comparación de ventas por sucursal (pedidos y facturado 30d) y totales globales.
+- **UI**: `/dashboard/reportes` (`PanelReportes`).
+- **Nota**: el exportador y el simulador de carga son funciones de apoyo sobre estos datos; modo demo como indicador.
