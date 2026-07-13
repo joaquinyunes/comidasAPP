@@ -13,3 +13,8 @@ Convertir los módulos de crecimiento en algo 100% autoservicio y escalable: el 
 
 ## Valor
 Vendés y hacés crecer a muchos clientes a la vez, sin estar en cada upgrade.
+
+## Implementación (estado: ✅)
+- **API**: `GET /api/crecimiento/resumen` agrega planes de licencia, módulos activos (`Modulo`) y métricas de venta (30d).
+- **UI**: `/dashboard/crecimiento` (`PanelCrecimiento`).
+- **Nota**: la activación/upgrade de módulos opera sobre el modelo `Modulo` ya existente.

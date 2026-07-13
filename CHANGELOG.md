@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-07-12 — Implementación de micro-fase 2.23
+
+Se pasa la micro-fase 2.23 del Bloque 2 de "documentada" a "implementada" (API + UI). Bloque 2 completo (2.1–2.23).
+
+### Micro-fase 2.23 — Crecimiento, Ventas y Licencias
+- API: `/api/crecimiento/resumen` (planes de licencia, módulos activos, métricas de venta).
+- UI: `/dashboard/crecimiento` (`PanelCrecimiento`).
+
+## 2026-07-12 — Implementación de micro-fase 2.22
+
+Se pasa la micro-fase 2.22 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.22 — Reportes, Demos y Onboarding
+- API: `/api/reportes/resumen` (comparación por sucursal, totales 30d).
+- UI: `/dashboard/reportes` (`PanelReportes`).
+
+## 2026-07-12 — Implementación de micro-fase 2.21
+
+Se pasa la micro-fase 2.21 del Bloque 2 de "documentada" a "implementada" (API + UI).
+
+### Micro-fase 2.21 — White-label & Multi-tenant
+- API: `/api/whitelabel/resumen`, `POST /api/whitelabel/clonar-rubro`.
+- UI: `/dashboard/whitelabel` (`PanelWhiteLabel`).
+- Navegación del dashboard completa (todas las secciones del Bloque 2).
+
 ## 2026-07-12 — Implementación de micro-fase 2.20
 
 Se pasa la micro-fase 2.20 del Bloque 2 de "documentada" a "implementada" (API + UI).

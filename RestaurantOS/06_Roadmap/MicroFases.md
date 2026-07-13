@@ -410,7 +410,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.21 — White-label & Multi-tenant (funciones 7,6,12,19,15/20)
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
@@ -424,7 +424,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.22 — Reportes, Demos y Onboarding (funciones 10,8,9,18,4/20)
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
@@ -438,7 +438,7 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 ---
 
 ## Micro-fase 2.23 — Crecimiento, Ventas y Licencias (función 21/20)
-**Estado**: 📋 Documentada
+**Estado**: ✅ Implementada (API + UI)
 
 | # | Archivo | Estado |
 |---|---------|--------|
@@ -483,9 +483,9 @@ Las siguientes micro-fases documentan las ideas de productividad operativa y las
 | 2.18 | 6 | ✅ |
 | 2.19 | 6 | ✅ |
 | 2.20 | 6 | ✅ |
-| 2.21 | 6 | 📋 |
-| 2.22 | 6 | 📋 |
-| 2.23 | 6 | 📋 |
-| **Total docs** | **62 + 138** | **Bloque 1 completo · Bloque 2 documentado** |
+| 2.21 | 6 | ✅ |
+| 2.22 | 6 | ✅ |
+| 2.23 | 6 | ✅ |
+| **Total docs** | **62 + 138** | **Bloque 1 completo · Bloque 2 implementado (2.1–2.23)** |
 
-**Bloque 1: documentación base + App Flutter (lista para implementación). Bloque 2: 23 micro-fases de productividad operativa y funciones de venta, documentadas en `07_Productividad/`. Las micro-fases 2.1–2.20 ya están implementadas (API + UI + modelos Prisma y migración). Las restantes (2.21–2.23) siguen pendientes de implementación de código.**
+**Bloque 1: documentación base + App Flutter (lista para implementación). Bloque 2: 23 micro-fases de productividad operativa y funciones de venta, documentadas en `07_Productividad/`. Las 23 micro-fases del Bloque 2 (2.1–2.23) están implementadas (API + UI + modelos Prisma y migración).**
