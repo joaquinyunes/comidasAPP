@@ -1,82 +1,70 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getTenantContext } from "@/lib/auth-context";
 import type { PedidoEstado } from "@/types";
 
 // ============================================
-// GET /api/pedidos - Listar pedidos
+// GET /api/pedidos - Listar pedidos (con micro-fases)
 // ============================================
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const ctx = await getTenantContext(request);
+  if (!ctx) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const mesaId = searchParams.get("mesaId");
   const estado = searchParams.get("estado");
 
-  // TODO: Reemplazar con Prisma
-  const pedidos = [
-    {
-      id: "ped-1",
-      mesaId: "2",
-      mesaNumero: "2",
-      sector: "Salón Principal",
-      mozo: "Carlos",
-      estado: "en_preparacion" as PedidoEstado,
-      tipo: "mesa",
-      total: 18500,
-      items: [
-        {
-          id: "item-1",
-          productoId: "p1",
-          nombre: "Pizza Napolitana",
-          cantidad: 2,
-          precioUnitario: 12500,
-          subtotal: 25000,
-          notas: "Sin cebolla",
-          estado: "en_preparacion" as PedidoEstado,
-        },
-        {
-          id: "item-2",
-          productoId: "b1",
-          nombre: "Coca-Cola",
-          cantidad: 2,
-          precioUnitario: 2500,
-          subtotal: 5000,
-          estado: "listo" as PedidoEstado,
-        },
-      ],
-      createdAt: new Date(Date.now() - 30 * 60000),
-    },
-    {
-      id: "ped-2",
-      mesaId: "4",
-      mesaNumero: "4",
-      sector: "Terraza",
-      mozo: "Carlos",
-      estado: "recibido" as PedidoEstado,
-      tipo: "mesa",
-      total: 14000,
-      items: [
-        {
-          id: "item-3",
-          productoId: "pa1",
-          nombre: "Ñoquis Caseros",
-          cantidad: 1,
-          precioUnitario: 9800,
-          subtotal: 9800,
-          estado: "recibido" as PedidoEstado,
-        },
-        {
-          id: "item-4",
-          productoId: "b2",
-          nombre: "Cerveza Artesanal",
-          cantidad: 1,
-          precioUnitario: 4500,
-          subtotal: 4500,
-          estado: "recibido" as PedidoEstado,
-        },
-      ],
-      createdAt: new Date(Date.now() - 5 * 60000),
-    },
-  ];
+  const where: Record<string, unknown> = { tenantId: ctx.tenantId };
+  if (mesaId) where.mesaId = mesaId;
+  if (estado) where.estado = estado;
 
-  return NextResponse.json(pedidos);
+  const pedidos = await prisma.pedido.findMany({
+    where,
+    include: {
+      mesa: true,
+      cliente: true,
+      items: { include: { producto: true } },
+      eventos: { orderBy: { createdAt: "asc" } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const data = pedidos.map((p) => ({
+    id: p.id,
+    mesaId: p.mesa?.numero ?? p.mesaId,
+    mesaNumero: p.mesa?.numero,
+    clienteId: p.clienteId,
+    clienteNombre: p.cliente?.nombre,
+    estado: p.estado as PedidoEstado,
+    tipo: p.tipo,
+    total: Number(p.total),
+    notas: p.notas,
+    items: p.items.map((i) => ({
+      id: i.id,
+      productoId: i.productoId,
+      productoNombre: i.producto?.nombre ?? i.productoId,
+      cantidad: i.cantidad,
+      precioUnitario: Number(i.precioUnitario),
+      subtotal: Number(i.subtotal),
+      notas: i.notas,
+      estado: i.estado as PedidoEstado,
+      horaEnviado: i.horaEnviado,
+      horaListo: i.horaListo,
+      horaEntregado: i.horaEntregado,
+      anulado: i.anulado,
+      urgente: i.urgente,
+    })),
+    microFases: p.eventos.map((e) => ({
+      evento: e.evento,
+      createdAt: e.createdAt,
+      usuarioId: e.usuarioId,
+    })),
+    createdAt: p.createdAt,
+  }));
+
+  return NextResponse.json(data);
 }
 
 // ============================================

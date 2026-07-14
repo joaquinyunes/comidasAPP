@@ -1,14 +1,18 @@
 import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
 function createPrismaClient() {
-  const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL!,
-  });
+  const connectionString = process.env.DATABASE_URL!;
+  const poolConfig: Record<string, unknown> = { connectionString };
+  if (/sslmode=require|neon\.tech|amazonaws|\.supabase\.co/.test(connectionString)) {
+    poolConfig.ssl = { rejectUnauthorized: false };
+  }
+  const adapter = new PrismaPg(new Pool(poolConfig as never));
   return new PrismaClient({ adapter });
 }
 

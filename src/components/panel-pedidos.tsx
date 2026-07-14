@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn, formatCurrency, formatTime } from "@/lib/utils";
 import type { Pedido, PedidoEstado } from "@/types";
 
@@ -16,54 +15,38 @@ interface PanelPedidosProps {
   onCerrarMesa?: (mesaId: string) => void;
 }
 
+const FASE_LABELS: Record<string, string> = {
+  recibido: "📥 Recibido",
+  confirmado: "✅ Confirmado",
+  en_preparacion: "🔥 Preparando",
+  listo: "✅ Listo",
+  entregado: "🍽️ Entregado",
+  pagado: "💰 Pagado",
+  anulado: "❌ Anulado",
+};
+
 export function PanelPedidos({ onCerrarMesa }: PanelPedidosProps) {
   const [filtroEstado, setFiltroEstado] = useState<string>("activo");
-  const [pedidos, setPedidos] = useState<Pedido[]>([
-    {
-      id: "ped-1",
-      mesaId: "2",
-      mozoId: "mozo-1",
-      estado: "en_preparacion",
-      tipo: "mesa",
-      total: 31000,
-      items: [
-        { id: "i1", productoId: "p1", cantidad: 2, precioUnitario: 12500, subtotal: 25000, notas: "Sin cebolla", estado: "en_preparacion" },
-        { id: "i2", productoId: "b1", cantidad: 2, precioUnitario: 2500, subtotal: 5000, notas: undefined, estado: "listo" },
-      ],
-      createdAt: new Date(Date.now() - 30 * 60000),
-    },
-    {
-      id: "ped-2",
-      mesaId: "5",
-      mozoId: "mozo-2",
-      estado: "esperando_cuenta",
-      tipo: "mesa",
-      total: 42000,
-      items: [
-        { id: "i3", productoId: "p2", cantidad: 1, precioUnitario: 14000, subtotal: 14000, notas: undefined, estado: "entregado" },
-        { id: "i4", productoId: "pa1", cantidad: 2, precioUnitario: 9800, subtotal: 19600, notas: undefined, estado: "entregado" },
-        { id: "i5", productoId: "b2", cantidad: 1, precioUnitario: 4500, subtotal: 4500, notas: undefined, estado: "entregado" },
-      ],
-      createdAt: new Date(Date.now() - 82 * 60000),
-    },
-    {
-      id: "ped-3",
-      mesaId: "8",
-      mozoId: "mozo-1",
-      estado: "recibido",
-      tipo: "mesa",
-      total: 35500,
-      items: [
-        { id: "i6", productoId: "pa2", cantidad: 3, precioUnitario: 10500, subtotal: 31500, notas: undefined, estado: "recibido" },
-        { id: "i7", productoId: "b1", cantidad: 1, precioUnitario: 2500, subtotal: 2500, notas: undefined, estado: "recibido" },
-        { id: "i8", productoId: "d1", cantidad: 1, precioUnitario: 5500, subtotal: 5500, notas: "Sin crema", estado: "recibido" },
-      ],
-      createdAt: new Date(Date.now() - 5 * 60000),
-    },
-  ]);
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    let activo = true;
+    fetch("/api/pedidos")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => {
+        if (activo) setPedidos(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {})
+      .finally(() => activo && setCargando(false));
+    return () => {
+      activo = false;
+    };
+  }, []);
 
   const pedidosFiltrados = pedidos.filter((p) => {
-    if (filtroEstado === "activo") return !["cerrado", "cancelado"].includes(p.estado);
+    if (filtroEstado === "activo")
+      return !["cerrado", "cancelado", "anulado"].includes(p.estado);
     if (filtroEstado === "recibido") return p.estado === "recibido";
     if (filtroEstado === "preparando") return ["aceptado", "en_preparacion"].includes(p.estado);
     if (filtroEstado === "listo") return p.estado === "listo";
@@ -119,7 +102,7 @@ export function PanelPedidos({ onCerrarMesa }: PanelPedidosProps) {
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline">
-            {pedidos.filter((p) => !["cerrado", "cancelado"].includes(p.estado)).length} activos
+            {pedidos.filter((p) => !["cerrado", "cancelado", "anulado"].includes(p.estado)).length} activos
           </Badge>
         </div>
       </div>
@@ -165,15 +148,18 @@ export function PanelPedidos({ onCerrarMesa }: PanelPedidosProps) {
                 {pedido.items.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <span className={cn(
-                      item.estado === "listo" || item.estado === "entregado"
+                      item.estado === "listo" || item.estado === "entregado" || item.anulado
                         ? "line-through text-gray-400"
                         : ""
                     )}>
-                      {item.cantidad}x Item {item.productoId.slice(-1)}
+                      {item.cantidad}x {item.productoNombre ?? item.productoId}
                       {item.notas && (
                         <span className="text-orange-500 text-xs ml-1">
                           ({item.notas})
                         </span>
+                      )}
+                      {item.urgente && (
+                        <span className="text-red-500 text-xs ml-1 font-semibold">⚡</span>
                       )}
                     </span>
                     <span className="text-gray-500">
@@ -181,6 +167,21 @@ export function PanelPedidos({ onCerrarMesa }: PanelPedidosProps) {
                     </span>
                   </div>
                 ))}
+
+                {/* Micro-fases (eventos del ciclo de vida) */}
+                {pedido.microFases && pedido.microFases.length > 0 && (
+                  <div className="mt-2 pt-2 border-t flex flex-wrap gap-1">
+                    {pedido.microFases.map((f, idx) => (
+                      <span
+                        key={idx}
+                        className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600"
+                        title={formatTime(f.createdAt)}
+                      >
+                        {FASE_LABELS[f.evento] ?? f.evento}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Total */}
@@ -241,7 +242,14 @@ export function PanelPedidos({ onCerrarMesa }: PanelPedidosProps) {
         ))}
       </div>
 
-      {pedidosFiltrados.length === 0 && (
+      {cargando && (
+        <div className="text-center py-12 text-gray-400">
+          <p className="text-4xl mb-2">⏳</p>
+          <p>Cargando pedidos…</p>
+        </div>
+      )}
+
+      {!cargando && pedidosFiltrados.length === 0 && (
         <div className="text-center py-12 text-gray-400">
           <p className="text-4xl mb-2">📋</p>
           <p>No hay pedidos con este filtro</p>

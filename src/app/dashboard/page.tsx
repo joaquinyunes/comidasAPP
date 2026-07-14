@@ -4,13 +4,22 @@ import { GemeloDigital, MesaDetalle } from "@/components/gemelo-digital";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useMesaStore, useDashboardStore } from "@/lib/store";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Mesa } from "@/types";
 
 export default function DashboardPage() {
   const { mesas, mesaSeleccionada, seleccionarMesa, getMesaById } = useMesaStore();
-  const { kpis } = useDashboardStore();
+  const { kpis, setKPIs } = useDashboardStore();
   const [showDetalle, setShowDetalle] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/dashboard/resumen")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data) setKPIs(data);
+      })
+      .catch(() => {});
+  }, [setKPIs]);
 
   const mesaSeleccionadaData = mesaSeleccionada ? getMesaById(mesaSeleccionada) : null;
 

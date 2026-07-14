@@ -50,24 +50,33 @@ export type PedidoTipo = "mesa" | "delivery" | "retiro";
 export interface Pedido {
   id: string;
   mesaId?: string;
+  mesaNumero?: string;
   clienteId?: string;
+  clienteNombre?: string;
   mozoId?: string;
   estado: PedidoEstado;
   tipo: PedidoTipo;
   notas?: string;
   total: number;
   items: PedidoItem[];
+  microFases?: { evento: string; createdAt: string }[];
   createdAt: Date;
 }
 
 export interface PedidoItem {
   id: string;
   productoId: string;
+  productoNombre?: string;
   cantidad: number;
   precioUnitario: number;
   subtotal: number;
   notas?: string;
   estado: PedidoEstado;
+  horaEnviado?: string | null;
+  horaListo?: string | null;
+  horaEntregado?: string | null;
+  anulado?: boolean;
+  urgente?: boolean;
   producto?: Producto;
 }
 
