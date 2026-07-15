@@ -36,22 +36,22 @@ export default function DashboardPage() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-gray-500">Vista general del restaurante</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-sm">
-            🟢 Sistema operativo
-          </Badge>
-          <span className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
             {new Date().toLocaleDateString("es-AR", {
               weekday: "long",
               year: "numeric",
               month: "long",
               day: "numeric",
             })}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-green-50 text-green-600 px-3 py-1.5 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+            Operativo
           </span>
         </div>
       </div>
@@ -114,31 +114,35 @@ function KPICard({
   porcentaje?: number;
 }) {
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium text-gray-500">
-            {titulo}
-          </CardTitle>
-          <span className="text-2xl">{icono}</span>
+    <div className="bg-white rounded-2xl border border-gray-100 p-5 hover-lift animate-fadeInUp group">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{titulo}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{valor}</p>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{valor}</div>
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+          {icono}
+        </div>
+      </div>
+      <div className="mt-3 flex items-center gap-2">
         {tendencia && (
-          <p className={`text-xs mt-1 ${tendencia === "up" ? "text-green-600" : "text-red-600"}`}>
+          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+            tendencia === "up"
+              ? "bg-green-50 text-green-600"
+              : "bg-red-50 text-red-500"
+          }`}>
             {tendencia === "up" ? "↑" : "↓"} vs ayer
-          </p>
+          </span>
         )}
-        {porcentaje !== undefined && (
-          <div className="mt-2 h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-red-500 rounded-full"
-              style={{ width: `${Math.min(porcentaje, 100)}%` }}
-            />
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      </div>
+      {porcentaje !== undefined && (
+        <div className="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-red-400 to-orange-400 rounded-full transition-all duration-700 ease-out"
+            style={{ width: `${Math.min(porcentaje, 100)}%` }}
+          />
+        </div>
+      )}
+    </div>
   );
 }
