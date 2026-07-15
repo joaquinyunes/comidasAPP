@@ -3,38 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: "📊" },
-  { href: "/dashboard/gemelo", label: "Gemelo Digital", icon: "🗺️" },
   { href: "/dashboard/pedidos", label: "Pedidos", icon: "📋" },
-  { href: "/dashboard/reservas", label: "Reservas", icon: "📅" },
-  { href: "/dashboard/stock", label: "Stock", icon: "📦" },
-  { href: "/dashboard/sucursales", label: "Sucursales", icon: "🏬" },
-  { href: "/dashboard/personal", label: "Personal", icon: "🧑‍🍳" },
-  { href: "/dashboard/friccion", label: "Fricción", icon: "🔌" },
-  { href: "/dashboard/fidelizacion", label: "Fidelización", icon: "⭐" },
-  { href: "/dashboard/operativo", label: "Operativo", icon: "🍳" },
   { href: "/dashboard/cocina", label: "Cocina", icon: "👨‍🍳" },
   { href: "/dashboard/mozo", label: "Mozo", icon: "🤵" },
-  { href: "/dashboard/dueno", label: "Dueño", icon: "📈" },
-  { href: "/dashboard/delivery", label: "Delivery", icon: "🛵" },
-  { href: "/dashboard/compras", label: "Compras", icon: "🛒" },
-  { href: "/dashboard/trazabilidad", label: "Trazabilidad", icon: "🔎" },
-  { href: "/dashboard/mantenimiento", label: "Mantenimiento", icon: "🔧" },
-  { href: "/dashboard/eventos", label: "Eventos", icon: "🎉" },
-  { href: "/dashboard/alcance", label: "Alcance", icon: "🌐" },
-  { href: "/dashboard/feedback", label: "Feedback", icon: "⭐" },
-  { href: "/dashboard/resiliencia", label: "Resiliencia", icon: "🛡️" },
-  { href: "/dashboard/gamificacion", label: "Gamificación", icon: "🏆" },
-  { href: "/dashboard/cliente-digital", label: "Cliente Digital", icon: "📱" },
-  { href: "/dashboard/selfservice", label: "Self-service", icon: "🛠️" },
-  { href: "/dashboard/whitelabel", label: "White-label", icon: "🎨" },
-  { href: "/dashboard/reportes", label: "Reportes", icon: "📊" },
-  { href: "/dashboard/crecimiento", label: "Crecimiento", icon: "🚀" },
-  { href: "/dashboard/clientes", label: "Clientes", icon: "👥" },
   { href: "/dashboard/caja", label: "Caja", icon: "💰" },
-  { href: "/dashboard/config", label: "Configuración", icon: "⚙️" },
+  { href: "/dashboard/inventario", label: "Inventario", icon: "📦" },
+  { href: "/dashboard/reservas", label: "Reservas", icon: "📅" },
+  { href: "/dashboard/clientes", label: "Clientes", icon: "👥" },
+  { href: "/dashboard/reportes", label: "Reportes", icon: "📈" },
+  { href: "/dashboard/configuracion", label: "Config", icon: "⚙️" },
 ];
 
 export default function DashboardLayout({
@@ -43,49 +24,84 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-900 text-white flex flex-col">
+      <aside
+        className={cn(
+          "flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out",
+          collapsed ? "w-[68px]" : "w-60"
+        )}
+      >
         {/* Logo */}
-        <div className="p-4 border-b border-gray-800">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="text-2xl">🍽️</span>
-            <span className="font-bold text-lg">
-              Restaurant<span className="text-red-500">OS</span>
-            </span>
-          </Link>
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100">
+          {!collapsed && (
+            <Link href="/dashboard" className="flex items-center gap-2.5">
+              <span className="text-xl">🍕</span>
+              <span className="font-bold text-sm text-gray-900">
+                La <span className="text-red-500">Nonna</span>
+              </span>
+            </Link>
+          )}
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+            title={collapsed ? "Expandir" : "Colapsar"}
+          >
+            {collapsed ? "»" : "«"}
+          </button>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 p-4 space-y-1">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                pathname === item.href
-                  ? "bg-red-600 text-white"
-                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
-              )}
-            >
-              <span className="text-lg">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
+        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200",
+                  isActive
+                    ? "bg-red-50 text-red-600 font-medium shadow-sm shadow-red-100"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                )}
+                title={collapsed ? item.label : undefined}
+              >
+                <span className="text-base flex-shrink-0">{item.icon}</span>
+                {!collapsed && <span>{item.label}</span>}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-800 text-xs text-gray-500">
-          <p>RestaurantOS v0.1.0</p>
-          <p>© 2026</p>
+        <div className="p-3 border-t border-gray-100">
+          {!collapsed && (
+            <div className="flex items-center gap-3 px-2 py-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                A
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-gray-900 truncate">Admin</p>
+                <p className="text-[10px] text-gray-400 truncate">admin@pizzaria.com</p>
+              </div>
+            </div>
+          )}
+          {collapsed && (
+            <div className="flex justify-center py-1">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                A
+              </div>
+            </div>
+          )}
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 bg-gray-50 overflow-auto">
+      <main className="flex-1 overflow-auto">
         {children}
       </main>
     </div>
