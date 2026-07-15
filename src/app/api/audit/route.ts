@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AuditService } from "@/lib/audit";
+import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================
 // GET /api/audit — Consultar logs de auditoría
@@ -7,8 +8,13 @@ import { AuditService } from "@/lib/audit";
 
 export async function GET(request: NextRequest) {
   try {
+    const ctx = await getTenantContext(request);
+    if (!ctx) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
-    const tenantId = searchParams.get("tenantId") || "tenant-demo-001";
+    const tenantId = ctx.tenantId;
     const entidad = searchParams.get("entidad") || undefined;
     const usuarioId = searchParams.get("usuarioId") || undefined;
     const accion = searchParams.get("accion") as "create" | "update" | "delete" | "login" | "logout" | "export" | "config_change" | undefined;

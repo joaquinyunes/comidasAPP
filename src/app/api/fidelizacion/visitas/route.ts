@@ -10,6 +10,41 @@ function nivelPorPuntos(puntos: number): string {
 }
 
 // ============================================
+// GET /api/fidelizacion/visitas — Listar visitas en mesa
+// ============================================
+export async function GET(request: NextRequest) {
+  try {
+    const context = await getTenantContext(request);
+    if (!context) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const mesaId = searchParams.get("mesaId");
+    const clienteId = searchParams.get("clienteId");
+
+    const where: Record<string, unknown> = { tenantId: context.tenantId };
+    if (mesaId) where.mesaId = mesaId;
+    if (clienteId) where.clienteId = clienteId;
+
+    const visitas = await prisma.visitaMesa.findMany({
+      where,
+      include: {
+        cliente: { select: { id: true, nombre: true, nivel: true } },
+        mesa: { select: { id: true, numero: true } },
+      },
+      orderBy: { fecha: "desc" },
+      take: 50,
+    });
+
+    return NextResponse.json({ data: visitas });
+  } catch (error) {
+    console.error("Error GET /api/fidelizacion/visitas:", error);
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
+}
+
+// ============================================
 // POST /api/fidelizacion/visitas — Registrar visita en mesa
 // ============================================
 export async function POST(request: NextRequest) {
