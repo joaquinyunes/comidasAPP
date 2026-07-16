@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import type { KDSPedido, PedidoEstado } from "@/types";
 
 // ============================================
-// KDS - Kitchen Display System
+// KDS - Kitchen Display System (con WebSocket)
 // ============================================
 
 interface KDSProps {
@@ -18,11 +18,90 @@ interface KDSProps {
 
 export function KDS({ tipo, onItemListo }: KDSProps) {
   const [pedidos, setPedidos] = useState<KDSPedido[]>([]);
+  const [conectado, setConectado] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Simular pedidos (en producción vendría de WebSocket)
+  const conectar = useCallback(() => {
+    try {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${protocol}//${window.location.host}/ws/kds`;
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        console.log(`[KDS:${tipo}] WebSocket conectado`);
+        setConectado(true);
+        ws.send(JSON.stringify({ tipo: "suscribir", canal: tipo }));
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const mensaje = JSON.parse(event.data);
+          switch (mensaje.tipo) {
+            case "pedido:nuevo":
+              setPedidos((prev) => [...prev, mensaje.pedido]);
+              break;
+            case "pedido:item:listo":
+              setPedidos((prev) =>
+                prev.map((p) =>
+                  p.id === mensaje.pedidoId
+                    ? {
+                        ...p,
+                        items: p.items.map((item) =>
+                          item.id === mensaje.itemId
+                            ? { ...item, estado: "listo" as PedidoEstado }
+                            : item
+                        ),
+                      }
+                    : p
+                )
+              );
+              break;
+            case "pedido:completado":
+              setPedidos((prev) => prev.filter((p) => p.id !== mensaje.pedidoId));
+              break;
+            case "pedido:lista":
+              setPedidos(mensaje.pedidos || []);
+              break;
+          }
+        } catch (err) {
+          console.error("[KDS] Error parseando mensaje:", err);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log(`[KDS:${tipo}] WebSocket desconectado, reconectando en 3s...`);
+        setConectado(false);
+        reconnectTimer.current = setTimeout(conectar, 3000);
+      };
+
+      ws.onerror = (err) => {
+        console.error(`[KDS:${tipo}] WebSocket error:`, err);
+        ws.close();
+      };
+    } catch (err) {
+      console.error(`[KDS:${tipo}] Error creando WebSocket:`, err);
+      reconnectTimer.current = setTimeout(conectar, 3000);
+    }
+  }, [tipo]);
+
   useEffect(() => {
-    // TODO: Conectar a WebSocket para recibir pedidos en tiempo real
-  }, []);
+    conectar();
+    return () => {
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      if (wsRef.current) wsRef.current.close();
+    };
+  }, [conectar]);
+
+  const handleItemListo = (pedidoId: string, itemId: string) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(
+        JSON.stringify({ tipo: "kds:completar", pedidoId, itemId })
+      );
+    }
+    onItemListo?.(pedidoId, itemId);
+  };
 
   const pedidosFiltrados = pedidos.filter((p) => {
     if (tipo === "barra") {
@@ -47,6 +126,9 @@ export function KDS({ tipo, onItemListo }: KDSProps) {
           {tipo === "cocina" ? "👨‍🍳 Cocina" : "🍹 Barra"}
         </h1>
         <div className="flex items-center gap-4">
+          <Badge variant={conectado ? "default" : "destructive"} className="text-xs">
+            {conectado ? "🟢 En vivo" : "🔴 Desconectado"}
+          </Badge>
           <span className="text-sm text-gray-400">
             { new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
           </span>
@@ -62,7 +144,7 @@ export function KDS({ tipo, onItemListo }: KDSProps) {
           <PedidoCard
             key={pedido.id}
             pedido={pedido}
-            onItemListo={onItemListo}
+            onItemListo={handleItemListo}
           />
         ))}
       </div>
