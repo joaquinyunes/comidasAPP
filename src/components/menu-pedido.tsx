@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,10 +23,47 @@ export function MenuPedido({ categorias, mesaNumero }: MenuPedidoProps) {
   const [productoNotas, setProductoNotas] = useState<string>("");
   const [productoNotasId, setProductoNotasId] = useState<string | null>(null);
   const [showResumen, setShowResumen] = useState(false);
+  const [pedidoEstado, setPedidoEstado] = useState<string | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   const categoriasFiltradas = categoriaActiva
     ? categorias.filter((c) => c.id === categoriaActiva)
     : categorias;
+
+  useEffect(() => {
+    try {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const ws = new WebSocket(`${protocol}//${window.location.host}/ws/pedidos`);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        if (mesaNumero) {
+          ws.send(JSON.stringify({ tipo: "suscribir", mesaNumero }));
+        }
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.tipo === "pedido:actualizado" && msg.mesaNumero === mesaNumero) {
+            setPedidoEstado(msg.estado);
+          }
+        } catch {}
+      };
+
+      ws.onclose = () => {
+        setTimeout(() => {
+          if (wsRef.current?.readyState !== WebSocket.OPEN) {
+            wsRef.current = new WebSocket(`${protocol}//${window.location.host}/ws/pedidos`);
+          }
+        }, 5000);
+      };
+    } catch {}
+
+    return () => {
+      wsRef.current?.close();
+    };
+  }, [mesaNumero]);
 
   const total = useMemo(() => {
     return Array.from(pedido.values()).reduce(
@@ -86,8 +123,7 @@ export function MenuPedido({ categorias, mesaNumero }: MenuPedidoProps) {
     }
   };
 
-  const handleEnviarPedido = () => {
-    // TODO: Enviar a API
+  const handleEnviarPedido = async () => {
     const pedidoArray = Array.from(pedido.values()).map((item) => ({
       productoId: item.producto.id,
       nombre: item.producto.nombre,
@@ -97,10 +133,33 @@ export function MenuPedido({ categorias, mesaNumero }: MenuPedidoProps) {
       notas: item.notas,
     }));
 
-    console.log("Enviando pedido:", { mesaNumero, items: pedidoArray, total });
-    alert("Pedido enviado a cocina! 🍕");
-    setPedido(new Map());
-    setShowResumen(false);
+    try {
+      const res = await fetch("/api/pedidos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mesaNumero,
+          tipo: "mesa",
+          items: pedidoArray,
+          total,
+          notas: "",
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Error al enviar pedido");
+      }
+
+      const pedidoCreado = await res.json();
+      console.log("Pedido enviado:", pedidoCreado.id);
+      alert("Pedido enviado a cocina! 🍕");
+      setPedido(new Map());
+      setShowResumen(false);
+    } catch (err) {
+      console.error("Error enviando pedido:", err);
+      alert("Error al enviar el pedido. Intentá de nuevo.");
+    }
   };
 
   return (
