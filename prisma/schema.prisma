@@ -384,6 +384,8 @@ model Reserva {
   zona              String?  @db.VarChar(50)
   occasion          String?  @db.VarChar(100)
   notas             String?
+  nombreCliente     String?  @map("nombre_cliente")
+  email             String?  @db.VarChar(255)
   estado            String   @default("pendiente") @db.VarChar(50)
   recordatorioEnviado Boolean @default(false) @map("recordatorio_enviado")
   createdAt         DateTime @default(now()) @map("created_at")

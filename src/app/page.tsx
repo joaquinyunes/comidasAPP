@@ -1,5 +1,5 @@
-import { LandingPage } from "@/components/landing-menu";
+import { LandingShell } from "@/components/landing/shell";
 
 export default function Home() {
-  return <LandingPage />;
+  return <LandingShell />;
 }

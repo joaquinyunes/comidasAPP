@@ -1,6 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=Caveat:wght@600&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "../styles/landing.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -158,6 +160,25 @@ body {
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    @apply font-sans scroll-smooth;
   }
 }
+
+/* ============================================
+   HOME PIZZERÍA "JUST PIZZA"
+   ============================================ */
+.font-\[Archivo_Black\] { font-family: "Archivo Black", sans-serif; }
+.font-\[Space_Grotesk\] { font-family: "Space Grotesk", Arial, sans-serif; }
+.font-\[Caveat\,cursive\] { font-family: "Caveat", cursive; }
+.font-\[Space_Grotesk\] { font-family: "Space Grotesk", Arial, sans-serif; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-fadeIn { animation: fadeIn 0.45s ease; }
+
+@keyframes spinSlow {
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spinSlow 22s linear infinite; }
