@@ -8,7 +8,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import type { Producto, CategoriaMenu } from "@/types";
 
 // ============================================
-// MENÚ DIGITAL PÚBLICO
+// MENÚ DIGITAL PÚBLICO (con mejoras móvil)
 // ============================================
 
 interface MenuDigitalProps {
@@ -32,10 +32,20 @@ export function MenuDigital({
     return pedidoActual.find((p) => p.productoId === productoId)?.cantidad || 0;
   };
 
+  const cantidadTotal = pedidoActual.reduce((sum, p) => sum + p.cantidad, 0);
+  const totalEstimado = pedidoActual.reduce((sum, p) => {
+    for (const cat of categorias) {
+      const prod = cat.productos.find((pr) => pr.id === p.productoId);
+      if (prod) return sum + prod.precio * p.cantidad;
+    }
+    return sum;
+  }, 0);
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <>
+    <div className="max-w-4xl mx-auto pb-24 md:pb-8">
       {/* Categorías - scroll horizontal */}
-      <div className="flex gap-2 overflow-x-auto pb-4 mb-6 -mx-4 px-4">
+      <div className="flex gap-2 overflow-x-auto pb-4 mb-6 -mx-4 px-4 sticky top-0 bg-white z-30">
         <Button
           variant={categoriaActiva === null ? "default" : "outline"}
           size="sm"
@@ -78,6 +88,20 @@ export function MenuDigital({
         ))}
       </div>
     </div>
+
+    {/* Botón flotante móvil */}
+    {cantidadTotal > 0 && (
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 md:hidden">
+        <Button
+          size="lg"
+          className="bg-red-600 hover:bg-red-700 shadow-lg px-6 py-3 rounded-full"
+          onClick={() => {}}
+        >
+          🛒 Ver pedido ({cantidadTotal}) — {formatCurrency(totalEstimado)}
+        </Button>
+      </div>
+    )}
+    </>
   );
 }
 
