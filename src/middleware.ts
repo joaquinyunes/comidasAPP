@@ -18,11 +18,13 @@ export interface JWTPayload {
 // Rutas públicas (no requieren auth)
 const PUBLIC_ROUTES = [
   "/",
+  "/login",
   "/menu",
   "/api/auth/login",
   "/api/auth/register",
   "/api/productos/publico",
   "/api/reservas",
+  "/api/publico",
 ];
 
 // Rutas que requieren solo tenant (sin auth estricta)
@@ -155,7 +157,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // Si es página, redirigir a login
-    const loginUrl = new URL("/api/auth/login", request.url);
+    const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
@@ -172,7 +174,7 @@ export async function middleware(request: NextRequest) {
       );
     }
 
-    const loginUrl = new URL("/api/auth/login", request.url);
+    const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
 

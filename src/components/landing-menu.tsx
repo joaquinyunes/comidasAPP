@@ -1,16 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { CarruselPizzas, type PizzaCarrusel } from "@/components/carrusel-pizzas";
 
 // ============================================
 // LANDING PAGE — RestaurantOS
 // ============================================
 
 export function LandingPage() {
+  const [pizzas, setPizzas] = useState<PizzaCarrusel[]>([]);
+
+  useEffect(() => {
+    fetch("/api/productos/publico?tenant=pizzaria-demo")
+      .then((r) => r.json())
+      .then((cats: any[]) => {
+        const planas = (cats ?? []).flatMap((c) => c.productos ?? []);
+        const soloPizzas = planas.filter((p) =>
+          (p.nombre || "").toLowerCase().includes("pizza")
+        );
+        setPizzas(soloPizzas.length ? soloPizzas : planas);
+      })
+      .catch(() => setPizzas([]));
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
@@ -38,6 +54,9 @@ export function LandingPage() {
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent" />
       </section>
+
+      {/* Carrusel de Pizzas */}
+      <CarruselPizzas pizzas={pizzas} />
 
       {/* Features */}
       <section className="py-20 bg-gray-50">

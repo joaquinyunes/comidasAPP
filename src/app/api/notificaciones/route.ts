@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================
 // POST /api/notificaciones — Enviar notificación
@@ -60,40 +62,41 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    const ctx = await getTenantContext(request);
+    if (!ctx) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
     const tipo = searchParams.get("tipo");
     const soloNoLeidas = searchParams.get("noLeidas") === "true";
 
-    // En producción: query a DB
-    const notificaciones = [
-      {
-        id: "1",
-        tipo: "pedido",
-        titulo: "Nuevo pedido #1234",
-        mensaje: "Mesa 5 realizó un pedido de $45.000",
-        canal: "in_app",
-        estado: "leida",
-        createdAt: new Date(),
-      },
-      {
-        id: "2",
-        tipo: "stock",
-        titulo: "Stock bajo: Muzzarella",
-        mensaje: "Quedan 2kg de muzzarella",
-        canal: "in_app",
-        estado: "pendiente",
-        createdAt: new Date(),
-      },
-    ];
+    const where: Record<string, unknown> = { tenantId: ctx.tenantId };
+    if (userId) where.usuarioId = userId;
+    if (tipo) where.tipo = tipo;
+    if (soloNoLeidas) where.leida = false;
 
-    const filtradas = notificaciones.filter((n) => {
-      if (tipo && n.tipo !== tipo) return false;
-      if (soloNoLeidas && n.estado === "leida") return false;
-      return true;
+    const notificaciones = await prisma.notificacion.findMany({
+      where,
+      include: { usuario: { select: { id: true, nombre: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 100,
     });
 
-    return NextResponse.json({ notificaciones: filtradas });
+    const data = notificaciones.map((n) => ({
+      id: n.id,
+      tipo: n.tipo,
+      titulo: n.titulo,
+      mensaje: n.mensaje,
+      leida: n.leida,
+      estado: n.leida ? "leida" : "pendiente",
+      usuario: n.usuario,
+      metadata: n.metadata,
+      createdAt: n.createdAt,
+    }));
+
+    return NextResponse.json({ notificaciones: data });
   } catch (error) {
     console.error("Error al listar notificaciones:", error);
     return NextResponse.json(

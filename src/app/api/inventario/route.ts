@@ -14,15 +14,14 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const sucursalId = searchParams.get("sucursalId") || context.sucursalId;
+    const sucursalId =
+      searchParams.get("sucursalId") ||
+      context.sucursalId ||
+      "6e29ec7f-fccd-44bc-b7a2-cf50cd1c7b70";
     const estado = searchParams.get("estado"); // "critico", "bajo", "ok"
     const busqueda = searchParams.get("q") || undefined;
     const page = parseInt(searchParams.get("page") || "1");
     const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
-
-    if (!sucursalId) {
-      return NextResponse.json({ error: "Se requiere sucursalId" }, { status: 400 });
-    }
 
     // Verificar que la sucursal pertenece al tenant
     const sucursal = await prisma.sucursal.findFirst({

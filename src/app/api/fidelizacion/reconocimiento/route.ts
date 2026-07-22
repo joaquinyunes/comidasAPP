@@ -4,6 +4,41 @@ import { ReconocimientoSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================
+// GET /api/fidelizacion/reconocimiento — Listar reconocimientos (visitas vinculadas)
+// ============================================
+export async function GET(request: NextRequest) {
+  try {
+    const context = await getTenantContext(request);
+    if (!context) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const clienteId = searchParams.get("clienteId");
+    const mesaId = searchParams.get("mesaId");
+
+    const where: Record<string, unknown> = { tenantId: context.tenantId };
+    if (clienteId) where.clienteId = clienteId;
+    if (mesaId) where.mesaId = mesaId;
+
+    const visitas = await prisma.visitaMesa.findMany({
+      where,
+      include: {
+        cliente: { select: { id: true, nombre: true, nivel: true, puntos: true } },
+        mesa: { select: { id: true, numero: true } },
+      },
+      orderBy: { fecha: "desc" },
+      take: 50,
+    });
+
+    return NextResponse.json({ data: visitas });
+  } catch (error) {
+    console.error("Error GET /api/fidelizacion/reconocimiento:", error);
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
+}
+
+// ============================================
 // POST /api/fidelizacion/reconocimiento — Vincular cliente a mesa por QR
 // ============================================
 export async function POST(request: NextRequest) {

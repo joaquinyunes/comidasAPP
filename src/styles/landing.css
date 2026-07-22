@@ -1,0 +1,94 @@
+/* ============================================================
+   ANIMACIONES DE LA LANDING (CSS puro, sin librerías)
+   ============================================ */
+
+.font-display { font-family: "Archivo Black", sans-serif; }
+.font-body { font-family: "Space Grotesk", Arial, sans-serif; }
+.font-script { font-family: "Caveat", cursive; }
+
+/* Hojas flotando en loop */
+@keyframes floatLeaf {
+  0%, 100% { transform: translateY(0) rotate(var(--r)); }
+  50% { transform: translateY(-14px) rotate(calc(var(--r) + 4deg)); }
+}
+.leaf-float { animation: floatLeaf 6s ease-in-out infinite; }
+
+/* Pizza entra con giro + escala + desenfoque */
+@keyframes spinIn {
+  0% { transform: scale(0.5) rotate(-160deg); opacity: 0; filter: blur(6px); }
+  60% { transform: scale(1.08) rotate(10deg); opacity: 1; filter: blur(0); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.slice-anim { animation: spinIn 0.6s cubic-bezier(.2,.9,.25,1); }
+
+/* Anillo punteado girando */
+@keyframes ringSpin { to { transform: rotate(360deg); } }
+.ring-spin { animation: ringSpin 20s linear infinite; }
+
+/* Migajas al tocar */
+@keyframes crumbBurst {
+  0% { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+}
+.crumb { animation: crumbBurst 0.6s ease-out forwards; }
+
+/* Frase/nombre deslizándose */
+@keyframes captionSlide {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.caption-anim { animation: captionSlide 0.5s ease; }
+
+/* Hint pulsante */
+@keyframes pulseHint {
+  0%, 100% { opacity: .55; }
+  50% { opacity: 1; }
+}
+.pulse-hint { animation: pulseHint 2s ease-in-out infinite; }
+
+/* Emoji que sube */
+@keyframes floatUp {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.6); }
+  100% { opacity: 1; transform: translate(-50%, -60px) scale(1); }
+}
+.float-up { animation: floatUp 0.7s cubic-bezier(.2,.8,.2,1) forwards; }
+
+/* Entrada con pop */
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.pop-in { animation: popIn 0.4s ease forwards; }
+
+/* Glow neón pulsante */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 14px rgba(255,59,107,.4); }
+  50% { box-shadow: 0 0 28px rgba(255,59,107,.85); }
+}
+.glow-pulse { animation: glowPulse 2.4s ease-in-out infinite; }
+
+/* Aparición al hacer scroll (IntersectionObserver) */
+@keyframes revealUp {
+  0% { opacity: 0; transform: translateY(28px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.reveal { opacity: 0; }
+.reveal.is-visible { animation: revealUp 0.7s cubic-bezier(.2,.8,.2,1) forwards; }
+
+/* Hover elevate en tarjetas */
+.card-hover { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.card-hover:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,.5); }
+
+/* Tap scale en la pizza */
+.tap-scale { transition: transform .15s ease; }
+.tap-scale:active { transform: scale(0.9) rotate(-4deg); }
+
+/* Loader temático */
+@keyframes loaderSpin { to { transform: rotate(360deg); } }
+.loader-spin { animation: loaderSpin 0.9s linear infinite; }
+@keyframes loaderDots {
+  0%, 80%, 100% { opacity: .3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.2); }
+}
+.loader-dot { animation: loaderDots 1.2s infinite ease-in-out; }
