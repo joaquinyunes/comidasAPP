@@ -1,12 +1,48 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Slice, Leaves } from "./slice";
 import { SITE, SABORES } from "@/config/site";
 
 // ============================================================
-// HERO — flavor switcher: tocás la pizza y cambia de sabor.
+// HERO — flavor switcher con partículas flotantes de fondo.
 // ============================================================
+
+function FloatingParticles() {
+  const [dots, setDots] = useState<{ id: number; x: number; y: number; size: number; dur: number; delay: number }[]>([]);
+
+  useEffect(() => {
+    setDots(
+      Array.from({ length: 20 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: 2 + Math.random() * 4,
+        dur: 8 + Math.random() * 12,
+        delay: Math.random() * 6,
+      }))
+    );
+  }, []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+      {dots.map((d) => (
+        <span
+          key={d.id}
+          className="absolute rounded-full bg-[#ff3b6b]/15"
+          style={{
+            width: d.size,
+            height: d.size,
+            left: `${d.x}%`,
+            top: `${d.y}%`,
+            animation: `floatLeaf ${d.dur}s ease-in-out ${d.delay}s infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function Hero({ direccion }: { direccion?: string | null }) {
   const [index, setIndex] = useState(0);
   const [spinKey, setSpinKey] = useState(0);
@@ -37,9 +73,10 @@ export function Hero({ direccion }: { direccion?: string | null }) {
 
   return (
     <div className="relative z-10 flex flex-col min-h-screen px-6 sm:px-10 pt-28 pb-12 font-body">
+      <FloatingParticles />
 
       {/* HERO */}
-      <div className="flex-1 flex flex-col items-center pt-8">
+      <div className="flex-1 flex flex-col items-center pt-8 relative z-10">
         <span className="text-xs tracking-[3px] uppercase opacity-60 mb-3 animate-pulse">
           {SITE.businessName} · {SITE.city}
         </span>
