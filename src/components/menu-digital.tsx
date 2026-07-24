@@ -119,33 +119,33 @@ function ProductoCard({ producto, cantidadEnPedido, onAgregar }: ProductoCardPro
   const [expandido, setExpandido] = useState(false);
 
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+    <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md hover:border-gray-200 transition-all duration-200 group">
       <div className="flex">
         {/* Imagen */}
-        <div className="w-24 h-24 bg-gray-100 flex-shrink-0 flex items-center justify-center text-3xl">
+        <div className="w-20 h-20 sm:w-28 sm:h-28 bg-gradient-to-br from-orange-50 to-red-50 flex-shrink-0 flex items-center justify-center text-3xl overflow-hidden">
           {producto.imagenUrl ? (
             <img
               src={producto.imagenUrl}
               alt={producto.nombre}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
-            "🍽️"
+            <span className="group-hover:scale-110 transition-transform duration-300">🍽️</span>
           )}
         </div>
 
         {/* Contenido */}
-        <CardContent className="flex-1 p-3">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h3 className="font-semibold">{producto.nombre}</h3>
+        <div className="flex-1 p-3 sm:p-4">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm sm:text-base leading-tight">{producto.nombre}</h3>
               {producto.descripcion && (
-                <p className="text-xs text-gray-500 line-clamp-2 mt-0.5">
+                <p className="text-xs text-gray-400 line-clamp-2 mt-0.5">
                   {producto.descripcion}
                 </p>
               )}
             </div>
-            <span className="font-bold text-red-600">
+            <span className="font-bold text-red-500 text-sm sm:text-base whitespace-nowrap">
               {formatCurrency(producto.precio)}
             </span>
           </div>
@@ -153,51 +153,61 @@ function ProductoCard({ producto, cantidadEnPedido, onAgregar }: ProductoCardPro
           {/* Metadata */}
           <div className="flex flex-wrap gap-1 mt-2">
             {producto.tiempoPreparacionMin && (
-              <Badge variant="secondary" className="text-xs">
-                ⏱️ {producto.tiempoPreparacionMin} min
-              </Badge>
+              <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                ⏱ {producto.tiempoPreparacionMin}min
+              </span>
             )}
             {producto.nivelPicante > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                🌶️ {producto.nivelPicante}
-              </Badge>
+              <span className="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full">
+                🌶 {producto.nivelPicante}
+              </span>
             )}
             {producto.calorias && (
-              <Badge variant="secondary" className="text-xs">
-                🔥 {producto.calorias} cal
-              </Badge>
+              <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                🔥 {producto.calorias}
+              </span>
             )}
             {producto.alergenos.length > 0 && (
-              <Badge variant="destructive" className="text-xs">
-                ⚠️ {producto.alergenos.join(", ")}
-              </Badge>
+              <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded-full">
+                ⚠ {producto.alergenos.join(", ")}
+              </span>
+            )}
+            {producto.destacado && (
+              <span className="text-[10px] bg-gradient-to-r from-orange-400 to-red-400 text-white px-2 py-0.5 rounded-full font-medium">
+                🔥 Popular
+              </span>
             )}
           </div>
 
           {/* Botón agregar */}
-          <div className="flex items-center justify-between mt-3">
-            <Button
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onAgregar();
-              }}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {cantidadEnPedido > 0 ? (
-                <>
-                  ✓ Agregado ({cantidadEnPedido}) — Agregar más
-                </>
-              ) : (
-                "+ Agregar"
-              )}
-            </Button>
-            {producto.destacado && (
-              <Badge className="bg-orange-500">🔥 Popular</Badge>
+          <div className="mt-3">
+            {cantidadEnPedido > 0 ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onAgregar(); }}
+                  className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-bold text-sm transition-colors flex items-center justify-center"
+                >
+                  −
+                </button>
+                <span className="w-8 text-center font-bold text-sm">{cantidadEnPedido}</span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onAgregar(); }}
+                  className="w-8 h-8 rounded-lg bg-red-500 text-white hover:bg-red-600 font-bold text-sm transition-colors flex items-center justify-center"
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={(e) => { e.stopPropagation(); onAgregar(); }}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all shadow-sm shadow-red-500/20 hover:shadow-red-500/30"
+              >
+                + Agregar
+              </button>
             )}
           </div>
-        </CardContent>
+        </div>
       </div>
-    </Card>
+    </div>
   );
 }
