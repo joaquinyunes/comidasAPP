@@ -8,7 +8,7 @@ export default function FinalCta() {
       style={
         {
           "--cta-img":
-            "url('https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&q=80')",
+            "url('https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1400&q=80')",
         } as React.CSSProperties
       }
     >
@@ -23,7 +23,7 @@ export default function FinalCta() {
         <p>
           Reserva tu experiencia en Just Pizza. Atencion personalizada, horno de
           leña encendido todo el dia, y los sabores que van a cambiar tu forma de
-          comer pizza.
+          comer pizza para siempre.
         </p>
         <a href="tel:+525555555555" className="cta glow-pulse">
           Reservar mesa
