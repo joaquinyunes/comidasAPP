@@ -14,13 +14,14 @@ export default function Footer() {
           <span className="echo-back" aria-hidden="true">
             JUST PIZZA
           </span>
-          <h2 className="echo-front font-display">
+          <h2 className="font-display">
             JUST <span>PIZZA</span>
           </h2>
         </div>
       </div>
       <div className="foot-fine">
-        &copy; {new Date().getFullYear()} Just Pizza. Todos los derechos reservados.
+        &copy; {new Date().getFullYear()} Just Pizza. Todos los derechos
+        reservados.
       </div>
     </footer>
   );
