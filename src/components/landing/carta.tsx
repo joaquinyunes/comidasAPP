@@ -48,6 +48,11 @@ export default function Carta() {
     menuRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
+  const totalByCategory = dishes.reduce((acc, d) => {
+    acc[d.cat] = (acc[d.cat] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
   return (
     <section id="menu" className="menu-section" ref={menuRef}>
       <div className="menu-head">
@@ -64,6 +69,11 @@ export default function Carta() {
               }}
             >
               {c.label}
+              {totalByCategory[c.key] && (
+                <span style={{ marginLeft: "6px", opacity: 0.5 }}>
+                  ({totalByCategory[c.key]})
+                </span>
+              )}
             </button>
           ))}
         </div>
