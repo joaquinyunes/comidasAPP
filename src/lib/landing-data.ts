@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { SITE } from "@/config/site";
 
-// ============================================================
+  // ============================================================
 // Hook de datos de la landing.
-// Única fuente de datos para las secciones (BD vía API pública).
+// �snica fuente de datos para las secciones (BD v��a API pǧblica).
 // ============================================================
 
 export interface ProductoLanding {
@@ -20,6 +20,7 @@ export interface ProductoLanding {
   alergenos: string[];
   destacado?: boolean;
   tipo?: string;
+  ingredientes: string[];  // Items que trae cada producto
 }
 
 export interface CategoriaLanding {

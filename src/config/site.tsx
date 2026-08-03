@@ -1,13 +1,16 @@
 // ============================================================
 // CONFIGURACIÓN DE LA LANDING DE LA PIZZERÍA
-// Todo lo editable vive acá: textos, marca, colores,
-// sabores del hero, navegación y redes.
-// Nada hardcodeado en los componentes.
+// TODO LO EDITABLE VIVE AQUÍ: TEXTOS, MARCA, COLORES,
+// SABORES DEL HERO, NAVEGACIÓN Y REDES.
+// NADA HARDCODEADO EN LOS COMPONENTES.
 // ============================================================
 import type { ReactNode } from "react";
 
+// Wallpaper de fondo para la fortaleza de la landing
+const FORTRESS_BG = "https://picsum.photos/seed/pizza-fortress-bg/1920/1080.jpg?grayscale=2&blur=2";
+
 export const SITE = {
-  // Marca / identidad
+  // Marca / identidad de la fortaleza
   brand: "JUST PIZZA",
   businessName: "Pizzería La Nonna",
   tagline: "I'M TEMPTED BY",
@@ -25,6 +28,10 @@ export const SITE = {
     accentSoft: "#ff2a5a",
     gold: "#ffd23f",
     leaf: "#3f8a4d",
+    shadow: "rgba(0, 0, 0, 0.8)",
+    glow: "rgba(255, 59, 107, 0.6)",
+    goldGlow: "rgba(255, 210, 63, 0.4)",
+    greenGlow: "rgba(63, 138, 77, 0.4)",
   },
 
   // Horario de atención (se muestra en el botón CTA)
@@ -33,7 +40,7 @@ export const SITE = {
   // Texto de ayuda del hero
   heroHint: "Toca la pizza para cambiar de sabor",
 
-  //contacto (editá con los datos reales del local)
+  // contacto (editá con los datos reales del local)
   contacto: {
     direccion: "Av. Corrientes 1234, CABA",
     telefono: "+54 11 1234-5678",
@@ -46,7 +53,7 @@ export const SITE = {
     ],
   },
 
-  // Redes sociales (footer)
+  // Redes sociales (footer de la fortaleza)
   social: [
     { label: "Instagram", icon: "📷", href: "#" },
     { label: "Facebook", icon: "📘", href: "#" },
@@ -55,7 +62,7 @@ export const SITE = {
   ] as { label: string; icon: string; href: string }[],
 } as const;
 
-// Navegación principal (anclas a secciones)
+// Navegación principal (anclas a secciones de la fortaleza)
 export const NAV_LINKS = [
   { label: "Carta", href: "#carta" },
   { label: "Mesas", href: "#mesas" },
@@ -64,15 +71,16 @@ export const NAV_LINKS = [
   { label: "Reservas", href: "#reservas" },
 ] as const;
 
-// Sabores del carrusel hero (SVG dibujado, sin fotos).
-// Para usar fotos reales: agregá `imagenUrl` y cambiá <Slice> por <img>.
+// Sabores del carrusel hero (con fotos reales de IA y backup SVG)
 export interface Sabor {
   name: string;
   caption: string;
   crust: string;
   price?: number;
   imagenUrl?: string;
+  imagenUrlIA?: string;
   toppings: React.ReactNode;
+  ingredientes?: string[];  // Items que trae cada cosa
 }
 
 export const SABORES: Sabor[] = [
@@ -80,6 +88,10 @@ export const SABORES: Sabor[] = [
     name: "MUZZARELLA",
     caption: "Classic vibes, straight-up flavor.",
     crust: "#e7b65f",
+    price: 12500,
+    imagenUrl: "https://picsum.photos/seed/pizza-muzzarella-real/800/600.jpg",
+    imagenUrlIA: "https://picsum.photos/seed/pizza-muzzarella-ia/800/600.jpg",
+    ingredientes: ["Muzzarella c/vaca", "Tomate natural", "Albahaca", "Aceite de oliva"],
     toppings: (
       <>
         <circle cx="75" cy="95" r="14" fill="#e2493a" />
@@ -95,6 +107,10 @@ export const SABORES: Sabor[] = [
     name: "FUGAZZETA",
     caption: "Onion-forward, low-key fire.",
     crust: "#e7b65f",
+    price: 13500,
+    imagenUrl: "https://picsum.photos/seed/pizza-fugazza-real/800/600.jpg",
+    imagenUrlIA: "https://picsum.photos/seed/pizza-fugazza-ia/800/600.jpg",
+    ingredientes: ["Cebolla caramelizada", "Muzzarella", "Aceite de oliva", "Orégano"],
     toppings: (
       <>
         <ellipse cx="85" cy="110" rx="26" ry="20" fill="#fff8ec" />
@@ -109,6 +125,10 @@ export const SABORES: Sabor[] = [
     name: "CALABRESA",
     caption: "Spicy, loud, and always a hit.",
     crust: "#e7b65f",
+    price: 14500,
+    imagenUrl: "https://picsum.photos/seed/pizza-calabresa-real/800/600.jpg",
+    imagenUrlIA: "https://picsum.photos/seed/pizza-calabresa-ia/800/600.jpg",
+    ingredientes: ["Salamin", "Muzzarella", "Tomate natural", "Aceitunas", "Orégano", "Picante"],
     toppings: (
       <>
         <circle cx="80" cy="90" r="16" fill="#c62b2b" />
@@ -126,6 +146,10 @@ export const SABORES: Sabor[] = [
     name: "NAPOLITANA",
     caption: "Herby, bold, and full of attitude.",
     crust: "#e0a94f",
+    price: 13800,
+    imagenUrl: "https://picsum.photos/seed/pizza-napolitana-real/800/600.jpg",
+    imagenUrlIA: "https://picsum.photos/seed/pizza-napolitana-ia/800/600.jpg",
+    ingredientes: ["Tomate san marino", "Muzzarella", "Albahaca", "Aceite de oliva", "Orégano", "Ajo"],
     toppings: (
       <>
         <path d="M35 60 Q100 40 165 60 L165 90 Q100 75 35 90 Z" fill="#4e7a2f" />
@@ -140,6 +164,10 @@ export const SABORES: Sabor[] = [
     name: "4 QUESOS",
     caption: "Creamy, fresh, and crazy addictive.",
     crust: "#e7b65f",
+    price: 15000,
+    imagenUrl: "https://picsum.photos/seed/pizza-cuatro-quesos-real/800/600.jpg",
+    imagenUrlIA: "https://picsum.photos/seed/pizza-cuatro-quesos-ia/800/600.jpg",
+    ingredientes: ["Muzzarella", "Cheddar", "Roquefort", "Parmesano", "Tomate", "Aceitunas"],
     toppings: (
       <>
         <ellipse cx="85" cy="110" rx="22" ry="17" fill="#fff8ec" />
