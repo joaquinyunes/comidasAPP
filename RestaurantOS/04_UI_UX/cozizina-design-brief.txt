@@ -1,0 +1,895 @@
+Sí. Analizando el video, este es el desglose del diseño y la identidad visual de la web.
+
+Estilo general
+Diseño: Neo Pop-Art + Cartoon + Ilustración Vectorial 3D Isométrica.
+Inspiración: videojuegos, comida rápida japonesa, cómics, stickers y branding de los años 90 mezclado con diseño web moderno.
+Sensación: divertida, energética, muy interactiva y premium.
+Paleta de colores
+Color principal
+
+Amarillo mostaza brillante
+
+#F6BE3B
+Colores secundarios
+
+Morado oscuro
+
+#5D23C7
+
+Morado medio
+
+#7432D6
+
+Morado claro
+
+#8F57F2
+
+Rojo ketchup
+
+#EF4136
+
+Naranja
+
+#F89B28
+
+Crema
+
+#FFF7E7
+
+Blanco
+
+#FFFFFF
+
+Negro
+
+#111111
+Contraste
+
+Siempre trabajan con
+
+fondo muy plano
+objetos muy saturados
+borde negro grueso
+
+Todo tiene mucho contraste.
+
+Tipografías
+Heading principal
+
+Muy parecida a
+
+Anton
+League Spartan Black
+Druk Wide
+Archivo Black
+
+Características
+
+ultra bold
+condensada
+mayúsculas
+negra
+muy pesada
+
+Ejemplo
+
+CELESTIAL
+FUEL FOR
+INTERSTELLAR
+APPETITES
+Navegación
+
+Fuente similar a
+
+Poppins SemiBold
+
+o
+
+Satoshi
+
+o
+
+General Sans
+Subtítulos
+
+Sans serif moderna
+
+peso 400–500
+
+color gris
+
+Logo
+
+Tiene
+
+borde negro
+relleno blanco
+efecto sticker
+
+Muy estilo anime.
+
+Ilustraciones
+
+Todo es
+
+3D Isométrico Vectorial
+
+Características
+
+sombras simples
+pocos degradados
+cel shading
+outlines negros
+colores planos
+Grosor de líneas
+
+Entre
+
+3px
+
+y
+
+5px
+
+Siempre negras.
+
+Bordes
+
+Todos los elementos tienen
+
+border-radius:
+20px
+
+aprox.
+
+Muchísimas curvas.
+
+Sombras
+
+No usan blur.
+
+Usan
+
+sombras dibujadas
+
+como ilustración.
+
+Botones
+
+Todos tienen
+
+fondo blanco
+borde negro
+icono negro
+
+Cuando haces hover
+
+escalan
+giran apenas
+rebote
+Animaciones
+
+Hay muchísimas.
+
+Entrada
+
+Los objetos aparecen con
+
+scale
+opacity
+rotate
+
+duración
+
+0.6 s
+Hover
+
+Escala
+
+1.05
+
+Rotación
+
+2°
+Floating
+
+Los objetos flotan continuamente
+
+translateY(-10px)
+
+↓
+
+translateY(10px)
+
+Loop infinito.
+
+Parallax
+
+Al mover el mouse
+
+el hotdog se mueve
+las papas se mueven
+los textos apenas
+
+Todo con efecto profundidad.
+
+Scroll
+
+Cuando hacés scroll
+
+Cada sección:
+
+entra desde abajo
+escala
+rota
+
+Nunca aparece de golpe.
+
+Cursor
+
+Cursor completamente personalizado.
+
+Con animaciones.
+
+Transiciones
+
+Muy suaves
+
+easeOutExpo
+
+
+o
+
+easeInOutCirc
+Layout
+
+Navbar
+
+Logo
+
+Links
+
+Botón sonido
+
+Hero
+
+Izquierda
+
+Ilustración
+
+Centro
+
+Objeto principal
+
+Derecha
+
+Título gigante
+Descripción
+
+Abajo
+
+Indicadores
+Espaciado
+
+Muchísimo aire.
+
+Todo respira.
+
+Nada está pegado.
+
+Grid
+
+Usan
+
+12 columnas
+
+aprox.
+
+Con muchísimo espacio negativo.
+
+Iconografía
+
+Todo parece dibujado.
+
+No usan iconos tipo Material.
+
+Estilo de ilustración
+
+Muy parecido a
+
+Adventure Time
+Cartoon Network
+Rick and Morty
+McDonald's Japón
+Super Mario RPG
+Nintendo Switch promos
+Movimiento de cámara
+
+La cámara nunca está fija.
+
+Siempre hay
+
+zoom lento
+paneos
+rotación muy pequeña
+profundidad
+Experiencia UX
+
+La página parece más una experiencia interactiva que un sitio tradicional:
+
+Cada scroll cuenta una historia.
+Las ilustraciones reaccionan al usuario.
+Las transiciones son cinematográficas.
+No hay cambios bruscos; todo tiene continuidad visual.
+Tecnologías que probablemente usa
+React / Next.js
+GSAP (animaciones de scroll y timeline)
+Framer Motion (microinteracciones)
+Lenis (scroll suave)
+Splitting.js (animación de texto)
+SVG + ilustraciones vectoriales
+CSS Variables para la paleta de colores
+Lottie o animaciones SVG para algunos detalles
+
+En conjunto, el sitio sigue una línea de diseño Pop-Art interactivo, con ilustraciones isométricas, colores muy saturados, tipografía pesada, bordes negros gruesos y animaciones constantes que le dan una sensación muy viva y dinámica.
+
+y decime tipo prinero el carrussel despeus los panes etc y despues etc asi con todo
+
+Sí. Si lo que querés es replicar exactamente la estructura del sitio, yo la dividiría en componentes de arriba hacia abajo. Quedaría algo así:
+
+1. Loading Screen
+
+Antes de entrar a la web.
+
+Contiene
+Fondo amarillo
+Logo animado
+Barra de carga
+Personaje/objeto flotando
+Texto "Loading..."
+Fade Out al terminar
+
+Animaciones
+
+Scale
+Opacity
+Rotación
+Barra creciendo
+2. Cursor Personalizado
+
+Siempre presente.
+
+Contiene
+
+Cursor principal
+Cursor secundario
+Escala al hacer hover
+Cambio de color
+Atracción sobre botones
+3. Fondo Global
+
+No es un color plano.
+
+Tiene
+
+pequeñas estrellas
+puntitos
+figuras flotantes
+líneas
+partículas
+
+Todo con movimiento muy lento.
+
+4. Navbar
+
+Contiene
+
+Izquierda
+
+Logo
+
+Centro
+Home
+Menu
+Story
+Contact
+Derecha
+
+Botón
+
+Sound On
+Sound Off
+
+Animaciones
+
+aparece desde arriba
+fondo blur al hacer scroll
+links con underline animado
+5. Hero Section
+
+Es la sección más grande.
+
+Se divide en dos columnas.
+
+Columna Izquierda
+
+Aquí está el personaje principal.
+
+Puede ser
+
+hamburguesa
+hotdog
+astronauta
+papas
+etc
+
+Tiene
+
+flotación
+rotación
+sombras
+stickers alrededor
+Columna Derecha
+
+Título gigante.
+
+Luego
+
+Subtítulo
+
+Después
+
+Descripción
+
+Después
+
+Botón CTA
+
+Después
+
+Flecha hacia abajo
+
+Animaciones
+
+Cada palabra aparece distinta.
+
+Scale
+Rotate
+Fade
+Bounce
+6. Carrusel Horizontal
+
+Después del Hero.
+
+Contiene tarjetas.
+
+Cada tarjeta tiene
+
+imagen
+nombre
+descripción
+botón
+
+El carrusel
+
+autoplay
+draggable
+infinito
+
+Hover
+
+escala
+levanta
+sombra
+7. Productos
+
+Grid.
+
+Cada producto tiene
+
+Imagen
+
+3D Isométrica.
+
+Nombre
+
+Fuente bold.
+
+Precio
+
+Color rojo.
+
+Ingredientes
+
+Texto gris.
+
+Botón
+
+Order
+
+Hover
+
+Imagen gira
+Tarjeta sube
+Sombra aumenta
+8. Ingredientes
+
+Cada ingrediente está separado.
+
+Ejemplo
+
+Pan
+
+↓
+
+Carne
+
+↓
+
+Queso
+
+↓
+
+Tomate
+
+↓
+
+Lechuga
+
+↓
+
+Salsas
+
+Cada uno tiene
+
+ilustración
+nombre
+descripción
+9. Sección Historia
+
+Dos columnas.
+
+Izquierda
+
+Texto.
+
+Derecha
+
+Ilustración.
+
+Aparecen al hacer scroll.
+
+10. Proceso
+
+Timeline.
+
+Paso 1
+
+↓
+
+Paso 2
+
+↓
+
+Paso 3
+
+↓
+
+Paso 4
+
+Cada paso tiene
+
+número
+ilustración
+descripción
+11. Galería
+
+Masonry o Grid.
+
+Fotos grandes.
+
+Hover
+
+zoom
+rotación
+borde amarillo
+12. Sección Especial
+
+Banner enorme.
+
+Con
+
+fondo ilustrado
+personaje gigante
+CTA
+13. Testimonials
+
+Cards.
+
+Cada una tiene
+
+foto
+nombre
+comentario
+estrellas
+
+Slider automático.
+
+14. FAQ
+
+Accordion.
+
+Animaciones
+
+altura
+fade
+icono rota
+15. CTA Final
+
+Muy grande.
+
+Título
+
+↓
+
+Descripción
+
+↓
+
+Botón
+
+↓
+
+Ilustraciones alrededor.
+
+16. Footer
+
+Contiene
+
+Logo
+
+↓
+
+Redes
+
+↓
+
+Links
+
+↓
+
+Copyright
+
+Componentes reutilizables
+Botones
+
+Todos iguales.
+
+borde negro
+fondo blanco
+icono
+hover
+Cards
+borde negro
+border radius
+sombra
+padding grande
+Badges
+
+Pequeños.
+
+Con
+
+fondo amarillo
+texto negro
+Chips
+
+Para ingredientes.
+
+Iconos
+
+Todos ilustrados.
+
+Stickers
+
+Repartidos por toda la página.
+
+Como
+
+estrellas
+rayos
+planetas
+flechas
+explosiones
+puntos
+Animaciones globales
+Scroll Reveal
+
+Cada sección
+
+opacity 0 → 1
+translateY(80px)
+scale(.9 → 1)
+Floating
+
+Todas las ilustraciones
+
+y:-10
+
+↓
+
+y:10
+
+Loop infinito.
+
+Hover
+scale 1.05
+rotate 2°
+shadow
+Mouse Parallax
+
+Todos los objetos
+
+siguen el mouse
+distintas velocidades
+profundidad
+Texto
+
+Los títulos
+
+aparecen letra por letra
+palabra por palabra
+con rebote
+Transiciones
+
+Cambio entre secciones
+
+Fade
+Scale
+Rotate
+Blur
+Sistema de diseño (Design System)
+Colores
+Amarillo (Primary)
+Morado (Secondary)
+Rojo (Accent)
+Blanco (Surface)
+Negro (Outline)
+Gris claro (Text Secondary)
+Tipografías
+H1
+Anton / Druk / Archivo Black
+H2
+League Spartan
+Body
+Poppins
+Satoshi
+General Sans
+Espaciado
+8 px
+16 px
+24 px
+32 px
+48 px
+64 px
+96 px
+128 px
+Organización recomendada del proyecto
+App
+│
+├── Loading
+├── Cursor
+├── Background
+├── Navbar
+├── Hero
+├── HeroCarousel
+├── FeaturedProducts
+├── Ingredients
+├── Story
+├── Process
+├── Gallery
+├── Specials
+├── Testimonials
+├── FAQ
+├── CTA
+├── Footer
+│
+├── Components
+│   ├── Button
+│   ├── Card
+│   ├── Badge
+│   ├── Chip
+│   ├── Marquee
+│   ├── Carousel
+│   ├── Modal
+│   ├── Tooltip
+│   ├── FloatingObject
+│   ├── AnimatedText
+│   ├── Sticker
+│   └── SectionTitle
+│
+├── Illustrations
+├── Icons
+├── Fonts
+├── Colors
+├── Animations
+└── Sounds
+
+Si tu objetivo es recrear esa landing con un nivel de detalle similar, yo iría todavía más allá y haría un documento de arquitectura visual donde se descomponga pixel por pixel: cada sección, cada ilustración, cada animación, el orden de aparición, las velocidades, easing, tamaños, márgenes, tipografías, paleta, componentes reutilizables y comportamiento responsive, como si fuera la guía de diseño oficial del sitio.
+
+¡Excelente análisis! La verdad que desarmaste la identidad visual a la perfección. Captaste la esencia Neo Pop-Art, la tipografía pesada tipo Anton y el estilo de ilustración 3D isométrico con cel shading.
+
+Para complementar tu desglose y responder qué más agregaría, dónde va cada cosa y cómo está construida, vamos a meternos un poco más en la arquitectura del proyecto y los trucos técnicos detrás de esas animaciones. Como seguramente estés acostumbrado a pensar la estructura en componentes o módulos (ideal para encararlo con React o Next.js), acá te dejo el plano de cómo armar esta bestia:
+
+1. Estructura y Layout (Dónde va cada cosa)
+El sitio se puede dividir en capas (Z-Index) y secciones semánticas:
+
+Capa Global (Z-Index máximo):
+
+Pre-loader: Pantalla roja inicial. Sirve para cargar los assets pesados (modelos 3D/imágenes) y pedir permiso para el audio.
+
+Custom Cursor: Un div fijo que sigue las coordenadas x, y del mouse.
+
+Navbar (Sticky): Siempre visible arriba. Contiene navegación a la izquierda, logo centrado, y el toggle de sonido a la derecha.
+
+Capa de Contenido (Main Flow):
+
+Section 1: Hero Carousel (100vh): Fondo amarillo. Aquí vive el Slider 3D.
+
+Section 2: Scroll Story (Altamente interactivo - aprox 300vh a 400vh): Fondo rojo. La sección de "HOW IT WORKS". Esta es la parte más compleja.
+
+Section 3: Footer / Locations (100vh): Fondo rojo. Los mapas estelares y el texto final.
+
+2. La Magia Técnica (Cómo está hecha)
+Acá es donde entran las librerías pesadas. No es solo CSS; hay un control total del DOM mediante JavaScript.
+
+A. El Efecto de Transición Inicial (Pre-loader a Hero)
+
+Cuando haces clic en "START", la pantalla roja no desaparece con un opacity. Se usa un efecto de máscara circular.
+
+Técnica: CSS clip-path: circle(0% at 50% 50%) animado hacia circle(150% at 50% 50%). Esto revela el fondo amarillo que ya estaba renderizado por debajo.
+
+B. El "Scrolljacking" de la Sección 2 (Armado de la Hamburguesa)
+
+Notarás que cuando scrolleas en "HOW IT WORKS", la página no baja inmediatamente. Se queda "anclada" mientras los ingredientes caen.
+
+Técnica: GSAP con ScrollTrigger.
+
+Se usa la propiedad pin: true en el contenedor de esa sección para que se quede fijo en la pantalla.
+
+Se usa scrub: true para vincular la animación de los ingredientes (caer, apilarse, la caja cerrándose) directamente a la barra de scroll. Si subís, la hamburguesa se desarma; si bajás, se arma.
+
+Los indicadores de abajo a la izquierda (1, 2, 3, 4) están escuchando el progreso de ese ScrollTrigger para iluminarse en el momento exacto.
+
+C. Gestión del Cursor Personalizado
+
+El cursor no es estático, reacciona al contexto. Empieza como una flecha negra y blanca, pero al pasar por encima de los botones del carrusel, cambia a una "mano" dibujada.
+
+Técnica: Ocultar el cursor nativo (cursor: none en el body) y usar un estado global para saber qué elemento se está haciendo hover. Dependiendo del elemento, el div del cursor cambia su clase CSS o renderiza un SVG diferente.
+
+D. Diseño de Sonido (Web Audio API)
+
+El botón "Sound on" no está de adorno. El pre-loader advierte: "Immersive sound ahead".
+
+Técnica: Almacenar pequeños archivos de audio (SFX) para clicks, whooshes (cuando algo entra volando), y pops. Se disparan en sincronía con los eventos de GSAP o los clics de React.
+
+E. Decoraciones y Partículas ("Juice")
+
+Fijate en las estrellas/destellos (✨) en el fondo rojo y el sticker de "GALAXY BITE".
+
+Tienen animaciones independientes, probablemente funciones de CSS puro (@keyframes de rotación y flotación) que corren en un loop infinito, totalmente desligadas del scroll, para darle "vida" constante a la pantalla aunque el usuario no toque nada.
+
+En resumen: El Stack Ideal para replicarlo
+Si tuvieras que clonar esto mañana mismo, tu mejor arsenal sería:
+
+Framework: React (o Next.js para optimizar la carga inicial).
+
+Animaciones Core: GSAP (ScrollTrigger para la sección de armado, y Timeline para las entradas iniciales).
+
+Estilos: Tailwind CSS o Módulos CSS con variables muy estrictas para los bordes (border: 4px solid #111) y las sombras duras (box-shadow: 10px 10px 0px #111).
+
+Modelos/Vectores: SVG exportados de Illustrator o Figma, optimizados a mano.
+
+Es un proyecto que requiere mucha coordinación entre el estado de los componentes y las animaciones matemáticas en el DOM.
+
+¿Tenías pensado replicar alguna de estas interacciones (como el armado de elementos al scrollear o el efecto de la máscara circular) para algún proyecto en particular o estabas analizando puramente por inspiración de UI/UX?
