@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +11,19 @@ import { Input } from "@/components/ui/input";
 // ============================================
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const callbackUrl = params.get("callbackUrl") || "/dashboard";
+  const callbackUrl = params?.get("callbackUrl") || "/dashboard";
 
-  const [email, setEmail] = useState("admin@pizzaria.com");
+  const [email, setEmail] = useState("admin@cozizina.com");
   const [password, setPassword] = useState("admin123");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -58,12 +67,12 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500 to-orange-600 shadow-lg shadow-red-500/25 mb-4 text-4xl">
-            🍕
+            🛸
           </div>
           <h1 className="font-bold text-3xl text-white tracking-tight">
-            La <span className="text-red-400">Nonna</span>
+            COZI<span className="text-red-400">ZINA</span>
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Panel de administración</p>
+          <p className="text-gray-400 text-sm mt-1">Panel de gestión</p>
         </div>
 
         {/* Card glassmorphism */}
@@ -79,7 +88,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   onFocus={() => setFocused("email")}
                   onBlur={() => setFocused(null)}
-                  placeholder="admin@pizzaria.com"
+                  placeholder="admin@cozizina.com"
                   required
                   className={`h-12 bg-white/[0.06] border-white/[0.1] text-white placeholder:text-gray-500 focus:border-red-500/50 focus:ring-red-500/20 transition-all duration-300 ${
                     focused === "email" ? "ring-2 ring-red-500/20 border-red-500/50" : ""
@@ -138,17 +147,23 @@ export default function LoginPage() {
             </Button>
           </form>
 
+          <p className="mt-4 text-center">
+            <Link href="/recuperar" className="text-[11px] text-gray-400 hover:text-gray-300 underline">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </p>
+
           {/* Demo hint */}
           <div className="mt-6 pt-5 border-t border-white/[0.08]">
             <p className="text-[11px] text-gray-500 text-center">
-              Demo: <span className="text-gray-400">admin@pizzaria.com</span> / <span className="text-gray-400">admin123</span>
+              Demo: <span className="text-gray-400">admin@cozizina.com</span> / <span className="text-gray-400">admin123</span>
             </p>
           </div>
         </div>
 
         {/* Footer */}
         <p className="text-center text-gray-600 text-xs mt-6">
-          RestaurantOS v0.1.0
+          Cozizina · Sistema de gestión
         </p>
       </div>
     </div>
