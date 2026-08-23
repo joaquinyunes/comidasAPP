@@ -1,27 +1,42 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Header from "./header";
+import Navbar from "./navbar";
 import Hero from "./hero";
-import ProductCarousel from "./product-carousel";
-import Carta from "./carta";
-import StatsBlocks from "./stats-blocks";
-import RegionsStrip from "./regions-strip";
-import FinalCta from "./final-cta";
+import Marquee from "./marquee";
+import FeaturedProducts from "./featured-products";
+import Ingredients from "./ingredients";
+import Story from "./story";
+import GalaxySlider from "./galaxy-slider";
+import Gallery from "./gallery";
+import Specials from "./specials";
+import Testimonials from "./testimonials";
+import FAQ from "./faq";
+import WhereToFind from "./where-to-find";
+import FinalCTA from "./cta";
+import FloatingShapes from "./floating-shapes";
 import Footer from "./footer";
 
 export default function LandingShell() {
-  const [loading, setLoading] = useState(true);
+  const [preloaderDone, setPreloaderDone] = useState(false);
+  const [collapsing, setCollapsing] = useState(false);
 
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1600);
-    return () => clearTimeout(t);
+  const handleStart = useCallback(() => {
+    setCollapsing(true);
+    setTimeout(() => setPreloaderDone(true), 900);
   }, []);
 
-  const initReveal = useCallback(() => {
-    const els = document.querySelectorAll<HTMLElement>(".reveal:not(.is-visible)");
-    if (!els.length) return;
+  // Auto-cierre del preloader (accesibilidad + si no hay interacción).
+  useEffect(() => {
+    const t = setTimeout(handleStart, 2200);
+    return () => clearTimeout(t);
+  }, [handleStart]);
 
+  const initReveal = useCallback(() => {
+    const els = document.querySelectorAll<HTMLElement>(
+      ".reveal-up:not(.is-visible), .reveal-scale:not(.is-visible)"
+    );
+    if (!els.length) return;
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -31,41 +46,50 @@ export default function LandingShell() {
           }
         });
       },
-      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
     );
-
     els.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
   }, []);
 
   useEffect(() => {
-    if (loading) return;
+    if (!preloaderDone) return;
     const t = setTimeout(() => initReveal(), 100);
-    return () => clearTimeout(t);
-  }, [loading, initReveal]);
-
-  // Re-run observer when DOM changes (for dynamic content)
-  useEffect(() => {
-    if (loading) return;
     const mut = new MutationObserver(() => initReveal());
     mut.observe(document.body, { childList: true, subtree: true });
-    return () => mut.disconnect();
-  }, [loading, initReveal]);
+    return () => {
+      clearTimeout(t);
+      mut.disconnect();
+    };
+  }, [preloaderDone, initReveal]);
 
   return (
     <>
-      <div id="loader" className={loading ? "" : "hidden"}>
-        <span>Just Pizza</span>
-        <div className="loader-bar" />
-      </div>
-      <Header />
+      {!preloaderDone && (
+        <div id="preloader" className={collapsing ? "collapsing" : ""}>
+          <div className="preloader-logo">COZIZINA</div>
+          <div className="preloader-sub">Comida al estilo cósmico</div>
+          <button className="preloader-start" onClick={handleStart}>
+            Entrar
+          </button>
+        </div>
+      )}
+
+      <FloatingShapes />
+      <Navbar />
       <main>
         <Hero />
-        <ProductCarousel />
-        <Carta />
-        <StatsBlocks />
-        <RegionsStrip />
-        <FinalCta />
+        <Marquee />
+        <FeaturedProducts />
+        <Ingredients />
+        <Story />
+        <GalaxySlider />
+        <Gallery />
+        <Specials />
+        <Testimonials />
+        <FAQ />
+        <WhereToFind />
+        <FinalCTA />
       </main>
       <Footer />
     </>

@@ -1,32 +1,32 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
+import { Imagen } from "./Imagen";
 
 export default function Hero() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const hero = heroRef.current;
+    if (!hero) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const floats = container.querySelectorAll<HTMLElement>(".float-img");
+    const floatingEls = hero.querySelectorAll<HTMLElement>(".parallax-target");
     let raf: number;
 
     const onMove = (e: MouseEvent) => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        const rect = container.getBoundingClientRect();
+        const rect = hero.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
         const dx = (e.clientX - cx) / rect.width;
         const dy = (e.clientY - cy) / rect.height;
 
-        floats.forEach((el, i) => {
-          const speed = (i + 1) * 20;
-          const x = dx * speed;
-          const y = dy * speed;
-          const rot = Number(el.dataset.rotate) || 0;
-          el.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
+        floatingEls.forEach((el, i) => {
+          const depth = (i + 1) * 12;
+          el.style.transform = `translate(${dx * depth}px, ${dy * depth}px) rotate(${dx * 2}deg)`;
         });
       });
     };
@@ -39,80 +39,44 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="hero" ref={containerRef}>
-      <span className="eyebrow reveal">Est. 2025 — Ciudad de Mexico</span>
-
-      <div className="echo reveal">
-        <span className="echo-back" aria-hidden="true">
-          JUST PIZZA
-        </span>
-        <h1 className="echo-front">JUST PIZZA</h1>
-      </div>
-
-      <div className="hero-tags reveal">
-        <div className="echo">
-          <span className="echo-back" aria-hidden="true">
-            Madera
-          </span>
-          <span className="echo-front">Madera</span>
+    <section className="hero-section" ref={heroRef} id="inicio">
+      <div className="hero-left">
+        <div className="hero-illustration parallax-target float-anim">
+          <Imagen src="/assets/hyperdog.png" alt="Hyperdog, hot dog cósmico de Cozizina" priority />
         </div>
-        <div className="echo">
-          <span className="echo-back" aria-hidden="true">
-            Carbon
-          </span>
-          <span className="echo-front">Carbon</span>
-        </div>
-        <div className="echo">
-          <span className="echo-back" aria-hidden="true">
-            Fuego
-          </span>
-          <span className="echo-front">Fuego</span>
-        </div>
-      </div>
-
-      <div className="hero-media reveal">
-        <img
-          src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&q=80"
-          alt="Pizza artesanal al horno de leña"
-          loading="eager"
-        />
-        <div className="hero-floats">
-          <div
-            className="float-img float-1"
-            data-rotate="-12"
-            style={{ transform: "rotate(-12deg)" }}
-          >
-            <img
-              src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80"
-              alt="Pizza pepperoni"
-            />
+        <div>
+          <div className="hero-title sticker-text reveal-up">ANTOJOS</div>
+          <div className="hero-title sticker-text-yellow reveal-up" style={{ animationDelay: "0.1s" }}>
+            DE OTRO
           </div>
-          <div
-            className="float-img float-2"
-            data-rotate="8"
-            style={{ transform: "rotate(8deg)" }}
-          >
-            <img
-              src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80"
-              alt="Pizza margarita"
-            />
+          <div className="hero-title sticker-text reveal-up" style={{ animationDelay: "0.2s" }}>
+            PLANETA
           </div>
         </div>
-      </div>
-
-      <div className="hero-copy reveal">
-        <div className="label">Sobre nosotros</div>
-        <h2>
-          Hecha con <span className="font-accent">amor</span> y fuego
-        </h2>
-        <p>
-          Nacimos con la mision de crear la pizza perfecta. Ingredientes frescos
-          del dia, masa fermentada 72 horas, y un horno de leña que le da ese
-          sabor que no vas a encontrar en ningun otro lugar.
+        <p className="hero-desc reveal-up">
+          Pizzas, empanadas y hamburguesas con ingredientes frescos y sabores
+          que explotan en tu paladar. Comida al estilo cósmico en Buenos Aires.
         </p>
-        <a href="#menu" className="cta">
-          Ver la carta
-        </a>
+        <div className="hero-cta reveal-up">
+          <Link href="/menu" className="pop-btn pop-btn-red">
+            Ver la carta
+          </Link>
+          <Link href="/ordenar" className="pop-btn pop-btn-yellow">
+            Ordenar ahora
+          </Link>
+        </div>
+        <div className="hero-dots reveal-up" aria-hidden="true">
+          <div className="hero-dot" style={{ background: "var(--yellow)" }} />
+          <div className="hero-dot active" style={{ background: "var(--purple)" }} />
+          <div className="hero-dot" style={{ background: "var(--red)" }} />
+          <div className="hero-dot" style={{ background: "var(--orange)" }} />
+        </div>
+      </div>
+
+      <div className="hero-right">
+        <div className="hero-main-img parallax-target float-anim-delay-1">
+          <Imagen src="/assets/galaxy-bite.png" alt="Galaxy Bite, hamburguesa cósmica de Cozizina" priority />
+        </div>
       </div>
     </section>
   );

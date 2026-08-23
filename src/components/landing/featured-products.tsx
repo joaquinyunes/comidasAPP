@@ -1,0 +1,71 @@
+"use client";
+
+import Link from "next/link";
+import { Sticker } from "./ui";
+import { Imagen } from "./Imagen";
+import { useLandingData, type ProductoLanding } from "@/lib/landing-data";
+
+const TAG_COLORS = ["#F6BE3B", "#8F57F2", "#EF4136", "#F89B28"];
+
+const FALLBACK: ProductoLanding[] = [
+  { id: "f1", nombre: "Galaxy Bite", descripcion: "Carne angus, cheddar, salsa especial en pan cósmico.", precio: 185, imagenUrl: "/assets/galaxy-bite.png", alergenos: [], destacado: true },
+  { id: "f2", nombre: "Hyperdog", descripcion: "Salchicha premium, cebolla crispy, mostaza y ketchup.", precio: 165, imagenUrl: "/assets/hyperdog.png", alergenos: [], destacado: true },
+  { id: "f3", nombre: "Pizzanaut", descripcion: "Masa artesanal, mozzarella, pepperoni y orégano.", precio: 195, imagenUrl: "/assets/pizzanaut.png", alergenos: [], destacado: true },
+];
+
+export default function FeaturedProducts() {
+  const { data } = useLandingData();
+
+  const productos = (() => {
+    if (!data) return FALLBACK;
+    const todos = data.carta.flatMap((c) => c.productos);
+    const destacados = todos.filter((p) => p.destacado);
+    const lista = (destacados.length >= 3 ? destacados : todos).slice(0, 6);
+    return lista.length ? lista : FALLBACK;
+  })();
+
+  return (
+    <section className="products-section" id="menu">
+      <div className="products-head">
+        <Sticker label="Saboriza tu misión" color="purple" className="products-eyebrow" />
+        <h2 className="font-display section-title-head reveal-up">
+          Nuestra <span style={{ color: "var(--red)" }}>galaxia</span>
+        </h2>
+        <p className="products-sub reveal-up">
+          Elegí tu destino y dejá que tus papilas viajen por el universo.
+        </p>
+      </div>
+
+      <div className="products-grid">
+        {productos.map((p, i) => (
+          <article className="product-card pop-card reveal-scale" key={p.id} style={{ animationDelay: `${i * 0.06}s` }}>
+            <div className="product-img">
+              {p.destacado && (
+                <div className="product-tag" style={{ background: TAG_COLORS[i % TAG_COLORS.length] }}>
+                  Destacado
+                </div>
+              )}
+              <Imagen src={p.imagenUrl || "/assets/galaxy-bite.png"} alt={p.nombre} />
+            </div>
+            <div className="product-body">
+              <h3 className="font-display product-name">{p.nombre}</h3>
+              {p.descripcion && <p className="product-ingredients-text">{p.descripcion}</p>}
+              <div className="product-foot">
+                <span className="product-price">${Math.round(p.precio).toLocaleString("es-AR")}</span>
+                <Link href="/ordenar" className="pop-btn product-order">
+                  Ordenar
+                </Link>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="products-more reveal-up">
+        <Link href="/menu" className="pop-btn pop-btn-purple">
+          Ver la carta completa
+        </Link>
+      </div>
+    </section>
+  );
+}
