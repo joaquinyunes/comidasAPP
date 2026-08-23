@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma, getTenantBySlug, getDefaultSucursal } from "@/lib/prisma";
+import { strictRateLimit } from "@/lib/rate-limit";
 
 // ============================================
 // POST /api/publico/reservas
@@ -21,8 +22,11 @@ const ReservaSchema = z.object({
   tenant: z.string().optional(),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    const limitada = await strictRateLimit(request);
+    if (limitada) return limitada;
+
     const body = await request.json();
     const parsed = ReservaSchema.safeParse(body);
     if (!parsed.success) {

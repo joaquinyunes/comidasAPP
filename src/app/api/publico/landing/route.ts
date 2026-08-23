@@ -35,6 +35,7 @@ export async function GET(request: Request) {
       prisma.mesa.findMany({
         where: { tenantId },
         orderBy: { numero: "asc" },
+        include: { sector: { select: { nombre: true } } },
       }),
       prisma.promocion.findMany({
         where: { tenantId, activa: true },
@@ -75,7 +76,7 @@ export async function GET(request: Request) {
       numero: m.numero,
       capacidad: m.capacidad,
       estado: m.estado,
-      sector: m.sector,
+      sector: m.sector?.nombre ?? null,
     }));
 
     const promociones = [
@@ -108,7 +109,6 @@ export async function GET(request: Request) {
             nombre: sucursal.nombre,
             direccion: sucursal.direccion,
             telefono: sucursal.telefono,
-            ciudad: sucursal.ciudad,
           }
         : null,
       carta,
