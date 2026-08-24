@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { PedidoSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
+import { sincronizarEstadoPedido } from "@/lib/pedidos/sincronizar-estado";
 
 // ============================================
 // GET /api/pedidos/[id] — Obtener pedido
@@ -66,7 +67,7 @@ export async function PUT(
       return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
     }
 
-    const estadosValidos = ["recibido", "aceptado", "en_preparacion", "listo", "entregado", "esperando_cuenta", "cerrado", "cancelado"];
+    const estadosValidos = ["recibido", "aceptado", "en_preparacion", "listo", "entregado", "esperando_cuenta", "pagado", "cerrado", "cancelado"];
     if (estado && !estadosValidos.includes(estado)) {
       return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
     }
@@ -87,6 +88,13 @@ export async function PUT(
           usuarioId: context.usuarioId,
         },
       });
+
+      // El estado del pedido sigue al de sus ítems (best-effort).
+      try {
+        await sincronizarEstadoPedido(prisma, id);
+      } catch (e) {
+        console.error("[api/pedidos/[id]] sincronizarEstadoPedido:", e);
+      }
     }
 
     // Actualizar estado del pedido si se proporciona
@@ -106,11 +114,11 @@ export async function PUT(
         },
       });
 
-      // Si el pedido se cierra, actualizar mesa
-      if (estado === "cerrado" && pedido.mesaId) {
+      // Si el pedido se cierra o se paga, liberar la mesa
+      if ((estado === "cerrado" || estado === "pagado") && pedido.mesaId) {
         await prisma.mesa.update({
           where: { id: pedido.mesaId },
-          data: { estado: "limpieza" },
+          data: { estado: "libre" },
         });
       }
     }

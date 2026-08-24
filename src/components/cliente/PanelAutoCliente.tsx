@@ -1,102 +1,91 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useCarrito, type ItemMenu } from "./useCarrito";
+import { useEstadoPedido } from "./useEstadoPedido";
+import { enviarPedido, nuevaClave } from "./enviarPedido";
+import MenuMesa from "./MenuMesa";
+import SeguimientoPedido from "./SeguimientoPedido";
 
-interface ItemMenu { id: string; nombre: string; descripcion: string | null; precio: number; alergenos: string[]; nivelPicante: number; tiempoMin: number | null; }
-interface Cat { categoria: string; items: ItemMenu[]; }
+interface Categoria {
+  categoria: string;
+  items: ItemMenu[];
+}
 
+// Orquestador: decide si mostrar el menú o el seguimiento. La
+// lógica de carrito, envío y polling vive en módulos separados.
 export default function PanelAutoCliente({ mesaId }: { mesaId: string }) {
-  const [cats, setCats] = useState<Cat[]>([]);
-  const [cart, setCart] = useState<Record<string, number>>({});
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [pedidoId, setPedidoId] = useState<string | null>(null);
-  const [estado, setEstado] = useState<any>(null);
-  const [msg, setMsg] = useState<string>("");
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [cupon, setCupon] = useState<{ codigo: string; descuento: number } | null>(null);
+  const claveRef = useRef<string>(nuevaClave());
+
+  const catalogo = categorias.flatMap((c) => c.items);
+  const carrito = useCarrito(catalogo);
+  const estado = useEstadoPedido(pedidoId);
 
   useEffect(() => {
-    fetch(`/api/cliente/menu?mesaId=${mesaId}`).then((r) => r.json()).then((d) => setCats(d.data ?? []));
+    let vivo = true;
+    fetch(`/api/cliente/menu?mesaId=${mesaId}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("menu"))))
+      .then((d) => {
+        if (vivo) setCategorias(d.data ?? []);
+      })
+      .catch(() => {
+        if (vivo) setError("No pudimos cargar el menú. Actualizá la página.");
+      });
+    return () => {
+      vivo = false;
+    };
   }, [mesaId]);
 
-  useEffect(() => {
-    if (!pedidoId) return;
-    const i = setInterval(async () => {
-      const d = await (await fetch(`/api/cliente/pedido/${pedidoId}/estado`)).json();
-      setEstado(d.data ?? null);
-    }, 5000);
-    return () => clearInterval(i);
-  }, [pedidoId]);
-
-  function cambiar(id: string, delta: number) {
-    setCart((c) => {
-      const n = (c[id] ?? 0) + delta;
-      if (n <= 0) { const { [id]: _, ...rest } = c; return rest; }
-      return { ...c, [id]: n };
-    });
-  }
-
-  const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
-
-  async function enviar() {
-    const items = Object.entries(cart).map(([productoId, cantidad]) => ({ productoId, cantidad }));
-    if (items.length === 0) return;
-    const res = await fetch("/api/cliente/pedido", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mesaId, items }),
-    });
-    const d = await res.json();
-    if (d.data?.pedidoId) {
-      setPedidoId(d.data.pedidoId);
-      setMsg(d.data.mensaje);
-      setCart({});
+  async function onEnviar() {
+    if (carrito.totalItems === 0) return;
+    setEnviando(true);
+    setError(null);
+    const r = await enviarPedido(
+      mesaId,
+      carrito.lineas.map((l) => ({ productoId: l.productoId, cantidad: l.cantidad })),
+      claveRef.current,
+      cupon?.codigo
+    );
+    setEnviando(false);
+    if (r.ok && r.pedidoId) {
+      setPedidoId(r.pedidoId);
+      carrito.vaciar();
+      setCupon(null);
     } else {
-      setMsg(d.error ?? "No se pudo enviar");
+      setError(r.faltantes?.length ? `${r.mensaje} (${r.faltantes.join(", ")})` : r.mensaje);
     }
   }
 
+  function nuevoPedido() {
+    claveRef.current = nuevaClave();
+    setPedidoId(null);
+    setError(null);
+    setCupon(null);
+  }
+
   if (pedidoId) {
-    return (
-      <div className="mx-auto max-w-md p-6 text-center">
-        <h1 className="text-xl font-bold mb-2">Tu pedido</h1>
-        <p className="text-zinc-600 mb-2">{estado?.mensaje}</p>
-        <div className="my-4 h-3 w-full rounded bg-zinc-100">
-          <div className="h-3 rounded bg-green-500 transition-all" style={{ width: `${estado?.progreso ?? 0}%` }} />
-        </div>
-        <p className="text-sm text-zinc-500">{estado?.sinApurar}</p>
-        <button onClick={() => { setPedidoId(null); setEstado(null); }} className="mt-4 rounded bg-zinc-900 px-4 py-2 text-white text-sm">Hacer otro pedido</button>
-      </div>
-    );
+    return <SeguimientoPedido pedidoId={pedidoId} estado={estado} onNuevoPedido={nuevoPedido} />;
   }
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="text-xl font-bold mb-1">Menú de la mesa</h1>
-      <p className="text-sm text-zinc-500 mb-4">Elegí solo lo posible. Pedí cuando quieras.</p>
-      {msg && <p className="mb-3 text-sm text-red-600">{msg}</p>}
-      {cats.map((c) => (
-        <div key={c.categoria} className="mb-5">
-          <h2 className="font-semibold mb-2">{c.categoria}</h2>
-          <div className="space-y-2">
-            {c.items.map((it) => (
-              <div key={it.id} className="flex items-center justify-between rounded border border-zinc-200 p-3">
-                <div>
-                  <div className="font-medium">{it.nombre} {it.nivelPicante > 0 && "🌶️".repeat(Math.min(it.nivelPicante, 3))}</div>
-                  <div className="text-xs text-zinc-500">{it.descripcion ?? ""}</div>
-                  {it.alergenos.length > 0 && <div className="text-xs text-red-500">Alérgenos: {it.alergenos.join(", ")}</div>}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">${it.precio}</span>
-                  <button onClick={() => cambiar(it.id, -1)} className="h-7 w-7 rounded bg-zinc-100">−</button>
-                  <span className="w-5 text-center text-sm">{cart[it.id] ?? 0}</span>
-                  <button onClick={() => cambiar(it.id, 1)} className="h-7 w-7 rounded bg-zinc-100">+</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-      <button onClick={enviar} disabled={totalItems === 0} className="sticky bottom-0 w-full rounded bg-green-600 py-3 text-white font-semibold disabled:opacity-40">
-        Enviar pedido ({totalItems})
-      </button>
-    </div>
+    <MenuMesa
+      mesaId={mesaId}
+      categorias={categorias}
+      cantidades={carrito.cantidades}
+      onCambiar={carrito.cambiar}
+      totalItems={carrito.totalItems}
+      totalMonto={carrito.totalMonto}
+      cupon={cupon}
+      onAplicarCupon={(codigo, descuento) => setCupon({ codigo, descuento })}
+      onQuitarCupon={() => setCupon(null)}
+      enviando={enviando}
+      error={error}
+      onEnviar={onEnviar}
+    />
   );
 }
