@@ -26,10 +26,27 @@ export async function GET(req: NextRequest) {
     orderBy: { nombre: "asc" },
   });
 
-  const porCategoria: Record<string, any[]> = {};
+  type ItemMenu = {
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    precio: number;
+    alergenos: string[];
+    nivelPicante: number;
+    tiempoMin: number | null;
+  };
+  const porCategoria: Record<string, ItemMenu[]> = {};
   for (const p of productos) {
     const cat = p.categoria.nombre;
-    (porCategoria[cat] ||= []).push({ id: p.id, nombre: p.nombre, descripcion: p.descripcion, precio: Number(p.precio), alergenos: p.alergenos, nivelPicante: p.nivelPicante, tiempoMin: p.tiempoPreparacionMin });
+    (porCategoria[cat] ||= []).push({
+      id: p.id,
+      nombre: p.nombre,
+      descripcion: p.descripcion,
+      precio: Number(p.precio),
+      alergenos: p.alergenos,
+      nivelPicante: p.nivelPicante,
+      tiempoMin: p.tiempoPreparacionMin,
+    });
   }
 
   return NextResponse.json({ data: Object.entries(porCategoria).map(([categoria, items]) => ({ categoria, items })), mesaId });

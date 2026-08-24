@@ -3,8 +3,23 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ClientePedidoSchema } from "@/lib/validation";
+import { crearPedidoCliente } from "@/lib/pedidos/crear";
+import { rateLimit } from "@/lib/rate-limit";
+
+// Una mesa comparte IP (wifi del local): límite generoso pero real.
+const limitePedidos = rateLimit({ maxRequests: 40, windowMs: 60_000 });
+
+const HTTP_POR_CODIGO = {
+  MESA_NO_ENCONTRADA: 404,
+  PRODUCTO_INVALIDO: 409,
+  SIN_STOCK: 409,
+  CUPON_INVALIDO: 422,
+} as const;
 
 export async function POST(req: NextRequest) {
+  const limitada = await limitePedidos(req);
+  if (limitada) return limitada;
+
   let body: unknown;
   try {
     body = await req.json();
@@ -14,60 +29,58 @@ export async function POST(req: NextRequest) {
 
   const parsed = ClientePedidoSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Datos inválidos", detalles: parsed.error.flatten() }, { status: 422 });
-  }
-  const { mesaId, clienteId, items } = parsed.data;
-
-  const mesa = await prisma.mesa.findFirst({ where: { id: mesaId } });
-  if (!mesa) return NextResponse.json({ error: "Mesa no encontrada" }, { status: 404 });
-
-  const productos = await prisma.producto.findMany({
-    where: { id: { in: items.map((i) => i.productoId) }, tenantId: mesa.tenantId },
-    select: { id: true, precio: true, disponible: true, nombre: true },
-  });
-  const mapa = new Map(productos.map((p) => [p.id, p]));
-  for (const it of items) {
-    const p = mapa.get(it.productoId);
-    if (!p) return NextResponse.json({ error: `Producto ${it.productoId} no existe` }, { status: 404 });
-    if (!p.disponible) return NextResponse.json({ error: `Producto ${p.nombre} no disponible` }, { status: 409 });
+    return NextResponse.json(
+      { error: "Datos inválidos", detalles: parsed.error.flatten() },
+      { status: 422 }
+    );
   }
 
-  const pedidoItems = items.map((it) => {
-    const p = mapa.get(it.productoId)!;
-    const precio = Number(p.precio);
-    const subtotal = Math.round(precio * it.cantidad * 100) / 100;
-    return {
-      tenantId: mesa.tenantId,
-      productoId: p.id,
-      cantidad: it.cantidad,
-      precioUnitario: precio,
-      subtotal,
-      notas: it.notas ?? null,
-      estado: "recibido",
-    };
-  });
-  const total = Math.round(pedidoItems.reduce((a, b) => a + Number(b.subtotal), 0) * 100) / 100;
+  const resultado = await crearPedidoCliente(parsed.data);
 
-  const pedido = await prisma.pedido.create({
-    data: {
-      tenantId: mesa.tenantId,
-      sucursalId: mesa.sucursalId,
-      mesaId,
-      clienteId: clienteId ?? null,
-      estado: "abierto",
-      total,
-      items: { create: pedidoItems },
-    },
-    include: { items: { select: { id: true, productoId: true, cantidad: true, estado: true } } },
-  });
+  if (!resultado.ok) {
+    const status = HTTP_POR_CODIGO[resultado.codigo] ?? 400;
+    return NextResponse.json(
+      {
+        error: resultado.mensaje,
+        codigo: resultado.codigo,
+        ...(resultado.codigo === "SIN_STOCK" ? { faltantes: resultado.faltantes } : {}),
+      },
+      { status }
+    );
+  }
 
-  return NextResponse.json({
-    data: {
-      pedidoId: pedido.id,
-      estado: pedido.estado,
-      total,
-      items: pedido.items,
-      mensaje: "Pedido confirmado. Lo preparan en cocina.",
+  // Efecto secundario best-effort: nunca debe tumbar la respuesta.
+  if (!resultado.duplicado) {
+    await marcarMesaOcupada(parsed.data.mesaId);
+  }
+
+  return NextResponse.json(
+    {
+      data: {
+        pedidoId: resultado.pedidoId,
+        estado: resultado.estado,
+        subtotal: resultado.subtotal,
+        descuento: resultado.descuento,
+        total: resultado.total,
+        cupon: resultado.cupon,
+        items: resultado.items,
+        mensaje: resultado.duplicado
+          ? "Este pedido ya lo habíamos recibido."
+          : "Pedido confirmado. Lo preparan en cocina.",
+      },
     },
-  }, { status: 201 });
+    { status: resultado.duplicado ? 200 : 201 }
+  );
 }
+
+async function marcarMesaOcupada(mesaId: string) {
+  try {
+    await prisma.mesa.updateMany({
+      where: { id: mesaId, estado: { in: ["libre", "reservada"] } },
+      data: { estado: "ocupada" },
+    });
+  } catch (e) {
+    console.error("[api/cliente/pedido] no se pudo actualizar la mesa:", e);
+  }
+}
+

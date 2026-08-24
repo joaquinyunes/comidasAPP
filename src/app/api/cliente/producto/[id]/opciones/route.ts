@@ -3,9 +3,10 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const producto = await prisma.producto.findUnique({
-    where: { id: params.id },
+    where: { id },
     select: {
       id: true,
       nombre: true,

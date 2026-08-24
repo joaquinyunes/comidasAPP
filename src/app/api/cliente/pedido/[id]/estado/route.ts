@@ -2,35 +2,44 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { mensajeCliente, SIN_APURAR } from "@/lib/pedidos/mensajes-cliente";
+import { progresoPedido } from "@/lib/pedidos/progreso";
+import { redondear2 } from "@/lib/pedidos/precio";
 
-const MENSAJES: Record<string, string> = {
-  recibido: "Recibimos tu pedido. En breve arranca la cocina.",
-  pendiente: "Tu pedido está en cola.",
-  en_preparacion: "Lo estamos preparando.",
-  listo: "¡Listo! El mozo te lo trae.",
-  entregado: "Disfrutá tu comida.",
-  anulado: "Este item fue anulado.",
-};
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const pedido = await prisma.pedido.findUnique({
-    where: { id: params.id },
-    select: { estado: true, items: { select: { estado: true, anulado: true } } },
+    where: { id },
+    select: {
+      estado: true,
+      total: true,
+      items: { select: { estado: true, anulado: true } },
+      pagos: { where: { estado: "completado" }, select: { monto: true, propina: true } },
+    },
   });
   if (!pedido) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
 
-  const estados = pedido.items.filter((i) => !i.anulado).map((i) => i.estado);
-  const total = estados.length;
-  const listos = estados.filter((e) => e === "listo" || e === "entregado").length;
-  const progreso = total === 0 ? 0 : Math.round((listos / total) * 100);
+  const total = Number(pedido.total);
+  const pagadoConsumo = redondear2(
+    pedido.pagos.reduce((acc, p) => acc + (Number(p.monto) - Number(p.propina)), 0)
+  );
+  const saldoPendiente = redondear2(Math.max(0, total - pagadoConsumo));
+  const pagado = pedido.estado === "pagado" || saldoPendiente <= 0.009;
 
   return NextResponse.json({
     data: {
-      pedidoId: params.id,
+      pedidoId: id,
       estadoGeneral: pedido.estado,
-      mensaje: MENSAJES[pedido.estado] ?? "Pedido en curso.",
-      progreso,
-      sinApurar: "Todo va bien, no hace falta apurar. Te avisamos cuando esté listo.",
+      mensaje: mensajeCliente(pedido.estado),
+      progreso: progresoPedido(pedido.items),
+      total,
+      pagadoConsumo,
+      saldoPendiente,
+      pagos: pedido.pagos.length,
+      pagado,
+      puedePagar: !pagado && pedido.estado !== "cancelado",
+      sinApurar: SIN_APURAR,
     },
   });
 }

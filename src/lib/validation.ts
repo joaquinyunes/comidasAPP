@@ -447,6 +447,20 @@ export const ClientePedidoItemSchema = z.object({
 export const ClientePedidoSchema = z.object({
   mesaId: z.string().uuid("ID de mesa inválido"),
   clienteId: z.string().uuid().optional(),
+  idempotencyKey: z.string().uuid().optional(),
+  cuponCodigo: z.string().min(3).max(20).regex(/^[A-Za-z0-9-]+$/).optional(),
+  items: z.array(ClientePedidoItemSchema).min(1, "El pedido debe tener al menos un item").max(30),
+});
+
+export const ClienteDeliverySchema = z.object({
+  tenant: z.string().min(1).optional(),
+  nombre: z.string().min(2, "Nombre requerido").max(100),
+  telefono: z.string().min(6, "Teléfono inválido").max(30),
+  direccion: z.string().min(5, "Dirección requerida").max(300),
+  zonaId: z.string().uuid("Zona inválida"),
+  notas: z.string().max(300).optional(),
+  cuponCodigo: z.string().min(3).max(20).regex(/^[A-Za-z0-9-]+$/).optional(),
+  idempotencyKey: z.string().uuid().optional(),
   items: z.array(ClientePedidoItemSchema).min(1, "El pedido debe tener al menos un item").max(30),
 });
 export type ClientePedidoItemInput = z.infer<typeof ClientePedidoItemSchema>;

@@ -25,7 +25,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const metodosValidos = ["efectivo", "tarjeta_credito", "tarjeta_debito", "qr_mp", "transferencia"];
+    const metodosValidos = [
+      "efectivo", "tarjeta", "qr", "transferencia",
+      "tarjeta_credito", "tarjeta_debito", "qr_mp", // compat
+    ];
     if (!metodosValidos.includes(metodoPago)) {
       return NextResponse.json(
         { error: `Método de pago inválido. Válidos: ${metodosValidos.join(", ")}` },
@@ -36,6 +39,7 @@ export async function POST(request: NextRequest) {
     // Verificar que el pedido existe
     const pedido = await prisma.pedido.findUnique({
       where: { id: pedidoId },
+      include: { pagos: { where: { estado: "completado" }, select: { id: true } } },
     });
 
     if (!pedido) {
@@ -45,37 +49,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Crear el pago
-    const pago = await prisma.pago.create({
-      data: {
-        tenantId: pedido.tenantId,
-        pedidoId,
-        cajaId: cajaId || null,
-        monto,
-        propina,
-        metodoPago,
-        estado: "completado",
-      },
-    });
+    // Idempotente: si ya tiene un pago completado, no duplicamos.
+    if (pedido.pagos.length > 0) {
+      return NextResponse.json({
+        success: true,
+        yaPagado: true,
+        pago: { id: pedido.pagos[0].id },
+      });
+    }
 
-    // Actualizar estado del pedido
-    await prisma.pedido.update({
-      where: { id: pedidoId },
-      data: { estado: "cerrado" },
-    });
-
-    // Registrar evento
-    await prisma.pedidoEvento.create({
-      data: {
-        tenantId: pedido.tenantId,
-        pedidoId,
-        evento: "pago_completado",
-        metadata: {
-          pagoId: pago.id,
+    // Crear pago + cerrar pedido + liberar mesa en una transacción.
+    const pago = await prisma.$transaction(async (tx) => {
+      const creado = await tx.pago.create({
+        data: {
+          tenantId: pedido.tenantId,
+          pedidoId,
+          cajaId: cajaId || null,
           monto,
+          propina,
           metodoPago,
+          estado: "completado",
         },
-      },
+      });
+
+      await tx.pedido.update({ where: { id: pedidoId }, data: { estado: "pagado" } });
+
+      if (pedido.mesaId) {
+        await tx.mesa.update({ where: { id: pedido.mesaId }, data: { estado: "libre" } });
+      }
+
+      await tx.pedidoEvento.create({
+        data: {
+          tenantId: pedido.tenantId,
+          pedidoId,
+          evento: "PAGO_COMPLETADO",
+          metadata: { pagoId: creado.id, monto, metodoPago },
+        },
+      });
+
+      return creado;
     });
 
     return NextResponse.json({
