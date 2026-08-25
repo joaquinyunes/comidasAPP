@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     where: { id: mesaId, tenantId: ctx.tenantId },
     include: {
       pedidos: {
-        where: { estado: { in: ["abierto", "en_proceso"] } },
+        where: { estado: { in: ["recibido", "en_preparacion", "listo", "entregado"] } },
         include: { cliente: { select: { id: true, nombre: true, alergias: true } } },
         take: 1,
       },

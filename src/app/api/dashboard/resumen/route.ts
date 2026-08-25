@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     }),
   ]);
 
-  const sum = (arr: { monto: number }[]) =>
+  const sum = (arr: { monto: unknown }[]) =>
     Math.round(arr.reduce((s, p) => s + Number(p.monto), 0));
 
   const ventasHoy = sum(pagosHoy);

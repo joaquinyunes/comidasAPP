@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     const where: Record<string, unknown> = {
       tenantId: context.tenantId,
-      estado: { in: ["recibido", "aceptado", "en_preparacion"] },
+      estado: { in: ["recibido", "en_preparacion"] },
     };
     if (sucursalId) where.sucursalId = sucursalId;
 

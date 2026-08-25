@@ -11,8 +11,8 @@ export async function GET(req: NextRequest) {
   const items = await prisma.pedidoItem.findMany({
     where: {
       anulado: false,
-      estado: { in: ["pendiente", "en_preparacion", "en_pausa"] },
-      pedido: { tenantId: ctx.tenantId, estado: { in: ["abierto", "en_proceso"] } },
+      estado: { in: ["recibido", "en_preparacion", "en_pausa"] },
+      pedido: { tenantId: ctx.tenantId, estado: { in: ["recibido", "en_preparacion"] } },
     },
     include: {
       producto: { select: { nombre: true, estacion: true, tiempoPreparacionMin: true } },

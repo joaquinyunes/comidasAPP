@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   if (!mesaId) return NextResponse.json({ error: "mesaId requerido" }, { status: 400 });
 
   const pedidos = await prisma.pedido.findMany({
-    where: { mesaId, tenantId: ctx.tenantId, estado: { in: ["abierto", "en_proceso"] } },
+    where: { mesaId, tenantId: ctx.tenantId, estado: { in: ["recibido", "en_preparacion", "listo", "entregado"] } },
     include: { items: { select: { id: true, subtotal: true, estado: true, anulado: true, producto: { select: { nombre: true } } } } },
   });
 

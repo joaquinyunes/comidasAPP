@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
       select: {
         id: true,
         numero: true,
-        pedidos: { where: { estado: { in: ["abierto", "en_proceso"] } }, orderBy: { createdAt: "desc" }, take: 1, select: { createdAt: true } },
+        pedidos: { where: { estado: { in: ["recibido", "en_preparacion", "listo", "entregado"] } }, orderBy: { createdAt: "desc" }, take: 1, select: { createdAt: true } },
       },
     }),
     prisma.pedido.groupBy({
