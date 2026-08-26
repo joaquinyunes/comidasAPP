@@ -24,7 +24,7 @@ export async function GET(
         sector: true,
         sucursal: true,
         pedidos: {
-          where: { estado: { in: ["recibido", "aceptado", "en_preparacion", "listo", "entregado", "esperando_cuenta"] } },
+          where: { estado: { in: ["recibido", "en_preparacion", "listo", "entregado"] } },
           include: { items: { include: { producto: true } } },
           orderBy: { createdAt: "desc" },
         },
@@ -197,7 +197,7 @@ export async function DELETE(
     const pedidosActivos = await prisma.pedido.count({
       where: {
         mesaId: id,
-        estado: { in: ["recibido", "aceptado", "en_preparacion", "listo", "entregado", "esperando_cuenta"] },
+        estado: { in: ["recibido", "en_preparacion", "listo", "entregado"] },
       },
     });
 

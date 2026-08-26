@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       include: {
         sector: true,
         pedidos: {
-          where: { estado: { in: ["recibido", "aceptado", "en_preparacion", "listo", "entregado", "esperando_cuenta"] } },
+          where: { estado: { in: ["recibido", "en_preparacion", "listo", "entregado"] } },
           take: 1,
           orderBy: { createdAt: "desc" },
         },
