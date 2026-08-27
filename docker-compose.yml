@@ -1,13 +1,11 @@
-version: "3.8"
-
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: restaurantos-db
+    container_name: cozizina-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: restaurantos
+      POSTGRES_DB: cozizina
     ports:
       - "5432:5432"
     volumes:
@@ -18,38 +16,20 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7-alpine
-    container_name: restaurantos-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: restaurantos-app
+    container_name: cozizina-app
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/restaurantos?schema=public
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/cozizina?schema=public
+      - JWT_SECRET=cambiar-en-produccion-min-32-chars
       - NODE_ENV=development
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
-      - SOCKET_PORT=3001
     ports:
       - "3000:3000"
-      - "3001:3001"
     depends_on:
       postgres:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     volumes:
       - .:/app
@@ -57,24 +37,8 @@ services:
       - /app/.next
     command: >
       sh -c "npx prisma db push &&
-             npx tsx prisma/seed.ts &&
+             npm run db:seed &&
              npm run dev"
-
-  socket-server:
-    build:
-      context: .
-      dockerfile: Dockerfile.socket
-    container_name: restaurantos-socket
-    environment:
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
-      - NODE_ENV=development
-    ports:
-      - "3001:3001"
-    depends_on:
-      redis:
-        condition: service_healthy
 
 volumes:
   postgres_data:
-  redis_data:
