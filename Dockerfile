@@ -1,29 +1,20 @@
-# Dockerfile para RestaurantOS
+# Cozizina — imagen de la app Next.js
 FROM node:20-alpine AS base
-
-# Instalar dependencias del sistema
 RUN apk add --no-cache libc6-compat openssl
-
 WORKDIR /app
 
-# Copiar package files
+# Dependencias (incluye devDeps: se necesitan para `next build`)
 COPY package*.json ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
+RUN npm ci
 
-# Instalar dependencias
-RUN npm ci --only=production
-
-# Generar Prisma Client
+# Prisma Client
 RUN npx prisma generate
 
-# Copiar código fuente
+# Código y build
 COPY . .
-
-# Build de la aplicación
 RUN npm run build
 
-# Exponer puerto
 EXPOSE 3000
-
-# Comando de inicio
 CMD ["npm", "run", "start"]

@@ -48,3 +48,5 @@ next-dev.log
 
 # assets de trabajo local (videos de referencia, etc.)
 public/assets/*.mp4
+
+!.env.example

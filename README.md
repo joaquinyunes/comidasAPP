@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cozizina — sitio + panel para un restaurante
 
-## Getting Started
+Sistema completo para un restaurante: sitio público con carta y reservas,
+pedido desde la mesa por QR, y panel de gestión (cocina, pedidos, caja,
+reservas, mesas).
 
-First, run the development server:
+- **Stack:** Next.js 16 (App Router), React 19, TypeScript, Tailwind v4,
+  Prisma 7 + PostgreSQL.
+- **Auth:** JWT propio en cookie httpOnly, con roles y permisos.
+- **Tiempo real:** los paneles se refrescan por polling (no requiere
+  servidor de sockets aparte).
+
+## Requisitos
+
+- Node.js 20+
+- PostgreSQL 16 (local, o un servicio como Neon / Supabase / RDS)
+
+## Puesta en marcha (local)
 
 ```bash
+cp .env.example .env      # y completá DATABASE_URL y JWT_SECRET
+npm install
+npm run db:push           # crea las tablas
+npm run db:seed           # datos de demo (menú, mesas, usuarios)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrí http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Sitio público: `/`
+- Panel: `/dashboard` (te redirige a `/login`)
+- Pedido desde la mesa: `/cliente/<id-de-mesa>` (los QR se imprimen desde
+  `/dashboard/mesas`)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Usuarios de demo
 
-## Learn More
+| Rol | Email | Contraseña |
+|---|---|---|
+| Administrador | `admin@cozizina.com` | `admin123` |
+| Gerente | `gerente@cozizina.com` | `admin123` |
+| Mozo | `mozo@cozizina.com` | `admin123` |
+| Cocina | `cocina@cozizina.com` | `admin123` |
+| Caja | `caja@cozizina.com` | `admin123` |
 
-To learn more about Next.js, take a look at the following resources:
+Cada rol ve solo las secciones que le corresponden.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Puesta en marcha (Docker)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+docker compose up
+```
 
-## Deploy on Vercel
+Levanta Postgres + la app, corre `db:push` y `db:seed`, y sirve en
+http://localhost:3000
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Variables de entorno
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variable | Descripción |
+|---|---|
+| `DATABASE_URL` | Cadena de conexión a Postgres. |
+| `JWT_SECRET` | Secreto para firmar la sesión. Generá uno real (mín. 32 chars). |
+| `NEXT_PUBLIC_APP_URL` | URL pública (para los links de los QR de mesa). |
+| `LOG_LEVEL` | `debug` \| `info` \| `warn` \| `error` |
+
+## Comandos
+
+```bash
+npm run dev          # desarrollo
+npm run build        # build de producción
+npm run start        # servir el build
+npm run lint         # análisis estático
+npm run typecheck    # tsc --noEmit
+npm run test         # tests (vitest)
+npm run db:push      # sincronizar el esquema con la BD
+npm run db:seed      # cargar datos de demo
+npm run db:studio    # explorar la BD (Prisma Studio)
+```
+
+## Estructura
+
+```
+src/
+  app/
+    (público)         page.tsx, menu, reservar, ordenar, nosotros, ubicaciones…
+    cliente/[mesaId]  pedido desde la mesa
+    dashboard/        panel de gestión
+    api/              endpoints
+  components/
+    landing/          sitio público (estética Cozizina)
+    cliente/          pedido desde la mesa
+    cocina-tablero/   KDS
+    pedidos-panel/    pedidos + cobro
+    reservas-panel/   reservas
+    caja-resumen/     arqueo de caja
+    mesas-qr/         generación de QR
+    dashboard/        navegación y sesión
+  lib/
+    pedidos/          lógica de negocio de pedidos (estados, precio, stock…)
+    reservas/         estados de reservas
+prisma/
+  schema.prisma       modelo de datos
+  seed.ts             datos de demo
+```
+
+## Despliegue
+
+Cualquier plataforma que corra Next.js (Vercel, Fly, Railway, un VPS con
+Docker). Necesita una base Postgres accesible y las variables de entorno.
+Antes del primer arranque: `npm run db:push` (y `npm run db:seed` si querés
+los datos de demo).
