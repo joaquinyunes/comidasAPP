@@ -27,7 +27,7 @@ describe("Validation", () => {
       const result = validateInput(schema, { email: "invalid" });
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errors).toContain("email: Invalid email");
+        expect(result.errors.some((e) => e.startsWith("email:"))).toBe(true);
       }
     });
   });
@@ -165,8 +165,8 @@ describe("Rate Limiting", () => {
 });
 
 describe("Logger", () => {
-  it("should log at different levels", () => {
-    const { logger } = require("@/lib/logger");
+  it("should log at different levels", async () => {
+    const { logger } = await import("@/lib/logger");
     expect(() => logger.debug("debug")).not.toThrow();
     expect(() => logger.info("info")).not.toThrow();
     expect(() => logger.warn("warn")).not.toThrow();

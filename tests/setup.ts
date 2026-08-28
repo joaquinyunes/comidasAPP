@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 beforeAll(async () => {
   // Configurar variables de entorno para tests
   process.env.JWT_SECRET = "test-secret-key-for-testing";
-  process.env.NODE_ENV = "test";
+  (process.env as Record<string, string>).NODE_ENV = "test";
   process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
 });
 
@@ -13,7 +13,7 @@ afterAll(async () => {
 });
 
 // Mock de NextRequest para tests
-global.NextRequest = class NextRequest {
+(global as Record<string, unknown>).NextRequest = class NextRequest {
   constructor(
     public url: string,
     public init: RequestInit = {}
@@ -58,7 +58,7 @@ global.NextRequest = class NextRequest {
 } as any;
 
 // Mock de NextResponse
-global.NextResponse = class NextResponse {
+(global as Record<string, unknown>).NextResponse = class NextResponse {
   static json(data: any, init?: ResponseInit) {
     return new Response(JSON.stringify(data), {
       ...init,

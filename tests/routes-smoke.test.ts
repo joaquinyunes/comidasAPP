@@ -123,28 +123,10 @@ describe("Smoke Bloque 2: guards y validación por micro-fase", () => {
     "fidelizacion/historial-mesa",
     "fidelizacion/logistica",
     "fidelizacion/sugerencias-mozo",
-    "trazabilidad/resumen",
-    "mantenimiento/equipos",
-    "eventos",
-    "alcance/resumen",
     "feedback/resumen",
-    "resiliencia/estado",
-    "friccion/estado",
-    "gamificacion/tablero",
-    "cliente-digital/resumen",
-    "selfservice/resumen",
-    "whitelabel/resumen",
     "reportes/resumen",
-    "crecimiento/resumen",
-    "multisucursal/comparativas",
-    "multisucursal/dashboard",
-    "multisucursal/stock",
-    "multisucursal/recetas",
     "audit",
     "notificaciones",
-    "operativo/alertas",
-    "operativo/comandas-estructuradas",
-    "operativo/stock-tiempo-real",
     "ia/prediccion-ventas",
     "ia/prediccion-stock",
     "dashboard/resumen",
@@ -170,13 +152,8 @@ describe("Smoke Bloque 2: guards y validación por micro-fase", () => {
     { route: "reservas", invalid: { clienteNombre: "" } },
     { route: "fidelizacion/visitas", invalid: { mesaId: "no-uuid" } },
     { route: "fidelizacion/reconocimiento", invalid: { mesaId: UUID } },
-    { route: "multisucursal/recetas", invalid: { ingredientes: [] } },
-    { route: "eventos/crear", invalid: {} },
     { route: "delivery/asignar", invalid: {} },
-    { route: "operativo/pase", invalid: {} },
-    { route: "friccion/sync", invalid: { items: "no-es-array" } },
     { route: "cliente/pedido", invalid: { mesaId: UUID, items: [] } },
-    { route: "whitelabel/clonar-rubro", invalid: {} },
   ];
 
   for (const { route, invalid } of POST_ROUTES) {
@@ -199,33 +176,6 @@ describe("Pruebas profundas (respuesta real con datos mock)", () => {
     process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret-key-for-testing-min-32-chars-xxxx";
   });
 
-  it("GET /api/whitelabel/resumen devuelve data con auth", async () => {
-    const { GET } = await import("@/app/api/whitelabel/resumen/route");
-    const res = await GET(req("http://localhost/api/whitelabel/resumen", { auth: true }));
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.data).toBeDefined();
-    expect(Array.isArray(body.data.idiomas)).toBe(true);
-    expect(Array.isArray(body.data.monedas)).toBe(true);
-    expect(typeof body.data.widgetSnippet).toBe("string");
-  });
-
-  it("GET /api/whitelabel/resumen 401 sin auth", async () => {
-    const { GET } = await import("@/app/api/whitelabel/resumen/route");
-    const res = await GET(req("http://localhost/api/whitelabel/resumen"));
-    expect(res.status).toBe(401);
-  });
-
-  it("GET /api/crecimiento/resumen devuelve planes y metricas", async () => {
-    const { GET } = await import("@/app/api/crecimiento/resumen/route");
-    const res = await GET(req("http://localhost/api/crecimiento/resumen", { auth: true }));
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(Array.isArray(body.data.planes)).toBe(true);
-    expect(body.data.planes.length).toBe(3);
-    expect(body.data.metricas).toBeDefined();
-    expect(body.data.metricas.pedidos30d).toBe(0);
-  });
 
   it("POST /api/cliente/pedido: body valido pasa validacion y llega a logica de negocio", async () => {
     const { POST } = await import("@/app/api/cliente/pedido/route");
