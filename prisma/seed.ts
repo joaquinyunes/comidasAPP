@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { hash } from "bcryptjs";
@@ -43,10 +44,10 @@ async function main() {
   // ============================================
   await prisma.tenant.upsert({
     where: { id: TENANT_ID },
-    update: {},
+    update: { nombre: "Cozizina" },
     create: {
       id: TENANT_ID,
-      nombre: "Pizzaria Demo",
+      nombre: "Cozizina",
       slug: "pizzaria-demo",
       plan: "premium",
       activo: true,
@@ -59,14 +60,14 @@ async function main() {
   // ============================================
   await prisma.sucursal.upsert({
     where: { id: SUCURSAL_ID },
-    update: {},
+    update: { nombre: "Cozizina Palermo" },
     create: {
       id: SUCURSAL_ID,
       tenantId: TENANT_ID,
-      nombre: "Sucursal Principal",
+      nombre: "Cozizina Palermo",
       direccion: "Av. Corrientes 1234, CABA",
-      telefono: "+54 11 1234-5678",
-      email: "sucursal@pizzaria-demo.com",
+      telefono: "+54 11 5555 1234",
+      email: "hola@cozizina.com",
       activa: true,
     },
   });
@@ -77,17 +78,25 @@ async function main() {
   // ============================================
   const roles = [
     { id: "rol-admin", nombre: "Administrador", permisos: ["*"] },
-    { id: "rol-mozo", nombre: "Mozo", permisos: ["pedidos:crear", "pedidos:leer", "mesas:leer", "mesas:actualizar"] },
+    {
+      id: "rol-gerente",
+      nombre: "Gerente",
+      permisos: [
+        "pedidos:*", "caja:*", "pagos:*", "reservas:*", "mesas:*",
+        "inventario:leer", "clientes:leer", "reportes:leer",
+      ],
+    },
+    { id: "rol-mozo", nombre: "Mozo", permisos: ["pedidos:crear", "pedidos:leer", "pedidos:actualizar", "mesas:leer", "mesas:actualizar", "reservas:leer"] },
     { id: "rol-cocinero", nombre: "Cocinero", permisos: ["pedidos:leer", "pedidos:actualizar", "productos:leer"] },
     { id: "rol-barman", nombre: "Barman", permisos: ["pedidos:leer", "pedidos:actualizar", "productos:leer"] },
-    { id: "rol-cajero", nombre: "Cajero", permisos: ["caja:*", "pagos:*", "pedidos:leer"] },
+    { id: "rol-cajero", nombre: "Cajero", permisos: ["caja:*", "pagos:*", "pedidos:leer", "pedidos:actualizar", "reservas:leer", "clientes:leer"] },
   ];
 
   for (const rol of roles) {
     const id = uid(rol.id);
     await prisma.rol.upsert({
       where: { id },
-      update: {},
+      update: { permisos: rol.permisos },
       create: {
         id,
         tenantId: TENANT_ID,
@@ -104,11 +113,12 @@ async function main() {
   const passwordHash = await hash("admin123", 12);
 
   const usuarios = [
-    { id: "user-admin", email: "admin@pizzaria.com", nombre: "Admin Sistema", rolId: "rol-admin" },
-    { id: "user-carlos", email: "carlos@pizzaria.com", nombre: "Carlos García", rolId: "rol-mozo" },
-    { id: "user-ana", email: "ana@pizzaria.com", nombre: "Ana López", rolId: "rol-cocinero" },
-    { id: "user-pedro", email: "pedro@pizzaria.com", nombre: "Pedro Martínez", rolId: "rol-barman" },
-    { id: "user-maria", email: "maria@pizzaria.com", nombre: "María Fernández", rolId: "rol-cajero" },
+    { id: "user-admin", email: "admin@cozizina.com", nombre: "Admin Cozizina", rolId: "rol-admin" },
+    { id: "user-gerente", email: "gerente@cozizina.com", nombre: "Lucía Gómez", rolId: "rol-gerente" },
+    { id: "user-carlos", email: "mozo@cozizina.com", nombre: "Carlos García", rolId: "rol-mozo" },
+    { id: "user-ana", email: "cocina@cozizina.com", nombre: "Ana López", rolId: "rol-cocinero" },
+    { id: "user-pedro", email: "barra@cozizina.com", nombre: "Pedro Martínez", rolId: "rol-barman" },
+    { id: "user-maria", email: "caja@cozizina.com", nombre: "María Fernández", rolId: "rol-cajero" },
   ];
 
   for (const user of usuarios) {
@@ -116,7 +126,7 @@ async function main() {
     const rolId = uid(user.rolId);
     await prisma.usuario.upsert({
       where: { id: userId },
-      update: {},
+      update: { email: user.email, nombre: user.nombre, passwordHash },
       create: {
         id: userId,
         tenantId: TENANT_ID,
@@ -175,12 +185,13 @@ async function main() {
   }
   console.log("✅ Sectores creados");
 
+  // Estados de mesa: libre | ocupada | reservada
   const mesas = [
-    { id: "mesa-1", numero: "1", capacidad: 2, sectorId: "sec-salon", posicionX: 100, posicionY: 100, estado: "en_cocina" },
-    { id: "mesa-2", numero: "2", capacidad: 4, sectorId: "sec-salon", posicionX: 200, posicionY: 100, estado: "comiendo" },
+    { id: "mesa-1", numero: "1", capacidad: 2, sectorId: "sec-salon", posicionX: 100, posicionY: 100, estado: "ocupada" },
+    { id: "mesa-2", numero: "2", capacidad: 4, sectorId: "sec-salon", posicionX: 200, posicionY: 100, estado: "ocupada" },
     { id: "mesa-3", numero: "3", capacidad: 4, sectorId: "sec-salon", posicionX: 300, posicionY: 100, estado: "libre" },
-    { id: "mesa-4", numero: "4", capacidad: 6, sectorId: "sec-salon", posicionX: 100, posicionY: 200, estado: "esperando_cuenta" },
-    { id: "mesa-5", numero: "5", capacidad: 2, sectorId: "sec-terraza", posicionX: 500, posicionY: 100, estado: "en_cocina" },
+    { id: "mesa-4", numero: "4", capacidad: 6, sectorId: "sec-salon", posicionX: 100, posicionY: 200, estado: "ocupada" },
+    { id: "mesa-5", numero: "5", capacidad: 2, sectorId: "sec-terraza", posicionX: 500, posicionY: 100, estado: "ocupada" },
     { id: "mesa-6", numero: "6", capacidad: 4, sectorId: "sec-terraza", posicionX: 600, posicionY: 100, estado: "libre" },
     { id: "mesa-7", numero: "7", capacidad: 8, sectorId: "sec-vip", posicionX: 100, posicionY: 400, estado: "reservada" },
     { id: "mesa-8", numero: "8", capacidad: 2, sectorId: "sec-barra", posicionX: 700, posicionY: 100, estado: "libre" },
@@ -211,23 +222,24 @@ async function main() {
   // CATEGORÍAS Y PRODUCTOS
   // ============================================
   const categorias = [
-    { id: "cat-pizzas", nombre: "Pizzas", orden: 1 },
-    { id: "cat-empanadas", nombre: "Empanadas", orden: 2 },
-    { id: "cat-pastas", nombre: "Pastas", orden: 3 },
-    { id: "cat-postres", nombre: "Postres", orden: 4 },
-    { id: "cat-bebidas", nombre: "Bebidas", orden: 5 },
-    { id: "cat-cervezas", nombre: "Cervezas", orden: 6 },
+    { id: "cat-pizzas", nombre: "Pizzas", orden: 1, descripcion: "A la piedra, masa madre fermentada 48 horas." },
+    { id: "cat-empanadas", nombre: "Empanadas", orden: 2, descripcion: "Al horno, mínimo media docena para llevar." },
+    { id: "cat-pastas", nombre: "Pastas", orden: 3, descripcion: "Caseras, con salsa a elección." },
+    { id: "cat-postres", nombre: "Postres", orden: 4, descripcion: null },
+    { id: "cat-bebidas", nombre: "Bebidas", orden: 5, descripcion: null },
+    { id: "cat-cervezas", nombre: "Cervezas", orden: 6, descripcion: "Tirada y artesanal." },
   ];
 
   for (const cat of categorias) {
     const id = uid(cat.id);
     await prisma.categoriaMenu.upsert({
       where: { id },
-      update: {},
+      update: { descripcion: cat.descripcion },
       create: {
         id,
         tenantId: TENANT_ID,
         nombre: cat.nombre,
+        descripcion: cat.descripcion,
         orden: cat.orden,
         activa: true,
       },
@@ -236,37 +248,40 @@ async function main() {
   console.log("✅ Categorías creadas");
 
   const productos = [
-    { id: "prod-muzzarella", nombre: "Pizza Muzzarella", precio: 5000, categoriaId: "cat-pizzas" },
-    { id: "prod-fugazzeta", nombre: "Fugazzeta Rellena", precio: 6500, categoriaId: "cat-pizzas" },
-    { id: "prod-calabresa", nombre: "Pizza Calabresa", precio: 5500, categoriaId: "cat-pizzas" },
-    { id: "prod-napolitana", nombre: "Pizza Napolitana", precio: 5800, categoriaId: "cat-pizzas" },
-    { id: "prod-4quesos", nombre: "Pizza 4 Quesos", precio: 6200, categoriaId: "cat-pizzas" },
-    { id: "prod-empanada-carne", nombre: "Empanada de Carne", precio: 900, categoriaId: "cat-empanadas" },
-    { id: "prod-empanada-jamon", nombre: "Empanada de Jamón y Queso", precio: 950, categoriaId: "cat-empanadas" },
-    { id: "prod-empanada-cebolla", nombre: "Empanada de Cebolla", precio: 850, categoriaId: "cat-empanadas" },
-    { id: "prod-noquis", nombre: "Ñoquis Caseros", precio: 4500, categoriaId: "cat-pastas" },
-    { id: "prod-ravioles", nombre: "Ravioles de Ricota", precio: 5200, categoriaId: "cat-pastas" },
-    { id: "prod-helado", nombre: "Helado Artesanal (3 bochas)", precio: 2500, categoriaId: "cat-postres" },
-    { id: "prod-flan", nombre: "Flan Casero", precio: 1800, categoriaId: "cat-postres" },
-    { id: "prod-coca", nombre: "Coca-Cola 500ml", precio: 1200, categoriaId: "cat-bebidas" },
-    { id: "prod-agua", nombre: "Agua Mineral 500ml", precio: 800, categoriaId: "cat-bebidas" },
-    { id: "prod-limonada", nombre: "Limonada Natural", precio: 1500, categoriaId: "cat-bebidas" },
-    { id: "prod-ipa", nombre: "IPA Artesanal", precio: 1800, categoriaId: "cat-cervezas" },
-    { id: "prod-lager", nombre: "Lager Rubia", precio: 1500, categoriaId: "cat-cervezas" },
+    { id: "prod-muzzarella", nombre: "Pizza Muzzarella", precio: 5000, categoriaId: "cat-pizzas", descripcion: "Masa a la piedra, salsa de tomate, muzzarella y aceite de oliva.", picante: 0 },
+    { id: "prod-fugazzeta", nombre: "Fugazzeta Rellena", precio: 6500, categoriaId: "cat-pizzas", descripcion: "Doble masa rellena de muzzarella, coronada con cebolla.", picante: 0 },
+    { id: "prod-calabresa", nombre: "Pizza Calabresa", precio: 5500, categoriaId: "cat-pizzas", descripcion: "Muzzarella, longaniza calabresa y morrón asado.", picante: 1 },
+    { id: "prod-napolitana", nombre: "Pizza Napolitana", precio: 5800, categoriaId: "cat-pizzas", descripcion: "Muzzarella, rodajas de tomate fresco, ajo y perejil.", picante: 0 },
+    { id: "prod-4quesos", nombre: "Pizza 4 Quesos", precio: 6200, categoriaId: "cat-pizzas", descripcion: "Muzzarella, provolone, roquefort y parmesano.", picante: 0 },
+    { id: "prod-empanada-carne", nombre: "Empanada de Carne", precio: 900, categoriaId: "cat-empanadas", descripcion: "Carne cortada a cuchillo, cebolla y huevo. Al horno.", picante: 1 },
+    { id: "prod-empanada-jamon", nombre: "Empanada de Jamón y Queso", precio: 950, categoriaId: "cat-empanadas", descripcion: "Jamón cocido y muzzarella. Al horno.", picante: 0 },
+    { id: "prod-empanada-cebolla", nombre: "Empanada de Cebolla", precio: 850, categoriaId: "cat-empanadas", descripcion: "Cebolla salteada y queso cremoso.", picante: 0 },
+    { id: "prod-noquis", nombre: "Ñoquis Caseros", precio: 4500, categoriaId: "cat-pastas", descripcion: "Ñoquis de papa con salsa a elección: bolognesa, fileto o crema.", picante: 0 },
+    { id: "prod-ravioles", nombre: "Ravioles de Ricota", precio: 5200, categoriaId: "cat-pastas", descripcion: "Ravioles de ricota y nuez con salsa a elección.", picante: 0 },
+    { id: "prod-helado", nombre: "Helado Artesanal (3 bochas)", precio: 2500, categoriaId: "cat-postres", descripcion: "Tres bochas de nuestros sabores del día.", picante: 0 },
+    { id: "prod-flan", nombre: "Flan Casero", precio: 1800, categoriaId: "cat-postres", descripcion: "Flan de huevo con dulce de leche y crema.", picante: 0 },
+    { id: "prod-coca", nombre: "Coca-Cola 500ml", precio: 1200, categoriaId: "cat-bebidas", descripcion: "Botella individual.", picante: 0 },
+    { id: "prod-agua", nombre: "Agua Mineral 500ml", precio: 800, categoriaId: "cat-bebidas", descripcion: "Con o sin gas.", picante: 0 },
+    { id: "prod-limonada", nombre: "Limonada Natural", precio: 1500, categoriaId: "cat-bebidas", descripcion: "Limón exprimido, menta y jengibre.", picante: 0 },
+    { id: "prod-ipa", nombre: "IPA Artesanal", precio: 1800, categoriaId: "cat-cervezas", descripcion: "Pinta. Amarga y aromática, lúpulo americano.", picante: 0 },
+    { id: "prod-lager", nombre: "Lager Rubia", precio: 1500, categoriaId: "cat-cervezas", descripcion: "Pinta. Suave y refrescante.", picante: 0 },
   ];
 
   for (const prod of productos) {
     const id = uid(prod.id);
     await prisma.producto.upsert({
       where: { id },
-      update: {},
+      update: { descripcion: prod.descripcion, precio: prod.precio, nivelPicante: prod.picante },
       create: {
         id,
         tenantId: TENANT_ID,
         nombre: prod.nombre,
+        descripcion: prod.descripcion,
         precio: prod.precio,
+        nivelPicante: prod.picante,
         categoriaId: uid(prod.categoriaId),
         disponible: true,
+        destacado: ["prod-muzzarella", "prod-fugazzeta", "prod-napolitana"].includes(prod.id),
       },
     });
   }
@@ -303,6 +318,87 @@ async function main() {
     });
   }
   console.log("✅ Ingredientes creados");
+
+  // ============================================
+  // RECETAS (para que inventario y control de stock tengan datos)
+  // ============================================
+  const recetas: {
+    productoId: string;
+    ingredientes: { ingredienteId: string; cantidad: number; unidad: string }[];
+  }[] = [
+    {
+      productoId: "prod-muzzarella",
+      ingredientes: [
+        { ingredienteId: "ing-harina", cantidad: 250, unidad: "g" },
+        { ingredienteId: "ing-tomate", cantidad: 80, unidad: "g" },
+        { ingredienteId: "ing-muzzarella", cantidad: 200, unidad: "g" },
+        { ingredienteId: "ing-aceite", cantidad: 10, unidad: "ml" },
+      ],
+    },
+    {
+      productoId: "prod-napolitana",
+      ingredientes: [
+        { ingredienteId: "ing-harina", cantidad: 250, unidad: "g" },
+        { ingredienteId: "ing-tomate", cantidad: 90, unidad: "g" },
+        { ingredienteId: "ing-muzzarella", cantidad: 180, unidad: "g" },
+        { ingredienteId: "ing-aceite", cantidad: 10, unidad: "ml" },
+      ],
+    },
+    {
+      productoId: "prod-fugazzeta",
+      ingredientes: [
+        { ingredienteId: "ing-harina", cantidad: 300, unidad: "g" },
+        { ingredienteId: "ing-muzzarella", cantidad: 250, unidad: "g" },
+        { ingredienteId: "ing-cebolla", cantidad: 150, unidad: "g" },
+        { ingredienteId: "ing-aceite", cantidad: 15, unidad: "ml" },
+      ],
+    },
+    {
+      productoId: "prod-empanada-jamon",
+      ingredientes: [
+        { ingredienteId: "ing-harina", cantidad: 40, unidad: "g" },
+        { ingredienteId: "ing-jamon", cantidad: 25, unidad: "g" },
+        { ingredienteId: "ing-muzzarella", cantidad: 20, unidad: "g" },
+      ],
+    },
+    {
+      productoId: "prod-ravioles",
+      ingredientes: [
+        { ingredienteId: "ing-harina", cantidad: 120, unidad: "g" },
+        { ingredienteId: "ing-ricota", cantidad: 140, unidad: "g" },
+        { ingredienteId: "ing-huevo", cantidad: 1, unidad: "un" },
+      ],
+    },
+  ];
+
+  for (const rec of recetas) {
+    const recetaId = uid(`receta-${rec.productoId}`);
+    await prisma.receta.upsert({
+      where: { id: recetaId },
+      update: {},
+      create: {
+        id: recetaId,
+        tenantId: TENANT_ID,
+        productoId: uid(rec.productoId),
+        porciones: 1,
+      },
+    });
+    for (const ing of rec.ingredientes) {
+      await prisma.recetaIngrediente.upsert({
+        where: { recetaId_ingredienteId: { recetaId, ingredienteId: uid(ing.ingredienteId) } },
+        update: { cantidad: ing.cantidad, unidad: ing.unidad },
+        create: {
+          id: uid(`ri-${rec.productoId}-${ing.ingredienteId}`),
+          tenantId: TENANT_ID,
+          recetaId,
+          ingredienteId: uid(ing.ingredienteId),
+          cantidad: ing.cantidad,
+          unidad: ing.unidad,
+        },
+      });
+    }
+  }
+  console.log("✅ Recetas creadas");
 
   // ============================================
   // CLIENTES
@@ -419,6 +515,32 @@ async function main() {
     });
   }
   console.log("✅ Stock inicial creado");
+
+  // ============================================
+  // ZONAS DE REPARTO
+  // ============================================
+  const zonas = [
+    { id: "zona-cerca", nombre: "Palermo y Villa Crespo", tiempoEstimadoMin: 30, costoEnvio: 900 },
+    { id: "zona-media", nombre: "Caballito, Almagro, Colegiales", tiempoEstimadoMin: 45, costoEnvio: 1400 },
+    { id: "zona-lejos", nombre: "Belgrano y Núñez", tiempoEstimadoMin: 60, costoEnvio: 2000 },
+  ];
+  for (const z of zonas) {
+    const id = uid(z.id);
+    await prisma.zonaReparto.upsert({
+      where: { id },
+      update: { costoEnvio: z.costoEnvio, tiempoEstimadoMin: z.tiempoEstimadoMin },
+      create: {
+        id,
+        tenantId: TENANT_ID,
+        sucursalId: SUCURSAL_ID,
+        nombre: z.nombre,
+        tiempoEstimadoMin: z.tiempoEstimadoMin,
+        costoEnvio: z.costoEnvio,
+        activa: true,
+      },
+    });
+  }
+  console.log("✅ Zonas de reparto creadas");
 
   const now = new Date();
   const daysAgo = (d: number) => new Date(now.getTime() - d * 86400000);
@@ -748,25 +870,38 @@ async function main() {
       fechaFin: daysAgo(-7),
     },
   });
-  await prisma.cupon.upsert({
-    where: { id: uid("cupon-1") },
-    update: {},
-    create: {
-      id: uid("cupon-1"),
-      tenantId: TENANT_ID,
-      codigo: "BIENVENIDA10",
-      descripcion: "10% de descuento en tu primera compra",
-      tipo: "porcentaje",
-      valor: 10,
-      fechaInicio: daysAgo(10),
-      fechaFin: daysAgo(-10),
-      usosMaximos: 100,
-      usosActuales: 12,
-      usosPorCliente: 1,
-      minimoCompra: 2000,
-      activo: true,
-    },
-  });
+  const cupones = [
+    { id: "cupon-1", codigo: "BIENVENIDA10", descripcion: "10% en tu primera compra", tipo: "porcentaje", valor: 10, minimoCompra: 2000 },
+    { id: "cupon-2", codigo: "ENVIOGRATIS", descripcion: "$900 de descuento (equivale al envío)", tipo: "monto_fijo", valor: 900, minimoCompra: 6000 },
+  ];
+  for (const c of cupones) {
+    await prisma.cupon.upsert({
+      where: { id: uid(c.id) },
+      update: {
+        valor: c.valor,
+        tipo: c.tipo,
+        minimoCompra: c.minimoCompra,
+        fechaInicio: daysAgo(30),
+        fechaFin: daysAgo(-365),
+        activo: true,
+      },
+      create: {
+        id: uid(c.id),
+        tenantId: TENANT_ID,
+        codigo: c.codigo,
+        descripcion: c.descripcion,
+        tipo: c.tipo,
+        valor: c.valor,
+        fechaInicio: daysAgo(30),
+        fechaFin: daysAgo(-365),
+        usosMaximos: 500,
+        usosActuales: 0,
+        usosPorCliente: 1,
+        minimoCompra: c.minimoCompra,
+        activo: true,
+      },
+    });
+  }
   console.log("✅ Fidelización (favoritos, puntos, campaña, cupón) creada");
 
   // ============================================
@@ -850,8 +985,8 @@ async function main() {
         accion: a.accion,
         entidad: a.entidad,
         entidadId: a.entidadId,
-        valorAnterior: a.valorAnterior ?? null,
-        valorNuevo: a.valorNuevo ?? null,
+        valorAnterior: a.valorAnterior ?? undefined,
+        valorNuevo: a.valorNuevo ?? undefined,
         ipAddress: "192.168.1.2",
         userAgent: "Mozilla/5.0",
         createdAt: daysAgo(i),
