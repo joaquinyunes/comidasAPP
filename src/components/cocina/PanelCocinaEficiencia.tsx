@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { usePolling } from "@/hooks/use-polling";
 
 interface ItemCocina {
   id: string;
@@ -27,7 +28,7 @@ export default function PanelCocinaEficiencia() {
     setCarga(false);
   }
 
-  useEffect(() => { cargar(); const i = setInterval(cargar, 10000); return () => clearInterval(i); }, []);
+  usePolling(cargar, 10000);
 
   async function toggleUrgente(id: string) {
     await fetch(`/api/cocina/items/${id}/urgente`, { method: "POST" });

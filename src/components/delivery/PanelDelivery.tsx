@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { usePolling } from "@/hooks/use-polling";
 
 interface Asig { id: string; estado: string; empleado: string; zona: string; cliente: string; total: number; horaSalida: string | null; horaEntrega: string | null; }
 const ESTADOS = ["asignado", "en_camino", "entregado", "fallido"] as const;
@@ -14,7 +15,7 @@ export default function PanelDelivery() {
     setAsignaciones(d.data?.asignaciones ?? []);
     setCargando(false);
   }
-  useEffect(() => { cargar(); const i = setInterval(cargar, 8000); return () => clearInterval(i); }, []);
+  usePolling(cargar, 8000);
 
   async function avanzar(id: string, estado: string) {
     await fetch(`/api/delivery/${id}/estado`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ estado }) });

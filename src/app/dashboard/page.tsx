@@ -1,14 +1,14 @@
 "use client";
 
 import { GemeloDigital, MesaDetalle } from "@/components/gemelo-digital";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useMesaStore, useDashboardStore } from "@/lib/store";
-import { useState, useEffect } from "react";
 import type { Mesa } from "@/types";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function DashboardPage() {
-  const { mesas, mesaSeleccionada, seleccionarMesa, getMesaById } = useMesaStore();
+  const router = useRouter();
+  const { mesaSeleccionada, seleccionarMesa, getMesaById } = useMesaStore();
   const { kpis, setKPIs } = useDashboardStore();
   const [showDetalle, setShowDetalle] = useState(false);
 
@@ -24,13 +24,13 @@ export default function DashboardPage() {
   const mesaSeleccionadaData = mesaSeleccionada ? getMesaById(mesaSeleccionada) : null;
 
   const handleMesaClick = (mesa: Mesa) => {
+    seleccionarMesa(mesa.id);
     setShowDetalle(true);
   };
 
-  const handleCobrar = (mesaId: string) => {
-    // TODO: Implementar flujo de cobro
-    console.log("Cobrar mesa:", mesaId);
+  const handleCobrar = () => {
     setShowDetalle(false);
+    router.push("/dashboard/pedidos");
   };
 
   return (

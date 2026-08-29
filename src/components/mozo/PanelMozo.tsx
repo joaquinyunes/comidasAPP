@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { usePolling } from "@/hooks/use-polling";
 
 interface Mesa { id: string; numero: number; estado: string; capacidad: number; segundosDesdeCambio: number; }
 interface Cuenta { subtotal: number; sugerenciaPropina: number; totalConPropina: number; totalPedidos: number; }
@@ -32,7 +33,7 @@ export default function PanelMozo() {
     setMesas(md.data ?? []);
     setDisponibilidad(dd.data ?? null);
   }
-  useEffect(() => { cargar(); const i = setInterval(cargar, 8000); return () => clearInterval(i); }, []);
+  usePolling(cargar, 8000);
 
   async function seleccionarMesa(id: string) {
     setMesaSel(id);

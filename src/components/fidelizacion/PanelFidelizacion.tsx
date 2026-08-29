@@ -1,23 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useEfectoAsync } from "@/hooks/use-efecto-async";
+import type { ClienteRecurrente, MesaOpcion, Reconocido, Logistica } from "./tipos";
 
 export function PanelFidelizacion() {
   const [tab, setTab] = useState<"recurrentes" | "visita" | "reconocimiento" | "logistica">("recurrentes");
-  const [clientes, setClientes] = useState<any[]>([]);
-  const [mesas, setMesas] = useState<any[]>([]);
+  const [clientes, setClientes] = useState<ClienteRecurrente[]>([]);
+  const [mesas, setMesas] = useState<MesaOpcion[]>([]);
   const [mensaje, setMensaje] = useState("");
 
   const [mesaId, setMesaId] = useState("");
   const [clienteId, setClienteId] = useState("");
   const [personas, setPersonas] = useState("");
   const [monto, setMonto] = useState("");
-  const [reconocido, setReconocido] = useState<any>(null);
-  const [logistica, setLogistica] = useState<any>(null);
+  const [reconocido, setReconocido] = useState<Reconocido | null>(null);
+  const [logistica, setLogistica] = useState<Logistica | null>(null);
 
   useEffect(() => {
-    fetch("/api/fidelizacion/clientes-recurrentes").then((r) => r.json()).then((d) => setClientes(d.data ?? []));
-    fetch("/api/mesas").then((r) => r.json()).then((d) => setMesas(d.data ?? d ?? []));
+    fetch("/api/fidelizacion/clientes-recurrentes")
+      .then((r) => r.json())
+      .then((d) => setClientes(d.data ?? []))
+      .catch(() => setClientes([]));
+    fetch("/api/mesas")
+      .then((r) => r.json())
+      .then((d) => setMesas(d.data ?? d ?? []))
+      .catch(() => setMesas([]));
   }, []);
 
   async function registrarVisita() {
@@ -51,11 +59,11 @@ export function PanelFidelizacion() {
     } else setMensaje(data.error);
   }
 
-  async function cargarLogistica() {
+  useEfectoAsync(async () => {
+    if (tab !== "logistica") return;
     const res = await fetch("/api/fidelizacion/logistica");
     if (res.ok) setLogistica(await res.json());
-  }
-  useEffect(() => { if (tab === "logistica") cargarLogistica(); }, [tab]);
+  }, [tab]);
 
   return (
     <div className="p-6">
@@ -105,7 +113,7 @@ export function PanelFidelizacion() {
         <div className="bg-white rounded-xl p-4 ring-1 ring-gray-200 max-w-md space-y-2">
           <select value={mesaId} onChange={(e) => setMesaId(e.target.value)} className="w-full border rounded-lg px-2 py-1.5 text-sm">
             <option value="">Seleccioná mesa…</option>
-            {mesas.map((m: any) => <option key={m.id} value={m.id}>{m.numero}{m.sector?.nombre ? ` (${m.sector.nombre})` : ""}</option>)}
+            {mesas.map((m) => <option key={m.id} value={m.id}>{m.numero}{m.sector?.nombre ? ` (${m.sector.nombre})` : ""}</option>)}
           </select>
           <input value={clienteId} onChange={(e) => setClienteId(e.target.value)} placeholder="ID cliente (opcional)" className="w-full border rounded-lg px-2 py-1.5 text-sm" />
           <input value={personas} onChange={(e) => setPersonas(e.target.value)} placeholder="Personas" type="number" className="w-full border rounded-lg px-2 py-1.5 text-sm" />
@@ -119,7 +127,7 @@ export function PanelFidelizacion() {
           <div className="bg-white rounded-xl p-4 ring-1 ring-gray-200 max-w-md space-y-2">
             <select value={mesaId} onChange={(e) => setMesaId(e.target.value)} className="w-full border rounded-lg px-2 py-1.5 text-sm">
               <option value="">Seleccioná mesa…</option>
-              {mesas.map((m: any) => <option key={m.id} value={m.id}>{m.numero}</option>)}
+              {mesas.map((m) => <option key={m.id} value={m.id}>{m.numero}</option>)}
             </select>
             <input value={clienteId} onChange={(e) => setClienteId(e.target.value)} placeholder="ID cliente" className="w-full border rounded-lg px-2 py-1.5 text-sm" />
             <button onClick={reconocer} className="w-full bg-red-600 text-white rounded-lg py-2 text-sm">Vincular por QR</button>
@@ -128,11 +136,11 @@ export function PanelFidelizacion() {
             <div className="bg-white rounded-xl p-4 ring-1 ring-gray-200">
               <h2 className="font-semibold">{reconocido.cliente?.nombre}</h2>
               <p className="text-xs text-gray-500 mb-2">Nivel {reconocido.cliente?.nivel} · {reconocido.cliente?.puntos} pts · {reconocido.cliente?.totalVisitas} visitas</p>
-              {reconocido.cliente?.alergias?.length > 0 && (
-                <p className="text-xs text-red-600 mb-2">⚠ Alergias: {reconocido.cliente.alergias.join(", ")}</p>
+              {(reconocido.cliente?.alergias?.length ?? 0) > 0 && (
+                <p className="text-xs text-red-600 mb-2">⚠ Alergias: {reconocido.cliente?.alergias?.join(", ")}</p>
               )}
               <h3 className="text-sm font-medium mt-2">Suele pedir</h3>
-              <ul className="text-sm list-disc ml-5">{reconocido.sugerencias.map((s: any) => <li key={s.productoId}>{s.nombre} ×{s.cantidad}</li>)}</ul>
+              <ul className="text-sm list-disc ml-5">{reconocido.sugerencias.map((s) => <li key={s.productoId}>{s.nombre} ×{s.cantidad}</li>)}</ul>
             </div>
           )}
         </div>
@@ -146,7 +154,7 @@ export function PanelFidelizacion() {
               <p>Cupones activos: <b>{logistica.data.cuponesActivos}</b></p>
               <p>Por nivel: {Object.entries(logistica.data.porNivel).map(([k, v]) => `${k}: ${v}`).join(" · ")}</p>
               <h3 className="font-medium mt-2">Top puntos</h3>
-              <ul className="list-disc ml-5">{logistica.data.topClientes.map((c: any) => <li key={c.id}>{c.nombre} ({c.puntos} pts)</li>)}</ul>
+              <ul className="list-disc ml-5">{logistica.data.topClientes.map((c) => <li key={c.id}>{c.nombre} ({c.puntos} pts)</li>)}</ul>
             </div>
           ) : <p className="text-sm text-gray-500">Cargando…</p>}
         </div>

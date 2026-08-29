@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useEfectoAsync } from "@/hooks/use-efecto-async";
+import type { ChecklistPlantilla, RendimientoFila } from "./tipos";
 
 interface FichajeEmpleado {
   empleadoId: string;
@@ -29,9 +31,7 @@ export function PanelPersonal() {
     }
   }, [empleadoSel]);
 
-  useEffect(() => {
-    cargarPlantel();
-  }, [cargarPlantel]);
+  useEfectoAsync(cargarPlantel, [cargarPlantel]);
 
   async function fichar(tipo: "ENTRADA" | "SALIDA" | "BREAK_IN" | "BREAK_OUT") {
     if (!empleadoSel) return;
@@ -135,18 +135,17 @@ export function PanelPersonal() {
 }
 
 function ChecklistPanel({ recargar }: { recargar: () => void }) {
-  const [plantillas, setPlantillas] = useState<any[]>([]);
+  const [plantillas, setPlantillas] = useState<ChecklistPlantilla[]>([]);
   const [tipo, setTipo] = useState<"APERTURA" | "CIERRE">("APERTURA");
   const [nombre, setNombre] = useState("");
   const [items, setItems] = useState<string[]>([""]);
   const [mensaje, setMensaje] = useState("");
-  const [ejecutarId, setEjecutarId] = useState<string>("");
 
-  async function cargar() {
+  const cargar = useCallback(async () => {
     const res = await fetch(`/api/personal/checklists?tipo=${tipo}`);
     if (res.ok) setPlantillas((await res.json()).data);
-  }
-  useEffect(() => { cargar(); }, [tipo]);
+  }, [tipo]);
+  useEfectoAsync(cargar, [cargar]);
 
   async function crear(e: React.FormEvent) {
     e.preventDefault();
@@ -163,7 +162,7 @@ function ChecklistPanel({ recargar }: { recargar: () => void }) {
   async function ejecutar(pid: string) {
     const plantilla = plantillas.find((p) => p.id === pid);
     if (!plantilla) return;
-    const marcados = plantilla.items.map((it: any) => ({ itemId: it.id, marcado: true }));
+    const marcados = plantilla.items.map((it) => ({ itemId: it.id, marcado: true }));
     const res = await fetch(`/api/personal/checklists/${pid}/ejecutar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -171,7 +170,6 @@ function ChecklistPanel({ recargar }: { recargar: () => void }) {
     });
     const data = await res.json();
     setMensaje(data.success ? `Ejecutado (completo: ${data.completo})` : data.error);
-    setEjecutarId("");
     recargar();
   }
 
@@ -199,7 +197,7 @@ function ChecklistPanel({ recargar }: { recargar: () => void }) {
         <h2 className="font-semibold mb-2">Nueva plantilla</h2>
         <form onSubmit={crear} className="space-y-2">
           <div className="flex gap-2">
-            <select value={tipo} onChange={(e) => setTipo(e.target.value as any)} className="border rounded-lg px-2 py-1.5 text-sm">
+            <select value={tipo} onChange={(e) => setTipo(e.target.value as "APERTURA" | "CIERRE")} className="border rounded-lg px-2 py-1.5 text-sm">
               <option value="APERTURA">Apertura</option>
               <option value="CIERRE">Cierre</option>
             </select>
@@ -219,9 +217,12 @@ function ChecklistPanel({ recargar }: { recargar: () => void }) {
 }
 
 function RendimientoPanel() {
-  const [filas, setFilas] = useState<any[]>([]);
+  const [filas, setFilas] = useState<RendimientoFila[]>([]);
   useEffect(() => {
-    fetch("/api/personal/rendimiento").then((r) => r.json()).then((d) => setFilas(d.data ?? []));
+    fetch("/api/personal/rendimiento")
+      .then((r) => r.json())
+      .then((d) => setFilas(d.data ?? []))
+      .catch(() => setFilas([]));
   }, []);
   return (
     <div className="bg-white rounded-xl p-4 ring-1 ring-gray-200">
