@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { useLandingData } from "@/lib/landing-data";
@@ -43,6 +43,11 @@ export default function OrdenarDelivery() {
   const [msg, setMsg] = useState("");
   const [resumen, setResumen] = useState<{ total: number; minutos: number } | null>(null);
   const claveRef = useRef(nuevaClave());
+  const confirmacionRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (estado === "ok") confirmacionRef.current?.focus();
+  }, [estado]);
 
   const zona = zonas.find((z) => z.id === datos.zonaId);
   const envio = zona?.costoEnvio ?? 0;
@@ -79,9 +84,9 @@ export default function OrdenarDelivery() {
 
   if (estado === "ok") {
     return (
-      <div className="form-ok page-enter-scale">
-        <div style={{ fontSize: "3rem" }}>🛵</div>
-        <h2>¡Pedido en camino!</h2>
+      <div className="form-ok page-enter-scale" role="status" aria-live="polite">
+        <div style={{ fontSize: "3rem" }} aria-hidden="true">🛵</div>
+        <h2 ref={confirmacionRef} tabIndex={-1}>¡Pedido en camino!</h2>
         <p>
           Total <strong>{formatCurrency(resumen?.total ?? total)}</strong>. Llega en aproximadamente{" "}
           <strong>{resumen?.minutos ?? zona?.tiempoEstimadoMin} min</strong>. Te llamamos si hace falta.
@@ -111,9 +116,11 @@ export default function OrdenarDelivery() {
                     <div className="flex shrink-0 items-center gap-2">
                       <span className="text-sm tabular-nums">{formatCurrency(p.precio)}</span>
                       <button onClick={() => carrito.cambiar(p.id, -1)} disabled={!carrito.cantidades[p.id]}
+                        aria-label={`Quitar una unidad de ${p.nombre}`}
                         className="h-8 w-8 rounded-lg bg-zinc-100 text-lg leading-none disabled:opacity-40">−</button>
-                      <span className="w-5 text-center text-sm tabular-nums">{carrito.cantidades[p.id] ?? 0}</span>
+                      <span className="w-5 text-center text-sm tabular-nums" aria-live="polite">{carrito.cantidades[p.id] ?? 0}</span>
                       <button onClick={() => carrito.cambiar(p.id, 1)}
+                        aria-label={`Agregar una unidad de ${p.nombre}`}
                         className="h-8 w-8 rounded-lg bg-black text-lg leading-none text-white">+</button>
                     </div>
                   </li>
@@ -128,20 +135,20 @@ export default function OrdenarDelivery() {
       <div className="space-y-3">
         <div className="form-pop">
           <div className="field-pop">
-            <label>Nombre</label>
-            <input value={datos.nombre} onChange={set("nombre")} placeholder="Tu nombre" />
+            <label htmlFor="delivery-nombre">Nombre</label>
+            <input id="delivery-nombre" value={datos.nombre} onChange={set("nombre")} placeholder="Tu nombre" />
           </div>
           <div className="field-pop">
-            <label>Teléfono</label>
-            <input value={datos.telefono} onChange={set("telefono")} placeholder="11 5555 5555" />
+            <label htmlFor="delivery-telefono">Teléfono</label>
+            <input id="delivery-telefono" value={datos.telefono} onChange={set("telefono")} placeholder="11 5555 5555" />
           </div>
           <div className="field-pop">
-            <label>Dirección de entrega</label>
-            <input value={datos.direccion} onChange={set("direccion")} placeholder="Calle, número, piso, timbre" />
+            <label htmlFor="delivery-direccion">Dirección de entrega</label>
+            <input id="delivery-direccion" value={datos.direccion} onChange={set("direccion")} placeholder="Calle, número, piso, timbre" />
           </div>
           <div className="field-pop">
-            <label>Zona</label>
-            <select value={datos.zonaId} onChange={set("zonaId")}>
+            <label htmlFor="delivery-zona">Zona</label>
+            <select id="delivery-zona" value={datos.zonaId} onChange={set("zonaId")}>
               <option value="">Elegí tu zona</option>
               {zonas.map((z) => (
                 <option key={z.id} value={z.id}>
@@ -152,8 +159,8 @@ export default function OrdenarDelivery() {
             {zonasError && <p className="form-note">No pudimos cargar las zonas. Llamanos: {SITE.contacto.telefono}</p>}
           </div>
           <div className="field-pop">
-            <label>Comentarios (opcional)</label>
-            <textarea rows={2} value={datos.notas} onChange={set("notas")} placeholder="Sin picante, tocar timbre…" />
+            <label htmlFor="delivery-notas">Comentarios (opcional)</label>
+            <textarea id="delivery-notas" rows={2} value={datos.notas} onChange={set("notas")} placeholder="Sin picante, tocar timbre…" />
           </div>
         </div>
 

@@ -52,6 +52,7 @@ export default function CuponInput({ mesaId, tenant, subtotal, aplicado, onAplic
           value={codigo}
           onChange={(e) => setCodigo(e.target.value.toUpperCase())}
           placeholder="Código de cupón"
+          aria-label="Código de cupón"
           className="flex-1 rounded-lg border border-zinc-300 px-3 py-1.5 text-sm uppercase"
         />
         <button
@@ -62,7 +63,7 @@ export default function CuponInput({ mesaId, tenant, subtotal, aplicado, onAplic
           {estado === "validando" ? "…" : "Aplicar"}
         </button>
       </div>
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-xs text-red-600" role="alert">{error}</p>}
     </div>
   );
 }

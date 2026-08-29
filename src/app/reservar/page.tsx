@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import SiteChrome from "@/components/landing/site-chrome";
 import { SITE } from "@/config/site";
@@ -19,6 +19,11 @@ export default function ReservarPage() {
   });
   const [estado, setEstado] = useState<"idle" | "enviando" | "ok" | "error">("idle");
   const [msg, setMsg] = useState("");
+  const confirmacionRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (estado === "ok") confirmacionRef.current?.focus();
+  }, [estado]);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [k]: e.target.value });
@@ -55,9 +60,9 @@ export default function ReservarPage() {
       intro="Te confirmamos por teléfono. Para grupos de más de 10 personas, escribinos directamente."
     >
       {estado === "ok" ? (
-        <div className="form-ok page-enter-scale">
-          <div style={{ fontSize: "3rem" }}>🛸</div>
-          <h2>¡Reserva recibida!</h2>
+        <div className="form-ok page-enter-scale" role="status" aria-live="polite">
+          <div style={{ fontSize: "3rem" }} aria-hidden="true">🛸</div>
+          <h2 ref={confirmacionRef} tabIndex={-1}>¡Reserva recibida!</h2>
           <p>
             Te esperamos el{" "}
             <strong>

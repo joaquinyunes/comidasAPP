@@ -107,6 +107,7 @@ export default function PagoMesa({ pedidoId, saldo, hayPagosPrevios, onPago }: P
             value={parte}
             onChange={(e) => setParte(e.target.value)}
             placeholder={`Hasta ${saldo}`}
+            aria-label="Monto a pagar"
             className="w-full rounded-lg border border-zinc-300 px-3 py-2"
           />
         </div>
@@ -133,6 +134,7 @@ export default function PagoMesa({ pedidoId, saldo, hayPagosPrevios, onPago }: P
           <button
             key={p}
             onClick={() => setPropinaPct(p)}
+            aria-pressed={propinaPct === p}
             className={`rounded-lg border px-3 py-1.5 text-sm ${
               propinaPct === p ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300"
             }`}
@@ -148,6 +150,7 @@ export default function PagoMesa({ pedidoId, saldo, hayPagosPrevios, onPago }: P
           <button
             key={m.valor}
             onClick={() => setMetodo(m.valor)}
+            aria-pressed={metodo === m.valor}
             className={`rounded-lg border px-3 py-2 text-sm ${
               metodo === m.valor ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300"
             }`}
@@ -159,8 +162,9 @@ export default function PagoMesa({ pedidoId, saldo, hayPagosPrevios, onPago }: P
 
       {metodo === "efectivo" && (
         <div className="mb-3">
-          <label className="mb-1 block text-xs font-medium text-zinc-500">Con cuánto pagás</label>
+          <label htmlFor="pago-efectivo" className="mb-1 block text-xs font-medium text-zinc-500">Con cuánto pagás</label>
           <input
+            id="pago-efectivo"
             type="number"
             inputMode="decimal"
             value={efectivo}

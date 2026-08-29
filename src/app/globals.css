@@ -329,6 +329,10 @@ img {
   transform: scale(0.97);
   box-shadow: 2px 2px 0px var(--black);
 }
+.pop-btn:focus-visible {
+  outline: 3px solid var(--black);
+  outline-offset: 3px;
+}
 .pop-btn-yellow {
   background: var(--yellow);
 }
