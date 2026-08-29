@@ -2,11 +2,29 @@
 
 import { useEffect, useState } from "react";
 
+interface FeedbackTriste {
+  id: string;
+  motivo: string | null;
+  mesa: number | null;
+  fecha: string;
+}
+
+interface FeedbackResumen {
+  total: number;
+  porCalificacion: Record<string, number>;
+  felizPct: number;
+  tristes: FeedbackTriste[];
+  alertaDueno: boolean;
+}
+
 export default function PanelFeedback() {
-  const [d, setD] = useState<any>(null);
+  const [d, setD] = useState<FeedbackResumen | null>(null);
 
   useEffect(() => {
-    fetch("/api/feedback/resumen").then((r) => r.json()).then((j) => setD(j.data ?? null));
+    fetch("/api/feedback/resumen")
+      .then((r) => r.json())
+      .then((j) => setD(j.data ?? null))
+      .catch(() => setD(null));
   }, []);
 
   if (!d) return <p className="text-sm text-zinc-500">Cargando feedback…</p>;
@@ -21,7 +39,7 @@ export default function PanelFeedback() {
       <div>
         <h3 className="font-semibold mb-2">Caritas tristes recientes</h3>
         <ul className="text-sm space-y-1">
-          {d.tristes.map((t: any) => (
+          {d.tristes.map((t) => (
             <li key={t.id} className="rounded border border-red-200 bg-red-50 p-2">
               {t.motivo ?? "sin motivo"}{t.mesa ? ` · Mesa ${t.mesa}` : ""} <span className="text-zinc-400">· {new Date(t.fecha).toLocaleString()}</span>
             </li>

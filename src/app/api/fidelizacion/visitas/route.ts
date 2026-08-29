@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { aJson } from "@/lib/audit-json";
 import { VisitaMesaSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    let cliente: any = null;
+    let cliente: Awaited<ReturnType<typeof prisma.cliente.update>> | null = null;
     if (validation.data.clienteId) {
       const actual = await prisma.cliente.findFirst({
         where: { id: validation.data.clienteId, tenantId: context.tenantId },
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
         accion: "REGISTRAR",
         entidad: "VisitaMesa",
         entidadId: visita.id,
-        valorNuevo: validation.data as any,
+        valorNuevo: aJson(validation.data),
       },
     });
 

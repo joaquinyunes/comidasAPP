@@ -98,7 +98,7 @@ export function handleError(error: unknown): NextResponse {
   );
 }
 
-export function asyncHandler<T extends (...args: any[]) => Promise<NextResponse>>(
+export function asyncHandler<T extends (...args: never[]) => Promise<NextResponse>>(
   handler: T
 ): T {
   return (async (...args: Parameters<T>) => {

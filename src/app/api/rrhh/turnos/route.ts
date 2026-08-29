@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { TurnoSchema, AsistenciaSchema, validateInput } from "@/lib/validation";
+import { aJson } from "@/lib/audit-json";
+import { TurnoSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
         accion: "CREAR",
         entidad: "Turno",
         entidadId: turno.id,
-        valorNuevo: turno as any,
+        valorNuevo: aJson(turno),
       },
     });
 

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { AsistenciaSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================

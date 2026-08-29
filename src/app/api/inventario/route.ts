@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { IngredienteSchema, StockMovimientoSchema, validateInput } from "@/lib/validation";
+import { aJson } from "@/lib/audit-json";
+import { IngredienteSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================
@@ -152,7 +153,7 @@ export async function POST(request: NextRequest) {
         accion: "CREAR",
         entidad: "Ingrediente",
         entidadId: ingredienteCreado.id,
-        valorNuevo: ingredienteCreado as any,
+        valorNuevo: aJson(ingredienteCreado),
       },
     });
 

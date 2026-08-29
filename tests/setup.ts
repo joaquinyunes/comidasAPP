@@ -55,14 +55,14 @@ afterAll(async () => {
   get nextUrl() {
     return new URL(this.url);
   }
-} as any;
+} as unknown;
 
 // Mock de NextResponse
 (global as Record<string, unknown>).NextResponse = class NextResponse {
-  static json(data: any, init?: ResponseInit) {
+  static json(data: unknown, init?: ResponseInit) {
     return new Response(JSON.stringify(data), {
       ...init,
       headers: { "Content-Type": "application/json", ...init?.headers },
     });
   }
-} as any;
+} as unknown;

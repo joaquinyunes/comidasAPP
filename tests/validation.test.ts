@@ -36,7 +36,6 @@ import {
 } from "@/lib/validation";
 
 const UUID = "550e8400-e29b-41d4-a716-446655440000";
-const UUID2 = "550e8400-e29b-41d4-a716-446655440001";
 
 describe("Validation: schemas core", () => {
   it("TenantSchema valido", () => {

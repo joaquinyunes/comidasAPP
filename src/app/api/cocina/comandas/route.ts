@@ -14,7 +14,6 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const sucursalId = searchParams.get("sucursalId") || context.sucursalId || undefined;
-    const soloSinImprimir = searchParams.get("sinImprimir") === "true";
 
     const where: Record<string, unknown> = {
       tenantId: context.tenantId,

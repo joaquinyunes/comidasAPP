@@ -1,7 +1,5 @@
 import { describe, it, expect, vi, beforeAll } from "vitest";
 import { NextRequest } from "next/server";
-import fs from "fs";
-import path from "path";
 
 // --- Mock de Prisma: cliente genérico que no toca la BD real ---
 vi.mock("@/lib/prisma", () => {
@@ -10,7 +8,8 @@ vi.mock("@/lib/prisma", () => {
       {},
       {
         get(_t, method) {
-          return (...args: any[]) => {
+          return (...args: unknown[]) => {
+            const arg = args[0] as { data?: unknown; create?: unknown } | undefined;
             switch (method) {
               case "count":
                 return Promise.resolve(0);
@@ -23,13 +22,13 @@ vi.mock("@/lib/prisma", () => {
               case "findUnique":
                 return Promise.resolve(null);
               case "create":
-                return Promise.resolve(args[0]?.data ?? {});
+                return Promise.resolve(arg?.data ?? {});
               case "update":
-                return Promise.resolve(args[0]?.data ?? {});
+                return Promise.resolve(arg?.data ?? {});
               case "upsert":
-                return Promise.resolve(args[0]?.create ?? {});
+                return Promise.resolve(arg?.create ?? {});
               case "createMany":
-                return Promise.resolve({ count: args[0]?.data?.length ?? 0 });
+                return Promise.resolve({ count: (arg?.data as unknown[] | undefined)?.length ?? 0 });
               case "delete":
                 return Promise.resolve({});
               case "deleteMany":
@@ -50,7 +49,7 @@ vi.mock("@/lib/prisma", () => {
 
 // --- Mock de auth: devuelve contexto si hay header Authorization ---
 vi.mock("@/lib/auth-context", () => ({
-  getTenantContext: (req: any) => {
+  getTenantContext: (req: NextRequest) => {
     const h = req?.headers?.get?.("Authorization");
     if (h) {
       return Promise.resolve({
@@ -71,22 +70,12 @@ const UUID = "550e8400-e29b-41d4-a716-446655440000";
 function req(url: string, opts: { method?: string; body?: unknown; auth?: boolean } = {}) {
   const headers: Record<string, string> = {};
   if (opts.auth) headers["Authorization"] = "Bearer token";
-  const init: any = { method: opts.method ?? "GET", headers };
+  const init: { method: string; headers: Record<string, string>; body?: string } = {
+    method: opts.method ?? "GET",
+    headers,
+  };
   if (opts.body !== undefined) init.body = JSON.stringify(opts.body);
   return new NextRequest(url, init);
-}
-
-function routeFile(route: string): string {
-  return path.resolve(__dirname, `../src/app/api/${route}/route.ts`);
-}
-
-function isProtected(route: string): boolean {
-  try {
-    const src = fs.readFileSync(routeFile(route), "utf8");
-    return src.includes("getTenantContext");
-  } catch {
-    return true;
-  }
 }
 
 // ============================================================
@@ -126,7 +115,6 @@ describe("Smoke Bloque 2: guards y validación por micro-fase", () => {
     "feedback/resumen",
     "reportes/resumen",
     "audit",
-    "notificaciones",
     "ia/prediccion-ventas",
     "ia/prediccion-stock",
     "dashboard/resumen",

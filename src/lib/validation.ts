@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { prisma } from "./prisma";
 
 // ============================================
 // SCHEMAS DE VALIDACIÓN (Zod)

@@ -31,7 +31,7 @@ function cleanupExpired() {
 setInterval(cleanupExpired, 60000);
 
 export function rateLimit(options: RateLimitOptions) {
-  const { maxRequests, windowMs, keyGenerator, skipSuccessfulRequests, skipFailedRequests } = options;
+  const { maxRequests, windowMs, keyGenerator } = options;
 
   return async (request: NextRequest): Promise<NextResponse | null> => {
     const key = keyGenerator ? keyGenerator(request) : getClientKey(request);

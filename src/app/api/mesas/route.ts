@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { MesaSchema, SectorSchema, validateInput } from "@/lib/validation";
+import { aJson } from "@/lib/audit-json";
+import { MesaSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
         accion: "CREAR",
         entidad: "Mesa",
         entidadId: mesa.id,
-        valorNuevo: mesa as any,
+        valorNuevo: aJson(mesa),
       },
     });
 

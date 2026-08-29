@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { aJson } from "@/lib/audit-json";
 import { AnulacionSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
@@ -56,7 +57,7 @@ export async function POST(
         pedidoItemId: itemId,
         evento: "ANULACION",
         usuarioId: context.usuarioId,
-        metadata: { motivo: validation.data.motivo } as any,
+        metadata: aJson({ motivo: validation.data.motivo }),
       },
     });
 
@@ -67,8 +68,8 @@ export async function POST(
         accion: "ANULAR",
         entidad: "PedidoItem",
         entidadId: itemId,
-        valorAnterior: { anulado: false } as any,
-        valorNuevo: { anulado: true, motivo: validation.data.motivo } as any,
+        valorAnterior: aJson({ anulado: false }),
+        valorNuevo: aJson({ anulado: true, motivo: validation.data.motivo }),
       },
     });
 

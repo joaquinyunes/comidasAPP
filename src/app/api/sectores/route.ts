@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { aJson } from "@/lib/audit-json";
 import { SectorSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
         accion: "CREAR",
         entidad: "Sector",
         entidadId: sector.id,
-        valorNuevo: sector as any,
+        valorNuevo: aJson(sector),
       },
     });
 

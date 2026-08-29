@@ -2,11 +2,23 @@
 
 import { useEffect, useState } from "react";
 
+interface SugerenciaCompra {
+  ingredienteId: string;
+  nombre: string;
+  unidad: string;
+  cantidadActual: number;
+  stockMinimo: number;
+  sugeridoComprar: number;
+}
+
 export default function PanelCompras() {
-  const [sugerencias, setSugerencias] = useState<any[]>([]);
+  const [sugerencias, setSugerencias] = useState<SugerenciaCompra[]>([]);
 
   useEffect(() => {
-    fetch("/api/compras/sugerencia-automatica").then((r) => r.json()).then((j) => setSugerencias(j.data?.sugerencias ?? []));
+    fetch("/api/compras/sugerencia-automatica")
+      .then((r) => r.json())
+      .then((j) => setSugerencias(j.data?.sugerencias ?? []))
+      .catch(() => setSugerencias([]));
   }, []);
 
   return (

@@ -21,7 +21,17 @@ export async function GET(req: NextRequest) {
     orderBy: [{ urgente: "desc" }, { horaEnviado: "asc" }],
   });
 
-  const mapa: Record<string, any[]> = {};
+  type ItemEstacion = {
+    id: string;
+    producto: string;
+    mesa: string | null;
+    estado: string;
+    urgente: boolean;
+    pausado: boolean;
+    horaEnviado: Date | null;
+    tiempoPreparacionMin: number | null;
+  };
+  const mapa: Record<string, ItemEstacion[]> = {};
   for (const it of items) {
     const estacion = it.producto.estacion || "sin_estacion";
     (mapa[estacion] ||= []).push({

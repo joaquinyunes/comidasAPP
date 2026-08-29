@@ -2,11 +2,27 @@
 
 import { useEffect, useState } from "react";
 
+interface ComparacionSucursal {
+  sucursalId: string;
+  nombre: string;
+  pedidos: number;
+  facturado: number;
+}
+
+interface ReportesResumen {
+  totalPedidos: number;
+  totalFacturado: number;
+  comparacion: ComparacionSucursal[];
+}
+
 export default function PanelReportes() {
-  const [d, setD] = useState<any>(null);
+  const [d, setD] = useState<ReportesResumen | null>(null);
 
   useEffect(() => {
-    fetch("/api/reportes/resumen").then((r) => r.json()).then((j) => setD(j.data ?? null));
+    fetch("/api/reportes/resumen")
+      .then((r) => r.json())
+      .then((j) => setD(j.data ?? null))
+      .catch(() => setD(null));
   }, []);
 
   if (!d) return <p className="text-sm text-zinc-500">Cargando reportes…</p>;
@@ -29,7 +45,7 @@ export default function PanelReportes() {
           <table className="w-full text-sm">
             <thead className="bg-zinc-50"><tr><th className="p-2 text-left">Sucursal</th><th className="p-2 text-right">Pedidos</th><th className="p-2 text-right">Facturado</th></tr></thead>
             <tbody>
-              {d.comparacion.map((c: any) => (
+              {d.comparacion.map((c) => (
                 <tr key={c.sucursalId} className="border-t border-zinc-100">
                   <td className="p-2">{c.nombre}</td>
                   <td className="p-2 text-right">{c.pedidos}</td>

@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { validateInput, sanitizeString, isValidUUID, checkRateLimit } from "@/lib/validation";
-import { AppError, handleError, asyncHandler, successResponse, errorResponse } from "@/lib/errors";
-import { rateLimit, authRateLimit, publicApiRateLimit, authenticatedApiRateLimit } from "@/lib/rate-limit";
-import { NextRequest, NextResponse } from "next/server";
+import { AppError, handleError, successResponse, errorResponse } from "@/lib/errors";
+import { rateLimit, authRateLimit } from "@/lib/rate-limit";
+import { NextRequest } from "next/server";
 
 describe("Validation", () => {
   describe("validateInput", () => {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { StockPorSucursalSchema, validateInput } from "@/lib/validation";
+import { aJson } from "@/lib/audit-json";
 import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
         accion: "MOVIMIENTO_STOCK",
         entidad: "StockMovimiento",
         entidadId: movimiento.id,
-        valorNuevo: { ...movimiento, cantidadAnterior: stock.cantidadActual, cantidadNueva: nuevaCantidad } as any,
+        valorNuevo: aJson({ ...movimiento, cantidadAnterior: stock.cantidadActual, cantidadNueva: nuevaCantidad }),
       },
     });
 

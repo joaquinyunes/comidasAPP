@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { aJson } from "@/lib/audit-json";
 import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================
@@ -53,7 +54,7 @@ export async function POST(
         pedidoId: id,
         evento: "IMPRESION_COMANDA",
         usuarioId: context.usuarioId,
-        metadata: { copias: 1 } as any,
+        metadata: aJson({ copias: 1 }),
       },
     });
 

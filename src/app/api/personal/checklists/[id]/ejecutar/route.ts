@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { aJson } from "@/lib/audit-json";
 import { ChecklistEjecucionSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
@@ -69,7 +70,7 @@ export async function POST(
         accion: "EJECUTAR",
         entidad: "ChecklistEjecucion",
         entidadId: ejecucion.id,
-        valorNuevo: { plantillaId: id, completo } as any,
+        valorNuevo: aJson({ plantillaId: id, completo }),
       },
     });
 

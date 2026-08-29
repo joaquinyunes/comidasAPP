@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { ProveedorSchema, OrdenCompraSchema, validateInput } from "@/lib/validation";
+import { aJson } from "@/lib/audit-json";
+import { ProveedorSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
         accion: "CREAR",
         entidad: "Proveedor",
         entidadId: proveedor.id,
-        valorNuevo: proveedor as any,
+        valorNuevo: aJson(proveedor),
       },
     });
 

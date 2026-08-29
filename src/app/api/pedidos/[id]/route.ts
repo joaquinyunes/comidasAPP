@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { PedidoSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 import { sincronizarEstadoPedido } from "@/lib/pedidos/sincronizar-estado";
 

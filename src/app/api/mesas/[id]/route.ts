@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { aJson } from "@/lib/audit-json";
 import { MesaSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
@@ -99,8 +100,8 @@ export async function PUT(
         accion: "ACTUALIZAR",
         entidad: "Mesa",
         entidadId: id,
-        valorAnterior: mesa as any,
-        valorNuevo: updated as any,
+        valorAnterior: aJson(mesa),
+        valorNuevo: aJson(updated),
       },
     });
 
@@ -220,7 +221,7 @@ export async function DELETE(
         accion: "ELIMINAR",
         entidad: "Mesa",
         entidadId: id,
-        valorAnterior: mesa as any,
+        valorAnterior: aJson(mesa),
       },
     });
 

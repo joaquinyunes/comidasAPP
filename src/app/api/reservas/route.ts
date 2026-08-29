@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { aJson } from "@/lib/audit-json";
 import { ReservaSchema, validateInput } from "@/lib/validation";
 import { getTenantContext } from "@/lib/auth-context";
 
@@ -148,7 +149,7 @@ export async function POST(request: NextRequest) {
         accion: "CREAR",
         entidad: "Reserva",
         entidadId: reserva.id,
-        valorNuevo: reserva as any,
+        valorNuevo: aJson(reserva),
       },
     });
 
