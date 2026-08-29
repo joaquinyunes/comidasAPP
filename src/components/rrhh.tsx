@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 // ============================================
@@ -159,8 +158,6 @@ export function GestionEmpleados() {
 // ============================================
 
 export function GestionTurnos() {
-  const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
-
   const turnosMock: Turno[] = [
     { id: "turn-1", empleadoId: "emp-1", empleadoNombre: "Carlos García", fecha: new Date(), horaInicio: "10:00", horaFin: "18:00", horasTrabajadas: 8, estado: "completado" },
     { id: "turn-2", empleadoId: "emp-2", empleadoNombre: "Ana López", fecha: new Date(), horaInicio: "14:00", horaFin: "22:00", horasTrabajadas: 4, estado: "en_curso" },

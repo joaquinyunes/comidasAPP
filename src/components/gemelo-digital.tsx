@@ -10,13 +10,11 @@ import { cn } from "@/lib/utils";
 
 interface GemeloDigitalProps {
   onMesaClick?: (mesa: Mesa) => void;
-  editable?: boolean;
   className?: string;
 }
 
 export function GemeloDigital({
   onMesaClick,
-  editable = false,
   className,
 }: GemeloDigitalProps) {
   const { mesas, mesaSeleccionada, seleccionarMesa } = useMesaStore();

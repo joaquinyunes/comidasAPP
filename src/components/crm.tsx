@@ -47,12 +47,6 @@ const NIVELES = {
   platino: { nombre: "Platino", minPuntos: 3000, color: "bg-purple-100 text-purple-800", beneficios: ["20% descuento", "Mesa reservada permanente", "Menú exclusivo", "Concierge personal"] },
 };
 
-function getNivel(puntos: number): keyof typeof NIVELES {
-  if (puntos >= 3000) return "platino";
-  if (puntos >= 1500) return "oro";
-  if (puntos >= 500) return "plata";
-  return "bronce";
-}
 
 // ============================================
 // COMPONENTE: Lista de Clientes

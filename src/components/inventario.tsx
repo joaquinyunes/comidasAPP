@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -13,11 +13,7 @@ import type { StockProducto } from "@/types";
 // GESTIÓN DE INVENTARIO
 // ============================================
 
-interface GestionInventarioProps {
-  sucursalId: string;
-}
-
-export function GestionInventario({ sucursalId }: GestionInventarioProps) {
+export function GestionInventario() {
   const [filtro, setFiltro] = useState<"todos" | "bajo" | "critico">("todos");
   const [busqueda, setBusqueda] = useState("");
 

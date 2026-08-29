@@ -26,7 +26,6 @@ const API_PUBLICAS = [
   "/api/auth",
   "/api/publico",
   "/api/cliente",
-  "/api/productos/publico",
   "/api/pagos/mercadopago/webhook",
 ];
 
