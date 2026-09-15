@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { SectionTitle } from "./ui";
 import {
   IllustrationBun,
@@ -9,6 +10,7 @@ import {
   IllustrationLettuce,
   IllustrationSauce,
 } from "./illustrations";
+import { useIngredientsScrolly } from "./animations/use-ingredients-scrolly";
 
 const ingredients = [
   {
@@ -50,8 +52,11 @@ const ingredients = [
 ];
 
 export default function Ingredients() {
+  const sectionRef = useRef<HTMLElement>(null);
+  useIngredientsScrolly(sectionRef);
+
   return (
-    <section className="ingredients-section" id="ingredients">
+    <section className="ingredients-section" id="ingredients" ref={sectionRef}>
       <div className="ingredients-head">
         <SectionTitle
           eyebrow="La materia prima"
@@ -67,7 +72,7 @@ export default function Ingredients() {
 
       <div className="ingredients-grid">
         {ingredients.map((ing, i) => (
-          <article className="ingredient-card pop-card reveal-scale" key={ing.name} style={{ animationDelay: `${i * 0.05}s` }}>
+          <article className="ingredient-card pop-card reveal-scale" key={ing.name}>
             <div className="ingredient-illu float-anim" style={{ animationDelay: `${i * 0.3}s` }}>
               {ing.illustration}
             </div>

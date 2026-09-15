@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Navbar from "./navbar";
 import Hero from "./hero";
 import Marquee from "./marquee";
@@ -16,10 +16,15 @@ import WhereToFind from "./where-to-find";
 import FinalCTA from "./cta";
 import FloatingShapes from "./floating-shapes";
 import Footer from "./footer";
+import { useScrollReveal } from "./animations/use-scroll-reveal";
+import { useMagneticButtons } from "./animations/use-magnetic";
 
 export default function LandingShell() {
   const [preloaderDone, setPreloaderDone] = useState(false);
   const [collapsing, setCollapsing] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const rescanReveals = useScrollReveal();
+  const rescanMagnetic = useMagneticButtons(rootRef);
 
   const handleStart = useCallback(() => {
     setCollapsing(true);
@@ -32,39 +37,25 @@ export default function LandingShell() {
     return () => clearTimeout(t);
   }, [handleStart]);
 
-  const initReveal = useCallback(() => {
-    const els = document.querySelectorAll<HTMLElement>(
-      ".reveal-up:not(.is-visible), .reveal-scale:not(.is-visible)"
-    );
-    if (!els.length) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            (e.target as HTMLElement).classList.add("is-visible");
-            obs.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
-    );
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
-
+  // Datos async (carta destacada) montan tarjetas nuevas después del primer
+  // paso de GSAP: se re-escanean para engancharlas al reveal por scroll.
   useEffect(() => {
     if (!preloaderDone) return;
-    const t = setTimeout(() => initReveal(), 100);
-    const mut = new MutationObserver(() => initReveal());
+    const rescanAll = () => {
+      rescanReveals();
+      rescanMagnetic();
+    };
+    const t = setTimeout(rescanAll, 100);
+    const mut = new MutationObserver(rescanAll);
     mut.observe(document.body, { childList: true, subtree: true });
     return () => {
       clearTimeout(t);
       mut.disconnect();
     };
-  }, [preloaderDone, initReveal]);
+  }, [preloaderDone, rescanReveals, rescanMagnetic]);
 
   return (
-    <>
+    <div ref={rootRef}>
       {!preloaderDone && (
         <div id="preloader" className={collapsing ? "collapsing" : ""}>
           <div className="preloader-logo">COZIZINA</div>
@@ -92,6 +83,6 @@ export default function LandingShell() {
         <FinalCTA />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

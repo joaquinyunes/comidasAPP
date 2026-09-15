@@ -1,57 +1,24 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { Imagen } from "./Imagen";
+import { useHeroEntrance } from "./animations/use-hero-entrance";
 
 export default function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const floatingEls = hero.querySelectorAll<HTMLElement>(".parallax-target");
-    let raf: number;
-
-    const onMove = (e: MouseEvent) => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const rect = hero.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dx = (e.clientX - cx) / rect.width;
-        const dy = (e.clientY - cy) / rect.height;
-
-        floatingEls.forEach((el, i) => {
-          const depth = (i + 1) * 12;
-          el.style.transform = `translate(${dx * depth}px, ${dy * depth}px) rotate(${dx * 2}deg)`;
-        });
-      });
-    };
-
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
+  useHeroEntrance(heroRef);
 
   return (
     <section className="hero-section" ref={heroRef} id="inicio">
       <div className="hero-left">
-        <div className="hero-illustration parallax-target float-anim">
+        <div className="hero-illustration parallax-target">
           <Imagen src="/assets/hyperdog.png" alt="Hyperdog, hot dog cósmico de Cozizina" priority />
         </div>
         <div>
           <div className="hero-title sticker-text reveal-up">ANTOJOS</div>
-          <div className="hero-title sticker-text-yellow reveal-up" style={{ animationDelay: "0.1s" }}>
-            DE OTRO
-          </div>
-          <div className="hero-title sticker-text reveal-up" style={{ animationDelay: "0.2s" }}>
-            PLANETA
-          </div>
+          <div className="hero-title sticker-text-yellow reveal-up">DE OTRO</div>
+          <div className="hero-title sticker-text reveal-up">PLANETA</div>
         </div>
         <p className="hero-desc reveal-up">
           Pizzas, empanadas y hamburguesas con ingredientes frescos y sabores
@@ -74,7 +41,7 @@ export default function Hero() {
       </div>
 
       <div className="hero-right">
-        <div className="hero-main-img parallax-target float-anim-delay-1">
+        <div className="hero-main-img parallax-target">
           <Imagen src="/assets/galaxy-bite.png" alt="Galaxy Bite, hamburguesa cósmica de Cozizina" priority />
         </div>
       </div>
