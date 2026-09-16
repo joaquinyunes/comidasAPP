@@ -1,6 +1,7 @@
 "use client";
 
 import { formatCurrency } from "@/lib/utils";
+import { ImagenThumb } from "@/components/landing/Imagen";
 import type { ItemMenu } from "./useCarrito";
 import CuponInput from "./CuponInput";
 
@@ -53,13 +54,16 @@ export default function MenuMesa({
       {categorias.map((c) => (
         <section key={c.categoria} className="mb-6">
           <h2 className="mb-2 font-semibold text-zinc-800">{c.categoria}</h2>
-          <ul className="space-y-2">
+          <ul className="flex flex-col gap-2">
             {c.items.map((it) => (
               <li
                 key={it.id}
                 className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 p-3"
               >
-                <div className="min-w-0">
+                {it.imagenUrl && (
+                  <ImagenThumb className="shrink-0 rounded-lg" src={it.imagenUrl} alt={it.nombre} size={56} />
+                )}
+                <div className="min-w-0 flex-1">
                   <div className="font-medium">
                     {it.nombre}{" "}
                     {it.nivelPicante > 0 && "🌶️".repeat(Math.min(it.nivelPicante, 3))}

@@ -451,6 +451,16 @@ export const ClientePedidoSchema = z.object({
   items: z.array(ClientePedidoItemSchema).min(1, "El pedido debe tener al menos un item").max(30),
 });
 
+export const ClienteLocalSchema = z.object({
+  tenant: z.string().min(1).optional(),
+  referencia: z.string().min(1, "Poné el número de mesa o el nombre del mozo").max(50),
+  notas: z.string().max(300).optional(),
+  cuponCodigo: z.string().min(3).max(20).regex(/^[A-Za-z0-9-]+$/).optional(),
+  idempotencyKey: z.string().uuid().optional(),
+  items: z.array(ClientePedidoItemSchema).min(1, "El pedido debe tener al menos un item").max(30),
+});
+export type ClienteLocalInput = z.infer<typeof ClienteLocalSchema>;
+
 export const ClienteDeliverySchema = z.object({
   tenant: z.string().min(1).optional(),
   nombre: z.string().min(2, "Nombre requerido").max(100),

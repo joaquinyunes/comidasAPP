@@ -248,30 +248,30 @@ async function main() {
   console.log("✅ Categorías creadas");
 
   const productos = [
-    { id: "prod-muzzarella", nombre: "Pizza Muzzarella", precio: 5000, categoriaId: "cat-pizzas", descripcion: "Masa a la piedra, salsa de tomate, muzzarella y aceite de oliva.", picante: 0 },
-    { id: "prod-fugazzeta", nombre: "Fugazzeta Rellena", precio: 6500, categoriaId: "cat-pizzas", descripcion: "Doble masa rellena de muzzarella, coronada con cebolla.", picante: 0 },
-    { id: "prod-calabresa", nombre: "Pizza Calabresa", precio: 5500, categoriaId: "cat-pizzas", descripcion: "Muzzarella, longaniza calabresa y morrón asado.", picante: 1 },
-    { id: "prod-napolitana", nombre: "Pizza Napolitana", precio: 5800, categoriaId: "cat-pizzas", descripcion: "Muzzarella, rodajas de tomate fresco, ajo y perejil.", picante: 0 },
-    { id: "prod-4quesos", nombre: "Pizza 4 Quesos", precio: 6200, categoriaId: "cat-pizzas", descripcion: "Muzzarella, provolone, roquefort y parmesano.", picante: 0 },
-    { id: "prod-empanada-carne", nombre: "Empanada de Carne", precio: 900, categoriaId: "cat-empanadas", descripcion: "Carne cortada a cuchillo, cebolla y huevo. Al horno.", picante: 1 },
-    { id: "prod-empanada-jamon", nombre: "Empanada de Jamón y Queso", precio: 950, categoriaId: "cat-empanadas", descripcion: "Jamón cocido y muzzarella. Al horno.", picante: 0 },
-    { id: "prod-empanada-cebolla", nombre: "Empanada de Cebolla", precio: 850, categoriaId: "cat-empanadas", descripcion: "Cebolla salteada y queso cremoso.", picante: 0 },
-    { id: "prod-noquis", nombre: "Ñoquis Caseros", precio: 4500, categoriaId: "cat-pastas", descripcion: "Ñoquis de papa con salsa a elección: bolognesa, fileto o crema.", picante: 0 },
-    { id: "prod-ravioles", nombre: "Ravioles de Ricota", precio: 5200, categoriaId: "cat-pastas", descripcion: "Ravioles de ricota y nuez con salsa a elección.", picante: 0 },
-    { id: "prod-helado", nombre: "Helado Artesanal (3 bochas)", precio: 2500, categoriaId: "cat-postres", descripcion: "Tres bochas de nuestros sabores del día.", picante: 0 },
-    { id: "prod-flan", nombre: "Flan Casero", precio: 1800, categoriaId: "cat-postres", descripcion: "Flan de huevo con dulce de leche y crema.", picante: 0 },
-    { id: "prod-coca", nombre: "Coca-Cola 500ml", precio: 1200, categoriaId: "cat-bebidas", descripcion: "Botella individual.", picante: 0 },
-    { id: "prod-agua", nombre: "Agua Mineral 500ml", precio: 800, categoriaId: "cat-bebidas", descripcion: "Con o sin gas.", picante: 0 },
-    { id: "prod-limonada", nombre: "Limonada Natural", precio: 1500, categoriaId: "cat-bebidas", descripcion: "Limón exprimido, menta y jengibre.", picante: 0 },
-    { id: "prod-ipa", nombre: "IPA Artesanal", precio: 1800, categoriaId: "cat-cervezas", descripcion: "Pinta. Amarga y aromática, lúpulo americano.", picante: 0 },
-    { id: "prod-lager", nombre: "Lager Rubia", precio: 1500, categoriaId: "cat-cervezas", descripcion: "Pinta. Suave y refrescante.", picante: 0 },
+    { id: "prod-muzzarella", nombre: "Pizza Muzzarella", precio: 5000, categoriaId: "cat-pizzas", descripcion: "Masa a la piedra, salsa de tomate, muzzarella y aceite de oliva.", picante: 0, imagenUrl: "/assets/pizza-muzzarella.svg" },
+    { id: "prod-fugazzeta", nombre: "Fugazzeta Rellena", precio: 6500, categoriaId: "cat-pizzas", descripcion: "Doble masa rellena de muzzarella, coronada con cebolla.", picante: 0, imagenUrl: "/assets/pizza-fugazzeta.svg" },
+    { id: "prod-calabresa", nombre: "Pizza Calabresa", precio: 5500, categoriaId: "cat-pizzas", descripcion: "Muzzarella, longaniza calabresa y morrón asado.", picante: 1, imagenUrl: "/assets/pizza-calabresa.svg" },
+    { id: "prod-napolitana", nombre: "Pizza Napolitana", precio: 5800, categoriaId: "cat-pizzas", descripcion: "Muzzarella, rodajas de tomate fresco, ajo y perejil.", picante: 0, imagenUrl: "/assets/pizza-napolitana.svg" },
+    { id: "prod-4quesos", nombre: "Pizza 4 Quesos", precio: 6200, categoriaId: "cat-pizzas", descripcion: "Muzzarella, provolone, roquefort y parmesano.", picante: 0, imagenUrl: "/assets/pizza-4quesos.svg" },
+    { id: "prod-empanada-carne", nombre: "Empanada de Carne", precio: 900, categoriaId: "cat-empanadas", descripcion: "Carne cortada a cuchillo, cebolla y huevo. Al horno.", picante: 1, imagenUrl: "/assets/empanada-carne.svg" },
+    { id: "prod-empanada-jamon", nombre: "Empanada de Jamón y Queso", precio: 950, categoriaId: "cat-empanadas", descripcion: "Jamón cocido y muzzarella. Al horno.", picante: 0, imagenUrl: "/assets/empanada-jamon.svg" },
+    { id: "prod-empanada-cebolla", nombre: "Empanada de Cebolla", precio: 850, categoriaId: "cat-empanadas", descripcion: "Cebolla salteada y queso cremoso.", picante: 0, imagenUrl: "/assets/empanada-cebolla.svg" },
+    { id: "prod-noquis", nombre: "Ñoquis Caseros", precio: 4500, categoriaId: "cat-pastas", descripcion: "Ñoquis de papa con salsa a elección: bolognesa, fileto o crema.", picante: 0, imagenUrl: "/assets/pasta-noquis.svg" },
+    { id: "prod-ravioles", nombre: "Ravioles de Ricota", precio: 5200, categoriaId: "cat-pastas", descripcion: "Ravioles de ricota y nuez con salsa a elección.", picante: 0, imagenUrl: "/assets/pasta-ravioles.svg" },
+    { id: "prod-helado", nombre: "Helado Artesanal (3 bochas)", precio: 2500, categoriaId: "cat-postres", descripcion: "Tres bochas de nuestros sabores del día.", picante: 0, imagenUrl: "/assets/postre-helado.svg" },
+    { id: "prod-flan", nombre: "Flan Casero", precio: 1800, categoriaId: "cat-postres", descripcion: "Flan de huevo con dulce de leche y crema.", picante: 0, imagenUrl: "/assets/postre-flan.svg" },
+    { id: "prod-coca", nombre: "Coca-Cola 500ml", precio: 1200, categoriaId: "cat-bebidas", descripcion: "Botella individual.", picante: 0, imagenUrl: "/assets/bebida-coca.svg" },
+    { id: "prod-agua", nombre: "Agua Mineral 500ml", precio: 800, categoriaId: "cat-bebidas", descripcion: "Con o sin gas.", picante: 0, imagenUrl: "/assets/bebida-agua.svg" },
+    { id: "prod-limonada", nombre: "Limonada Natural", precio: 1500, categoriaId: "cat-bebidas", descripcion: "Limón exprimido, menta y jengibre.", picante: 0, imagenUrl: "/assets/bebida-limonada.svg" },
+    { id: "prod-ipa", nombre: "IPA Artesanal", precio: 1800, categoriaId: "cat-cervezas", descripcion: "Pinta. Amarga y aromática, lúpulo americano.", picante: 0, imagenUrl: "/assets/cerveza-ipa.svg" },
+    { id: "prod-lager", nombre: "Lager Rubia", precio: 1500, categoriaId: "cat-cervezas", descripcion: "Pinta. Suave y refrescante.", picante: 0, imagenUrl: "/assets/cerveza-lager.svg" },
   ];
 
   for (const prod of productos) {
     const id = uid(prod.id);
     await prisma.producto.upsert({
       where: { id },
-      update: { descripcion: prod.descripcion, precio: prod.precio, nivelPicante: prod.picante },
+      update: { descripcion: prod.descripcion, precio: prod.precio, nivelPicante: prod.picante, imagenUrl: prod.imagenUrl },
       create: {
         id,
         tenantId: TENANT_ID,
@@ -280,6 +280,7 @@ async function main() {
         precio: prod.precio,
         nivelPicante: prod.picante,
         categoriaId: uid(prod.categoriaId),
+        imagenUrl: prod.imagenUrl,
         disponible: true,
         destacado: ["prod-muzzarella", "prod-fugazzeta", "prod-napolitana"].includes(prod.id),
       },

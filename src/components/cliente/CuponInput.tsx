@@ -34,11 +34,11 @@ export default function CuponInput({ mesaId, tenant, subtotal, aplicado, onAplic
 
   if (aplicado) {
     return (
-      <div className="flex items-center justify-between rounded-lg bg-green-50 px-3 py-2 text-sm">
+      <div className="flex items-center justify-between rounded-2xl border-2 border-black bg-green-50 px-4 py-3 text-sm">
         <span className="text-green-800">
           Cupón <strong>{aplicado.codigo}</strong> · −{formatCurrency(aplicado.descuento)}
         </span>
-        <button onClick={onQuitar} className="text-xs text-green-700 underline">
+        <button onClick={onQuitar} className="text-xs font-semibold text-green-700 underline">
           quitar
         </button>
       </div>
@@ -46,24 +46,24 @@ export default function CuponInput({ mesaId, tenant, subtotal, aplicado, onAplic
   }
 
   return (
-    <div>
+    <div className="rounded-2xl border-2 border-black bg-white p-4">
       <div className="flex gap-2">
         <input
           value={codigo}
           onChange={(e) => setCodigo(e.target.value.toUpperCase())}
           placeholder="Código de cupón"
           aria-label="Código de cupón"
-          className="flex-1 rounded-lg border border-zinc-300 px-3 py-1.5 text-sm uppercase"
+          className="min-w-0 flex-1 rounded-xl border-2 border-black px-3 py-2 text-sm uppercase"
         />
         <button
           onClick={probar}
           disabled={estado === "validando" || !codigo.trim()}
-          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm disabled:opacity-40"
+          className="shrink-0 rounded-xl border-2 border-black px-3 py-2 text-sm font-semibold disabled:opacity-40"
         >
           {estado === "validando" ? "…" : "Aplicar"}
         </button>
       </div>
-      {error && <p className="mt-1 text-xs text-red-600" role="alert">{error}</p>}
+      {error && <p className="mt-2 text-xs font-semibold text-red-600" role="alert">{error}</p>}
     </div>
   );
 }

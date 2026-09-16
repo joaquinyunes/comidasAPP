@@ -3,12 +3,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
+import { ImagenThumb } from "@/components/landing/Imagen";
 import { useLandingData } from "@/lib/landing-data";
 import { useCarrito, type ItemMenu } from "@/components/cliente/useCarrito";
 import CuponInput from "@/components/cliente/CuponInput";
 import { SITE } from "@/config/site";
 import { useZonas } from "./useZonas";
 import { enviarDelivery, nuevaClave, type DatosEntrega } from "./enviarDelivery";
+import CategoriaAcordeon from "./CategoriaAcordeon";
 
 export default function OrdenarDelivery() {
   const { data, loading } = useLandingData();
@@ -25,6 +27,7 @@ export default function OrdenarDelivery() {
           alergenos: p.alergenos ?? [],
           nivelPicante: p.nivelPicante ?? 0,
           tiempoMin: p.tiempoPreparacionMin ?? null,
+          imagenUrl: p.imagenUrl ?? null,
         }))
       ),
     [data]
@@ -102,14 +105,16 @@ export default function OrdenarDelivery() {
       <div>
         <h2 className="menu-cat-title" style={{ fontSize: "1.4rem" }}>Elegí qué pedir</h2>
         {loading && <p className="form-note">Cargando la carta…</p>}
-        <div className="mt-3 space-y-6">
+        <div className="mt-3">
           {(data?.carta ?? []).filter((c) => c.productos.length).map((c) => (
-            <section key={c.id}>
-              <h3 className="mb-2 font-semibold">{c.nombre}</h3>
-              <ul className="space-y-2">
+            <CategoriaAcordeon key={c.id} nombre={c.nombre}>
+              <ul className="flex flex-col gap-2">
                 {c.productos.map((p) => (
                   <li key={p.id} className="flex items-center justify-between gap-3 rounded-xl border-2 border-black bg-white p-3">
-                    <div className="min-w-0">
+                    {p.imagenUrl && (
+                      <ImagenThumb className="shrink-0 rounded-lg" src={p.imagenUrl} alt={p.nombre} size={56} />
+                    )}
+                    <div className="min-w-0 flex-1">
                       <div className="font-medium">{p.nombre}</div>
                       {p.descripcion && <div className="text-xs text-zinc-500">{p.descripcion}</div>}
                     </div>
@@ -126,13 +131,13 @@ export default function OrdenarDelivery() {
                   </li>
                 ))}
               </ul>
-            </section>
+            </CategoriaAcordeon>
           ))}
         </div>
       </div>
 
       {/* Datos + resumen */}
-      <div className="space-y-3">
+      <div className="flex flex-col gap-8">
         <div className="form-pop">
           <div className="field-pop">
             <label htmlFor="delivery-nombre">Nombre</label>
@@ -174,11 +179,13 @@ export default function OrdenarDelivery() {
           />
         )}
 
-        <div className="rounded-2xl border-2 border-black bg-white p-4 text-sm">
-          <Fila label={`Subtotal (${carrito.totalItems} ítem)`} valor={carrito.totalMonto} />
-          {descuento > 0 && <Fila label="Descuento" valor={-descuento} />}
-          <Fila label="Envío" valor={envio} />
-          <div className="mt-1 flex justify-between border-t-2 border-black pt-1 font-bold">
+        <div className="rounded-2xl border-2 border-black bg-white p-5 text-sm">
+          <div className="flex flex-col gap-2">
+            <Fila label={`Subtotal (${carrito.totalItems} ítem)`} valor={carrito.totalMonto} />
+            {descuento > 0 && <Fila label="Descuento" valor={-descuento} />}
+            <Fila label="Envío" valor={envio} />
+          </div>
+          <div className="mt-3 flex justify-between border-t-2 border-black pt-3 font-bold">
             <span>Total</span>
             <span>{formatCurrency(total)}</span>
           </div>
@@ -196,7 +203,7 @@ export default function OrdenarDelivery() {
 
 function Fila({ label, valor }: { label: string; valor: number }) {
   return (
-    <div className="flex justify-between">
+    <div className="flex justify-between gap-3">
       <span className="text-zinc-500">{label}</span>
       <span>{formatCurrency(valor)}</span>
     </div>

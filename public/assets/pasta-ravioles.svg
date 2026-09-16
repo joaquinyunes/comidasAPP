@@ -1,0 +1,30 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#EF4136">
+    <path transform="translate(58,78) scale(0.85)" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z"/>
+  </g>
+  <g fill="#F6BE3B">
+    <path transform="translate(342,90) scale(1.05)" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z"/>
+    <path transform="translate(345,300) scale(0.75)" d="M0,-10 L2.5,-2.5 L10,0 L2.5,2.5 L0,10 L-2.5,2.5 L-10,0 L-2.5,-2.5 Z"/>
+  </g>
+  <g transform="translate(50,325) rotate(-30)">
+    <path d="M0,0 L-52,9 L-34,0 L-52,-9 Z" fill="#8F57F2"/>
+    <circle r="7" fill="#8F57F2"/>
+  </g>
+
+  <path d="M75,220 Q70,320 200,330 Q330,320 325,220 Z" fill="#8F57F2" stroke="#171310" stroke-width="10" stroke-linejoin="round"/>
+  <ellipse cx="200" cy="220" rx="126" ry="34" fill="#FFFDF5" stroke="#171310" stroke-width="10"/>
+
+  <g fill="#F6D77A" stroke="#171310" stroke-width="5" stroke-linejoin="round">
+    <rect x="130" y="188" width="42" height="42" rx="6" transform="rotate(8 151 209)"/>
+    <rect x="190" y="180" width="42" height="42" rx="6" transform="rotate(-6 211 201)"/>
+    <rect x="245" y="195" width="42" height="42" rx="6" transform="rotate(10 266 216)"/>
+    <rect x="160" y="222" width="42" height="42" rx="6" transform="rotate(-8 181 243)"/>
+    <rect x="215" y="220" width="42" height="42" rx="6" transform="rotate(6 236 241)"/>
+  </g>
+  <g fill="#171310" opacity="0.5">
+    <circle cx="240" cy="180" r="3"/>
+    <circle cx="260" cy="240" r="3"/>
+    <circle cx="150" cy="245" r="3"/>
+  </g>
+  <path d="M110,190 Q120,165 145,168" fill="none" stroke="#3E8E3F" stroke-width="7" stroke-linecap="round"/>
+</svg>

@@ -10,6 +10,7 @@ export interface ItemMenu {
   alergenos: string[];
   nivelPicante: number;
   tiempoMin: number | null;
+  imagenUrl?: string | null;
 }
 
 // Estado del carrito: cantidades por producto. Solo maneja el

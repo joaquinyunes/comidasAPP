@@ -2,8 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { urlClienteMesa } from "@/lib/mesas/url-cliente";
+import { urlPedirLocal } from "@/lib/mesas/url-local";
 import { useMesas } from "./useMesas";
 import QrMesa from "./QrMesa";
+import QrLocal from "./QrLocal";
+
+const QR_LOCAL_CODIGO = process.env.NEXT_PUBLIC_QR_LOCAL_CODIGO ?? "";
 
 export default function PanelMesasQr() {
   const { mesas, cargando, error } = useMesas();
@@ -33,6 +37,13 @@ export default function PanelMesasQr() {
       </div>
 
       {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+
+      {origin && QR_LOCAL_CODIGO && (
+        <div className="mb-6 max-w-xs">
+          <QrLocal url={urlPedirLocal(origin, QR_LOCAL_CODIGO)} />
+        </div>
+      )}
+
       {cargando && <p className="text-sm text-zinc-500">Cargando mesas…</p>}
       {!cargando && !error && mesas.length === 0 && (
         <p className="text-sm text-zinc-500">No hay mesas cargadas.</p>

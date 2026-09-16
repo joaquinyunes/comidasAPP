@@ -42,8 +42,8 @@ export default function OrdenarPage() {
 
           <div className="order-card">
             <h3>Ya estás en el local</h3>
-            <p>Escaneá el código QR de tu mesa para ver la carta, pedir y pagar desde tu celular.</p>
-            <Link className="pop-btn pop-btn-purple" href="/menu">Ver la carta</Link>
+            <p>Escaneá el código QR del local, poné tu mesa o el nombre de tu mozo, y pedí desde tu celular.</p>
+            <Link className="pop-btn pop-btn-purple" href="/pedir-local">Pedir en el local</Link>
           </div>
         </div>
       )}

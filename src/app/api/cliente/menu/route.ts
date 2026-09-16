@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
       alergenos: true,
       nivelPicante: true,
       tiempoPreparacionMin: true,
+      imagenUrl: true,
       categoria: { select: { id: true, nombre: true } },
     },
     orderBy: { nombre: "asc" },
@@ -34,6 +35,7 @@ export async function GET(req: NextRequest) {
     alergenos: string[];
     nivelPicante: number;
     tiempoMin: number | null;
+    imagenUrl: string | null;
   };
   const porCategoria: Record<string, ItemMenu[]> = {};
   for (const p of productos) {
@@ -46,6 +48,7 @@ export async function GET(req: NextRequest) {
       alergenos: p.alergenos,
       nivelPicante: p.nivelPicante,
       tiempoMin: p.tiempoPreparacionMin,
+      imagenUrl: p.imagenUrl,
     });
   }
 
