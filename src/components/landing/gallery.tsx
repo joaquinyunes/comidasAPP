@@ -4,12 +4,14 @@ import { SectionTitle } from "./ui";
 import { ImagenCover } from "./Imagen";
 
 const galleryItems = [
-  { src: "/assets/galaxy-bite.png", caption: "Galaxy Bite", span: "tall" },
-  { src: "/assets/hyperdog.png", caption: "Hyperdog", span: "wide" },
-  { src: "/assets/pizzanaut.png", caption: "Pizzanaut", span: "" },
-  { src: "/assets/galaxy-bite.png", caption: "Doble queso", span: "" },
-  { src: "/assets/hyperdog.png", caption: "Cebolla crispy", span: "tall" },
-  { src: "/assets/pizzanaut.png", caption: "Pepperoni cósmico", span: "wide" },
+  { src: "/assets/gallery-doble-queso.png", caption: "Doble queso" },
+  { src: "/assets/gallery-parrilla.png", caption: "A la parrilla" },
+  { src: "/assets/gallery-toppings.png", caption: "Ingredientes frescos" },
+  { src: "/assets/gallery-fritas.png", caption: "Comet Fries" },
+  { src: "/assets/gallery-horno.png", caption: "Recién horneada" },
+  { src: "/assets/gallery-combo-tray.png", caption: "Bandeja completa" },
+  { src: "/assets/gallery-entrega.png", caption: "Entrega cósmica" },
+  { src: "/assets/gallery-equipo.png", caption: "Nuestro equipo" },
 ];
 
 export default function Gallery() {
@@ -27,7 +29,7 @@ export default function Gallery() {
 
       <div className="gallery-grid">
         {galleryItems.map((g, i) => (
-          <figure className={`gallery-item ${g.span} pop-card reveal-scale`} key={i} style={{ animationDelay: `${i * 0.05}s` }}>
+          <figure className="gallery-item pop-card reveal-scale" key={i} style={{ animationDelay: `${i * 0.05}s` }}>
             <ImagenCover src={g.src} alt={g.caption} />
             <figcaption className="gallery-caption">
               <span className="gallery-dot" />

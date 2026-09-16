@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { SectionTitle } from "./ui";
+import { ImagenThumb } from "./Imagen";
+import { gsap, useGSAP, prefersReducedMotion } from "./animations/gsap-client";
 
 const testimonials = [
   {
@@ -10,6 +12,7 @@ const testimonials = [
     text: "El Galaxy Bite me hizo flotar. El queso, la carne, todo perfecto. Vuelvo cada semana.",
     stars: 5,
     color: "#F6BE3B",
+    avatar: "/assets/testi-avatar-1.png",
   },
   {
     name: "Mateo G.",
@@ -17,6 +20,7 @@ const testimonials = [
     text: "Los Comet Fries son otro nivel. Mejores que cualquier otra papa frita de la zona.",
     stars: 5,
     color: "#8F57F2",
+    avatar: "/assets/testi-avatar-2.png",
   },
   {
     name: "Sofía L.",
@@ -24,6 +28,7 @@ const testimonials = [
     text: "La hamburguesa más rica que probé. Fresca, rápida y con un toque distinto. 100% recomendada.",
     stars: 4,
     color: "#EF4136",
+    avatar: "/assets/testi-avatar-3.png",
   },
   {
     name: "Diego M.",
@@ -31,6 +36,7 @@ const testimonials = [
     text: "Pedí por la web, llegó en minutos y caliente. La atención es de otro planeta.",
     stars: 5,
     color: "#F89B28",
+    avatar: "/assets/testi-avatar-4.png",
   },
 ];
 
@@ -46,9 +52,35 @@ function Stars({ count }: { count: number }) {
 
 export default function Testimonials() {
   const [active, setActive] = useState(0);
+  const boxRef = useRef<HTMLDivElement>(null);
 
-  const next = useCallback(() => setActive((a) => (a + 1) % testimonials.length), []);
-  const prev = useCallback(() => setActive((a) => (a - 1 + testimonials.length) % testimonials.length), []);
+  const { contextSafe } = useGSAP(() => {}, { scope: boxRef });
+
+  const swapTo = useCallback(
+    (updater: () => void) => {
+      contextSafe(() => {
+        if (prefersReducedMotion() || !boxRef.current) {
+          updater();
+          return;
+        }
+        gsap.to(boxRef.current, {
+          autoAlpha: 0,
+          y: -14,
+          duration: 0.22,
+          ease: "power2.in",
+          onComplete: () => {
+            updater();
+            gsap.fromTo(boxRef.current, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" });
+          },
+        });
+      })();
+    },
+    [contextSafe]
+  );
+
+  const next = useCallback(() => swapTo(() => setActive((a) => (a + 1) % testimonials.length)), [swapTo]);
+  const prev = useCallback(() => swapTo(() => setActive((a) => (a - 1 + testimonials.length) % testimonials.length)), [swapTo]);
+  const goTo = useCallback((i: number) => swapTo(() => setActive(i)), [swapTo]);
 
   useEffect(() => {
     const id = setInterval(next, 5000);
@@ -69,9 +101,9 @@ export default function Testimonials() {
         />
       </div>
 
-      <div className="testimonials-box pop-card" key={active}>
+      <div className="testimonials-box pop-card" ref={boxRef}>
         <div className="testi-avatar" style={{ background: t.color }}>
-          {t.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+          <ImagenThumb src={t.avatar} alt={t.name} size={72} />
         </div>
         <Stars count={t.stars} />
         <p className="testi-text">{t.text}</p>
@@ -89,7 +121,7 @@ export default function Testimonials() {
               key={s.name}
               className={`galaxy-dot ${i === active ? "active" : ""}`}
               style={{ backgroundColor: i === active ? s.color : "transparent" }}
-              onClick={() => setActive(i)}
+              onClick={() => goTo(i)}
               aria-label={s.name}
             />
           ))}

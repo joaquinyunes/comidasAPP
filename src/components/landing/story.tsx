@@ -16,10 +16,10 @@ export default function Story() {
     <section className="story-section" id="story">
       <div className="story-col story-text">
         <Sticker label="Nuestra historia" color="red" className="story-eyebrow" />
-        <h2 className="font-display section-title-head reveal-up">
+        <h2 className="font-display section-title-head reveal-up" data-reveal="left">
           Un viaje <span style={{ color: "var(--purple)" }}>galáctico</span>
         </h2>
-        <p className="story-lead reveal-up">
+        <p className="story-lead reveal-up" data-reveal="left">
           Empezamos con un sueño y una parrilla. Hoy, cientos de miles de
           mordidas después, seguimos buscando el sabor perfecto.
         </p>
@@ -36,9 +36,9 @@ export default function Story() {
         </div>
       </div>
 
-      <div className="story-visual reveal-scale">
+      <div className="story-visual reveal-scale" data-reveal="right">
         <div className="story-illustration float-anim">
-          <Imagen src="/assets/galaxy-bite.png" alt="Cozizina, nuestra historia" />
+          <Imagen src="/assets/story-origin.png" alt="El food truck cósmico donde nació Cozizina" />
         </div>
         <div className="story-sticker story-sticker-1 float-anim-delay-2">
           <StickerStar color="#F6BE3B" size={64} />

@@ -11,6 +11,9 @@ const FALLBACK: ProductoLanding[] = [
   { id: "f1", nombre: "Galaxy Bite", descripcion: "Carne angus, cheddar, salsa especial en pan cósmico.", precio: 185, imagenUrl: "/assets/galaxy-bite.png", alergenos: [], destacado: true },
   { id: "f2", nombre: "Hyperdog", descripcion: "Salchicha premium, cebolla crispy, mostaza y ketchup.", precio: 165, imagenUrl: "/assets/hyperdog.png", alergenos: [], destacado: true },
   { id: "f3", nombre: "Pizzanaut", descripcion: "Masa artesanal, mozzarella, pepperoni y orégano.", precio: 195, imagenUrl: "/assets/pizzanaut.png", alergenos: [], destacado: true },
+  { id: "f4", nombre: "Meteor Empanada", descripcion: "Masa dorada y crocante, relleno jugoso recién horneado.", precio: 95, imagenUrl: "/assets/meteor-empanada.png", alergenos: [], destacado: true },
+  { id: "f5", nombre: "Comet Fries", descripcion: "Papas cortadas a mano con salsa nebulosa de la casa.", precio: 110, imagenUrl: "/assets/comet-fries.png", alergenos: [], destacado: false },
+  { id: "f6", nombre: "Nebula Soda", descripcion: "Bebida cósmica bien fría, ideal para acompañar cualquier misión.", precio: 75, imagenUrl: "/assets/nebula-soda.png", alergenos: [], destacado: false },
 ];
 
 export default function FeaturedProducts() {

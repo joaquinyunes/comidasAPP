@@ -35,8 +35,8 @@ export default function Specials() {
           </div>
         </div>
 
-        <div className="specials-mascot float-anim-delay-1">
-          <Imagen src="/assets/galaxy-bite.png" alt="Combo Galaxia" />
+        <div className="specials-hero float-anim-delay-1">
+          <Imagen src="/assets/specials-combo-galaxia.png" alt="Combo Galaxia: burger, papas y bebida" />
         </div>
       </div>
     </section>

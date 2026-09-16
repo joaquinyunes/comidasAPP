@@ -133,6 +133,15 @@ button, a, .clickable {
   cursor: pointer;
 }
 
+@media (pointer: fine) {
+  body {
+    cursor: url("/assets/cursors/cursor-default.svg") 4 0, auto;
+  }
+  button, a, .clickable, [role="button"], input, textarea, select {
+    cursor: url("/assets/cursors/cursor-pointer.svg") 6 0, pointer;
+  }
+}
+
 ::selection {
   background: var(--yellow);
   color: var(--black);
@@ -1093,6 +1102,9 @@ img {
   width: max-content;
   animation: marqueeText 22s linear infinite;
 }
+.marquee-section:hover .marquee-track {
+  animation-play-state: paused;
+}
 @keyframes marqueeText {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -1149,7 +1161,7 @@ img {
 }
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: clamp(24px, 3vw, 40px);
 }
 .product-card {
@@ -1399,8 +1411,8 @@ img {
 .gallery-head { margin-bottom: 48px; }
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 240px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 260px;
   gap: clamp(16px, 2vw, 28px);
 }
 .gallery-item {
@@ -1408,8 +1420,6 @@ img {
   margin: 0;
   overflow: hidden;
 }
-.gallery-item.tall { grid-row: span 2; }
-.gallery-item.wide { grid-column: span 2; }
 .gallery-item img {
   width: 100%;
   height: 100%;
@@ -1547,6 +1557,12 @@ img {
   font-family: var(--font-anton), sans-serif;
   font-size: 1.4rem;
   -webkit-text-stroke: 1px var(--black);
+  overflow: hidden;
+}
+.testi-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .testi-stars { display: flex; gap: 4px; font-size: 1.5rem; }
 .testi-star { color: #ccc; }
@@ -1692,7 +1708,7 @@ img {
   .specials-banner { grid-template-columns: 1fr; }
   .specials-hero { order: -1; }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-  .gallery-item.wide { grid-column: span 2; }
+  .products-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 480px) {
   .hero-title {
@@ -1700,8 +1716,6 @@ img {
   }
   .carousel-item { flex: 0 0 240px; }
   .gallery-grid { grid-template-columns: 1fr; grid-auto-rows: 220px; }
-  .gallery-item.wide { grid-column: span 1; }
-  .gallery-item.tall { grid-row: span 1; }
   .products-grid { grid-template-columns: 1fr; }
 }
 
