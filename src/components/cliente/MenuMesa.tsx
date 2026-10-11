@@ -2,6 +2,7 @@
 
 import { formatCurrency } from "@/lib/utils";
 import { ImagenThumb } from "@/components/landing/Imagen";
+import BotonCamara from "@/components/producto-camara/BotonCamara";
 import type { ItemMenu } from "./useCarrito";
 import CuponInput from "./CuponInput";
 
@@ -60,9 +61,12 @@ export default function MenuMesa({
                 key={it.id}
                 className="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 p-3"
               >
-                {it.imagenUrl && (
-                  <ImagenThumb className="shrink-0 rounded-lg" src={it.imagenUrl} alt={it.nombre} size={56} />
-                )}
+                <div className="cam-thumb">
+                  {it.imagenUrl && (
+                    <ImagenThumb className="rounded-lg" src={it.imagenUrl} alt={it.nombre} size={56} />
+                  )}
+                  <BotonCamara producto={it} variante="miniatura" />
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="font-medium">
                     {it.nombre}{" "}

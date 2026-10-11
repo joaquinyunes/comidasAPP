@@ -17,6 +17,9 @@ export interface ProductoLanding {
   tiempoPreparacionMin?: number | null;
   nivelPicante?: number;
   calorias?: number | null;
+  tamanoCm?: number | null;
+  pesoGr?: number | null;
+  incluye?: string[];
   alergenos: string[];
   destacado?: boolean;
   tipo?: string;

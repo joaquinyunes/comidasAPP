@@ -1,0 +1,319 @@
+/* ============================================================
+   HERO 3D — viaje cósmico atado al scroll
+   Sección alta (500vh) con un escenario sticky. La escena three vive
+   en .hero3d-canvas; el texto es DOM real encima. Tokens de globals.css.
+   ============================================================ */
+
+.hero3d {
+  position: relative;
+  height: 500vh;
+  background: #1b0a46;
+  /* `clip` (no `hidden`) para no romper el position: sticky del hijo. */
+  overflow-x: clip;
+}
+
+.hero3d-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ---------- Fondo ---------- */
+.hero3d-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(60% 55% at calc(72% - var(--hero-progress, 0) * 40%) 45%, rgba(143, 87, 242, 0.55), transparent 70%),
+    radial-gradient(40% 40% at calc(15% + var(--hero-progress, 0) * 60%) 85%, rgba(239, 65, 54, 0.28), transparent 70%),
+    radial-gradient(circle at 50% 50%, #2a0f66 0%, #1b0a46 55%, #0d0426 100%);
+}
+/* Trama de puntos: el mismo halftone de las ilustraciones. */
+.hero3d-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 2px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse at 70% 50%, #000 10%, transparent 75%);
+}
+
+.hero3d-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.hero3d-canvas.is-ready {
+  opacity: 1;
+}
+.hero3d-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- Texto principal (versión sobre oscuro) ---------- */
+.hero3d-copy-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  padding: 96px clamp(20px, 5vw, 60px) 72px;
+  pointer-events: none;
+}
+.hero3d-copy {
+  max-width: min(580px, 48vw);
+  pointer-events: auto;
+}
+.hero3d .hero-title {
+  color: var(--white);
+  -webkit-text-stroke: 3px var(--black);
+  text-shadow: 6px 6px 0 var(--red);
+}
+.hero3d .hero-title-accent {
+  color: var(--yellow);
+  text-shadow: 6px 6px 0 var(--black);
+}
+.hero3d .hero-desc {
+  color: var(--white);
+  opacity: 0.92;
+}
+
+/* ---------- Carteles de producto ---------- */
+.hero3d-caption {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  max-width: min(400px, 40vw);
+  margin-top: -90px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.hero3d-caption-left {
+  left: clamp(20px, 6vw, 90px);
+}
+.hero3d-caption-right {
+  right: clamp(20px, 6vw, 90px);
+  align-items: flex-end;
+  text-align: right;
+}
+.hero3d-caption-tag {
+  display: inline-block;
+  padding: 7px 14px;
+  background: var(--yellow);
+  border: 3px solid var(--black);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--black);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--black);
+  transform: rotate(-2deg);
+}
+.hero3d-caption-title,
+.hero3d-finale-title {
+  font-family: var(--font-anton), sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.92;
+  color: var(--white);
+  -webkit-text-stroke: 3px var(--black);
+  paint-order: stroke fill;
+  text-shadow: 5px 5px 0 var(--red);
+}
+.hero3d-caption-title {
+  font-size: clamp(2.4rem, 5.4vw, 4.6rem);
+}
+.hero3d-caption-text {
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--white);
+  opacity: 0.92;
+  max-width: 340px;
+}
+
+/* ---------- Cartel final ---------- */
+.hero3d-finale {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: min(92vw, 640px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+}
+.hero3d-finale-title {
+  font-size: clamp(2.8rem, 8vw, 6rem);
+  text-shadow: 6px 6px 0 var(--purple);
+}
+.hero3d-finale-cta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+/* ---------- Pista de scroll + riel de progreso ---------- */
+.hero3d-hint {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 22px;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--white);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 var(--black), 0 0 12px rgba(13, 4, 38, 0.9);
+  /* Aparece con fade CSS: el scroll (GSAP) es el único dueño de su opacidad
+     una vez que arranca el viaje. */
+  animation: hero3d-hint-in 0.6s ease 1.4s backwards;
+}
+@keyframes hero3d-hint-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.hero3d-hint-mouse {
+  width: 22px;
+  height: 36px;
+  border: 3px solid var(--white);
+  border-radius: 12px;
+  position: relative;
+}
+.hero3d-hint-mouse::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 4px;
+  height: 7px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--yellow);
+  animation: hero3d-wheel 1.6s ease-in-out infinite;
+}
+@keyframes hero3d-wheel {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(11px); opacity: 0; }
+}
+.hero3d-skip {
+  color: var(--yellow);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  letter-spacing: 0.06em;
+}
+
+.hero3d-rail {
+  position: absolute;
+  z-index: 4;
+  right: clamp(10px, 2vw, 24px);
+  top: 50%;
+  translate: 0 -50%;
+  width: 6px;
+  height: min(40vh, 280px);
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid var(--black);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.hero3d-rail-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--yellow);
+  transform-origin: top;
+  transform: scaleY(0);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .hero3d-copy-wrap {
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 88px;
+    text-align: center;
+  }
+  .hero3d-copy {
+    max-width: 100%;
+  }
+  .hero3d .hero-copy,
+  .hero3d .hero-heading {
+    align-items: center;
+  }
+  .hero3d .hero-cta {
+    justify-content: center;
+  }
+  .hero3d .hero-desc {
+    margin-inline: auto;
+  }
+  .hero3d-caption {
+    top: auto;
+    bottom: 96px;
+    margin-top: 0;
+    max-width: calc(100vw - 40px);
+  }
+  .hero3d-caption-left,
+  .hero3d-caption-right {
+    left: 20px;
+    right: 20px;
+    align-items: center;
+    text-align: center;
+  }
+  .hero3d-caption-text {
+    max-width: 440px;
+  }
+  .hero3d-rail {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero3d .hero-title {
+    font-size: clamp(2.6rem, 14vw, 3.8rem);
+    -webkit-text-stroke-width: 2px;
+  }
+  .hero3d-copy-wrap {
+    padding-top: 80px;
+  }
+  .hero3d .hero-desc {
+    font-size: 0.95rem;
+  }
+  .hero3d-hint-mouse {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero3d-hint-mouse::after {
+    animation: none;
+  }
+}
+
+/* Navbar sobre el hero oscuro: links claros hasta que se pega el fondo crema. */
+body:has(.hero3d) .navbar:not(.scrolled) .nav-links a {
+  color: var(--white);
+}

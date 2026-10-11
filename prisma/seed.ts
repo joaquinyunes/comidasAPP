@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { MEDIDAS_PRODUCTOS } from "./seed-medidas";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { hash } from "bcryptjs";
@@ -269,9 +270,10 @@ async function main() {
 
   for (const prod of productos) {
     const id = uid(prod.id);
+    const medidas = MEDIDAS_PRODUCTOS[prod.id];
     await prisma.producto.upsert({
       where: { id },
-      update: { descripcion: prod.descripcion, precio: prod.precio, nivelPicante: prod.picante, imagenUrl: prod.imagenUrl },
+      update: { descripcion: prod.descripcion, precio: prod.precio, nivelPicante: prod.picante, imagenUrl: prod.imagenUrl, ...medidas },
       create: {
         id,
         tenantId: TENANT_ID,
@@ -281,6 +283,7 @@ async function main() {
         nivelPicante: prod.picante,
         categoriaId: uid(prod.categoriaId),
         imagenUrl: prod.imagenUrl,
+        ...medidas,
         disponible: true,
         destacado: ["prod-muzzarella", "prod-fugazzeta", "prod-napolitana"].includes(prod.id),
       },

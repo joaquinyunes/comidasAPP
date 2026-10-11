@@ -3,17 +3,18 @@
 import Link from "next/link";
 import { Sticker } from "./ui";
 import { Imagen } from "./Imagen";
+import BotonCamara from "@/components/producto-camara/BotonCamara";
 import { useLandingData, type ProductoLanding } from "@/lib/landing-data";
 
 const TAG_COLORS = ["#F6BE3B", "#8F57F2", "#EF4136", "#F89B28"];
 
 const FALLBACK: ProductoLanding[] = [
-  { id: "f1", nombre: "Galaxy Bite", descripcion: "Carne angus, cheddar, salsa especial en pan cósmico.", precio: 185, imagenUrl: "/assets/galaxy-bite.png", alergenos: [], destacado: true },
-  { id: "f2", nombre: "Hyperdog", descripcion: "Salchicha premium, cebolla crispy, mostaza y ketchup.", precio: 165, imagenUrl: "/assets/hyperdog.png", alergenos: [], destacado: true },
-  { id: "f3", nombre: "Pizzanaut", descripcion: "Masa artesanal, mozzarella, pepperoni y orégano.", precio: 195, imagenUrl: "/assets/pizzanaut.png", alergenos: [], destacado: true },
-  { id: "f4", nombre: "Meteor Empanada", descripcion: "Masa dorada y crocante, relleno jugoso recién horneado.", precio: 95, imagenUrl: "/assets/meteor-empanada.png", alergenos: [], destacado: true },
-  { id: "f5", nombre: "Comet Fries", descripcion: "Papas cortadas a mano con salsa nebulosa de la casa.", precio: 110, imagenUrl: "/assets/comet-fries.png", alergenos: [], destacado: false },
-  { id: "f6", nombre: "Nebula Soda", descripcion: "Bebida cósmica bien fría, ideal para acompañar cualquier misión.", precio: 75, imagenUrl: "/assets/nebula-soda.png", alergenos: [], destacado: false },
+  { id: "f1", nombre: "Galaxy Bite", descripcion: "Carne angus, cheddar, salsa especial en pan cósmico.", precio: 185, imagenUrl: "/assets/galaxy-bite.png", alergenos: [], destacado: true, tamanoCm: 30, pesoGr: 320, incluye: ["Carne angus", "Cheddar", "Salsa especial", "Pan cósmico"] },
+  { id: "f2", nombre: "Hyperdog", descripcion: "Salchicha premium, cebolla crispy, mostaza y ketchup.", precio: 165, imagenUrl: "/assets/hyperdog.png", alergenos: [], destacado: true, tamanoCm: 30, pesoGr: 260, incluye: ["Salchicha premium", "Cebolla crispy", "Mostaza", "Ketchup"] },
+  { id: "f3", nombre: "Pizzanaut", descripcion: "Masa artesanal, mozzarella, pepperoni y orégano.", precio: 195, imagenUrl: "/assets/pizzanaut.png", alergenos: [], destacado: true, tamanoCm: 32, pesoGr: 820, incluye: ["Masa artesanal", "Mozzarella", "Pepperoni", "Orégano", "8 porciones"] },
+  { id: "f4", nombre: "Meteor Empanada", descripcion: "Masa dorada y crocante, relleno jugoso recién horneado.", precio: 95, imagenUrl: "/assets/meteor-empanada.png", alergenos: [], destacado: true, tamanoCm: 28, pesoGr: 110, incluye: ["Masa dorada", "Relleno jugoso", "Al horno"] },
+  { id: "f5", nombre: "Comet Fries", descripcion: "Papas cortadas a mano con salsa nebulosa de la casa.", precio: 110, imagenUrl: "/assets/comet-fries.png", alergenos: [], destacado: false, tamanoCm: 26, pesoGr: 300, incluye: ["Papas cortadas a mano", "Salsa nebulosa"] },
+  { id: "f6", nombre: "Nebula Soda", descripcion: "Bebida cósmica bien fría, ideal para acompañar cualquier misión.", precio: 75, imagenUrl: "/assets/nebula-soda.png", alergenos: [], destacado: false, tamanoCm: 24, pesoGr: 450, incluye: ["Bebida cósmica", "Bien fría"] },
 ];
 
 export default function FeaturedProducts() {
@@ -49,6 +50,7 @@ export default function FeaturedProducts() {
                 </div>
               )}
               <Imagen src={p.imagenUrl || "/assets/galaxy-bite.png"} alt={p.nombre} />
+              <BotonCamara producto={p} variante="flotante" />
             </div>
             <div className="product-body">
               <h3 className="font-display product-name">{p.nombre}</h3>

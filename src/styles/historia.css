@@ -1,0 +1,318 @@
+/* ============================================================
+   NOSOTROS — la historia contada con scroll
+   Sección alta (100vh + capítulos) con escenario sticky. Cada capítulo
+   trae una lámina (recorte sobre un planeta de color), su año y su texto;
+   los mueve use-historia-scroll. Paleta del home sobre crema; el color de
+   cada capítulo (--c1/--c2) viene de la galaxia y sólo pinta el planeta.
+   ============================================================ */
+
+.historia {
+  position: relative;
+  height: calc(100vh + var(--capitulos, 4) * 100vh);
+  /* `clip` (no `hidden`) para no romper el position: sticky del hijo. */
+  overflow-x: clip;
+  border-bottom: 4px solid var(--black);
+}
+
+.historia-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: var(--cream);
+  background-image: radial-gradient(rgba(17, 17, 17, 0.1) 1.6px, transparent 1.6px);
+  background-size: 24px 24px;
+}
+
+/* Calcomanías decorativas (estáticas, flotan por transform). */
+.historia-deco {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+.historia-deco-1 { top: 15%; left: 46%; }
+.historia-deco-2 { bottom: 20%; left: 6%; }
+.historia-deco-3 { top: 22%; right: 5%; }
+
+/* ---------- Intro ---------- */
+.historia-intro {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 18px;
+  padding: 96px clamp(20px, 5vw, 60px) 72px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.historia-intro .carta-titulo { max-width: 900px; }
+.historia-intro .carta-intro { font-weight: 500; }
+
+/* ---------- Año gigante ---------- */
+.historia-anios {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.historia-anio {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: clamp(96px, 14vh, 140px);
+  font-family: var(--font-anton), sans-serif;
+  font-size: clamp(5.5rem, 14vw, 12rem);
+  line-height: 0.8;
+  letter-spacing: 0.02em;
+  color: var(--white);
+  -webkit-text-stroke: 3px var(--black);
+  paint-order: stroke fill;
+  text-shadow: 8px 8px 0 color-mix(in srgb, var(--c1) 70%, var(--black));
+  opacity: 0;
+  visibility: hidden;
+}
+/* El año va del lado del texto, sobre el título; la lámina queda del otro. */
+.historia-anio[data-lado="izq"] { left: clamp(20px, 6vw, 90px); }
+.historia-anio[data-lado="der"] { right: clamp(20px, 6vw, 90px); }
+
+/* ---------- Láminas ---------- */
+.historia-escena {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.historia-lamina {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: min(48vw, 640px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+.historia-lamina[data-lado="der"] { right: clamp(16px, 4vw, 70px); }
+.historia-lamina[data-lado="izq"] { left: clamp(16px, 4vw, 70px); }
+
+/* El planeta del capítulo: círculo de color con borde y sombra dura. */
+.historia-lamina-halo {
+  position: absolute;
+  width: min(86%, 62vh);
+  aspect-ratio: 1;
+  border: 5px solid var(--black);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.7) 0, transparent 22%),
+    radial-gradient(circle at 40% 36%, var(--c1), var(--c2) 100%);
+  box-shadow: 10px 10px 0 var(--black);
+}
+.historia-lamina-anillo {
+  position: absolute;
+  width: min(104%, 76vh);
+  aspect-ratio: 1;
+  border: 3px dashed var(--black);
+  border-radius: 50%;
+  opacity: 0.55;
+  animation: historia-gira 50s linear infinite;
+}
+@keyframes historia-gira {
+  to { transform: rotate(360deg); }
+}
+.historia-lamina-flota {
+  position: relative;
+  width: 86%;
+  animation: historia-flota 5.5s ease-in-out infinite;
+}
+@keyframes historia-flota {
+  0%, 100% { transform: translateY(0) rotate(-1.2deg); }
+  50% { transform: translateY(-14px) rotate(1.2deg); }
+}
+.historia-lamina-flota img {
+  display: block;
+  max-height: 58vh;
+  object-fit: contain;
+}
+
+/* ---------- Textos ---------- */
+.historia-textos {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.historia-cap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: min(480px, 42vw);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  opacity: 0;
+  visibility: hidden;
+}
+.historia-cap[data-lado="izq"] { left: clamp(20px, 6vw, 90px); }
+.historia-cap[data-lado="der"] { right: clamp(20px, 6vw, 90px); }
+
+.historia-cap-etiqueta {
+  align-self: flex-start;
+  padding: 6px 14px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: var(--c1);
+  border: 3px solid var(--black);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--black);
+  transform: rotate(-2deg);
+}
+.historia-cap-titulo {
+  font-family: var(--font-anton), sans-serif;
+  font-size: clamp(2.1rem, 4.8vw, 3.8rem);
+  font-weight: 400;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--black);
+  text-shadow: 4px 4px 0 var(--c1);
+}
+.historia-cap-texto {
+  padding: 16px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--black);
+  background: var(--white);
+  border: 3px solid var(--black);
+  border-radius: 18px;
+  box-shadow: 6px 6px 0 var(--black);
+}
+
+/* ---------- Pista y línea de tiempo ---------- */
+.historia-hint {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 84px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.historia-hint .carta-viaje-hint-mouse { border-color: var(--black); }
+.historia-hint .carta-viaje-hint-mouse::after { background: var(--red); }
+
+.historia-riel {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  width: min(560px, 82vw);
+}
+.historia-riel ol {
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+}
+.historia-riel li {
+  padding-top: 12px;
+  font-family: var(--font-anton), sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  color: rgba(17, 17, 17, 0.38);
+  transition: color 0.3s ease;
+}
+.historia-riel li[data-activo="1"] { color: var(--black); }
+.historia-riel-barra {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 8px;
+  overflow: hidden;
+  background: var(--white);
+  border: 2px solid var(--black);
+  border-radius: 8px;
+}
+.historia-riel-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: var(--red);
+}
+
+/* ---------- Lo que no cambia ---------- */
+.principios {
+  padding-top: 84px;
+  padding-bottom: 40px;
+}
+.principios-cab { margin-bottom: 38px; }
+.principios-grilla {
+  /* auto-fit: las 3 tarjetas se reparten todo el ancho (sin columna vacía). */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+.principios-cab .carta-orbita-titulo { max-width: 760px; }
+.principio-escena { min-height: 230px; }
+.principio-imagen {
+  position: relative;
+  width: min(100%, 230px);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.principio .carta-tarjeta-halo { width: 74%; }
+.principio-imagen img {
+  display: block;
+  max-height: 210px;
+  object-fit: contain;
+}
+@media (hover: hover) {
+  .principio:hover .principio-imagen { transform: scale(1.07) rotate(-3deg); }
+}
+.principio-titulo { font-size: 1.4rem; }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 760px) {
+  .historia-lamina {
+    top: 19vh;
+    bottom: auto;
+    height: 38vh;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100%;
+  }
+  .historia-lamina-halo { width: min(70%, 38vh); }
+  .historia-lamina-anillo { width: min(84%, 46vh); }
+  .historia-lamina-flota { width: 62%; }
+  .historia-lamina-flota img { max-height: 34vh; }
+  .historia-cap {
+    top: auto;
+    bottom: 84px;
+    left: 16px !important;
+    right: 16px !important;
+    width: auto;
+    gap: 8px;
+  }
+  .historia-cap-texto { padding: 12px 14px; font-size: 0.92rem; line-height: 1.5; box-shadow: 4px 4px 0 var(--black); }
+  .historia-anio { padding-top: 11vh; font-size: 30vw; }
+  .historia-anio[data-lado="izq"], .historia-anio[data-lado="der"] { left: 50%; right: auto; transform: none; margin-left: -15vw; }
+  .historia-hint { bottom: 70px; }
+  .historia-deco { display: none; }
+}

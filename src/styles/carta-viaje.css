@@ -1,0 +1,293 @@
+/* ============================================================
+   LA CARTA — viaje por la galaxia (la única sección "espacio" de /menu)
+   Sección alta con escenario sticky: la cámara avanza por el eje Z y pasa
+   junto a un planeta por sector. El mundo lo mueve use-viaje-scroll.
+   Costo de pintura mínimo: planetas estáticos, sin filtros ni blur; el
+   fondo de estrellas es un patrón fijo que sólo se traslada.
+   ============================================================ */
+
+.carta-viaje {
+  position: relative;
+  height: calc(100vh + var(--sectores, 6) * 70vh);
+  /* `clip` (no `hidden`) para no romper el position: sticky del hijo. */
+  overflow-x: clip;
+  color: var(--white);
+  border-bottom: 4px solid var(--black);
+  background: linear-gradient(180deg, #1a0b4a 0%, #2c1180 45%, var(--purple) 100%);
+}
+
+.carta-viaje-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ---------- Estrellas: patrones fijos, se trasladan (parallax) ---------- */
+.carta-viaje-estrellas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -30%;
+  height: 160%;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
+  background-repeat: repeat;
+}
+.carta-viaje-estrellas-lejos {
+  background-size: 340px 340px;
+  background-image:
+    radial-gradient(1.4px 1.4px at 30px 40px, #fff, transparent 70%),
+    radial-gradient(1px 1px at 140px 90px, #fff, transparent 70%),
+    radial-gradient(1.6px 1.6px at 250px 30px, #ffe7a3, transparent 70%),
+    radial-gradient(1px 1px at 90px 230px, #fff, transparent 70%),
+    radial-gradient(1.4px 1.4px at 300px 200px, #cdb9ff, transparent 70%),
+    radial-gradient(1px 1px at 200px 300px, #fff, transparent 70%);
+  opacity: 0.8;
+}
+.carta-viaje-estrellas-cerca {
+  background-size: 520px 520px;
+  background-image:
+    radial-gradient(2.4px 2.4px at 70px 120px, #fff, transparent 70%),
+    radial-gradient(3px 3px at 330px 60px, var(--yellow), transparent 70%),
+    radial-gradient(2.2px 2.2px at 450px 330px, #fff, transparent 70%),
+    radial-gradient(2.6px 2.6px at 180px 430px, #ffb3ae, transparent 70%);
+}
+
+/* ---------- Escena 3D ---------- */
+.carta-viaje-escena {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  perspective: 900px;
+  perspective-origin: 50% 46%;
+}
+.carta-viaje-mundo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Planeta del sector (link). */
+.carta-viaje-planeta {
+  --d: clamp(170px, 31vmin, 320px);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 3vmin, 26px);
+  text-align: center;
+  color: var(--black);
+  will-change: opacity;
+}
+.carta-viaje-planeta .carta-planeta {
+  width: var(--d);
+  border-width: 5px;
+  box-shadow:
+    inset -22px -16px 34px rgba(0, 0, 0, 0.32),
+    0 0 0 8px color-mix(in srgb, var(--c1) 35%, transparent);
+}
+.carta-viaje-planeta .carta-planeta-anillo { border-width: 5px; }
+.carta-viaje-rotulo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 18px 11px;
+  background: var(--white);
+  border: 3px solid var(--black);
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 var(--black);
+  opacity: var(--rotulo, 1);
+}
+.carta-viaje-rotulo small {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+.carta-viaje-rotulo strong {
+  font-family: var(--font-anton), sans-serif;
+  font-size: clamp(1.4rem, 3.4vmin, 2.2rem);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* Meteoros: platos sueltos que cruzan el recorrido. */
+.carta-viaje-meteoro {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: clamp(88px, 14vmin, 150px);
+  will-change: opacity;
+}
+.carta-viaje-meteoro-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---------- Texto de arranque ---------- */
+.carta-viaje-copy-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  padding: 96px clamp(20px, 5vw, 60px) 72px;
+  pointer-events: none;
+}
+.carta-viaje-copy {
+  width: min(680px, 100%);
+  margin-left: max(0px, calc((100vw - 1200px) / 2));
+  pointer-events: auto;
+  will-change: transform, opacity;
+}
+.carta-viaje-copy .carta-cabecera { margin-bottom: 0; }
+
+/* ---------- Cartel del sector actual ---------- */
+.carta-viaje-caption {
+  position: absolute;
+  z-index: 3;
+  left: clamp(20px, 5vw, 60px);
+  bottom: clamp(70px, 11vh, 110px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.carta-viaje-caption-sector {
+  padding: 4px 12px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: var(--c1);
+  border: 2px solid var(--black);
+  border-radius: 999px;
+}
+.carta-viaje-caption strong {
+  font-family: var(--font-anton), sans-serif;
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  font-weight: 400;
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--white);
+  -webkit-text-stroke: 3px var(--black);
+  paint-order: stroke fill;
+  text-shadow: 5px 5px 0 var(--black);
+}
+.carta-viaje-caption-cuenta {
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* ---------- Pista de scroll, final y riel ---------- */
+.carta-viaje-hint {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.carta-viaje-hint-mouse {
+  position: relative;
+  width: 24px;
+  height: 38px;
+  border: 3px solid var(--white);
+  border-radius: 14px;
+}
+.carta-viaje-hint-mouse::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 4px;
+  height: 8px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--yellow);
+  animation: carta-rueda 1.6s ease-in-out infinite;
+}
+@keyframes carta-rueda {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(12px); opacity: 0; }
+}
+.carta-viaje-saltar {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  color: var(--white);
+}
+
+.carta-viaje-final {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  padding: 13px 26px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: var(--yellow);
+  border: 4px solid var(--black);
+  border-radius: var(--radius);
+  box-shadow: 4px 4px 0 var(--black);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.carta-viaje-riel {
+  position: absolute;
+  z-index: 3;
+  right: clamp(12px, 2.4vw, 32px);
+  top: 20%;
+  bottom: 20%;
+  width: 8px;
+  border: 2px solid var(--black);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+.carta-viaje-riel-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: top center;
+  transform: scaleY(0);
+  background: var(--yellow);
+}
+
+@media (max-width: 640px) {
+  .carta-viaje-copy-wrap { align-items: flex-start; padding-top: 104px; }
+  .carta-viaje-caption { bottom: 96px; }
+  .carta-viaje-planeta { --d: clamp(150px, 46vw, 230px); }
+}

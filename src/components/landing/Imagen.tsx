@@ -34,11 +34,14 @@ export function ImagenThumb({
   alt,
   size = 84,
   className,
+  eager = false,
 }: {
   src: string;
   alt: string;
   size?: number;
   className?: string;
+  // Carga inmediata (sin lazy) para miniaturas que se ven apenas se arma la pantalla.
+  eager?: boolean;
 }) {
   return (
     <Image
@@ -48,6 +51,7 @@ export function ImagenThumb({
       height={size}
       className={className}
       style={{ objectFit: "cover" }}
+      loading={eager ? "eager" : undefined}
     />
   );
 }

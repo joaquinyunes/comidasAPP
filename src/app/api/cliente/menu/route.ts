@@ -22,6 +22,10 @@ export async function GET(req: NextRequest) {
       nivelPicante: true,
       tiempoPreparacionMin: true,
       imagenUrl: true,
+      calorias: true,
+      tamanoCm: true,
+      pesoGr: true,
+      incluye: true,
       categoria: { select: { id: true, nombre: true } },
     },
     orderBy: { nombre: "asc" },
@@ -36,6 +40,10 @@ export async function GET(req: NextRequest) {
     nivelPicante: number;
     tiempoMin: number | null;
     imagenUrl: string | null;
+    calorias: number | null;
+    tamanoCm: number | null;
+    pesoGr: number | null;
+    incluye: string[];
   };
   const porCategoria: Record<string, ItemMenu[]> = {};
   for (const p of productos) {
@@ -49,6 +57,10 @@ export async function GET(req: NextRequest) {
       nivelPicante: p.nivelPicante,
       tiempoMin: p.tiempoPreparacionMin,
       imagenUrl: p.imagenUrl,
+      calorias: p.calorias,
+      tamanoCm: p.tamanoCm,
+      pesoGr: p.pesoGr,
+      incluye: p.incluye,
     });
   }
 

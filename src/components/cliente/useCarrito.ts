@@ -11,6 +11,10 @@ export interface ItemMenu {
   nivelPicante: number;
   tiempoMin: number | null;
   imagenUrl?: string | null;
+  calorias?: number | null;
+  tamanoCm?: number | null;
+  pesoGr?: number | null;
+  incluye?: string[];
 }
 
 // Estado del carrito: cantidades por producto. Solo maneja el

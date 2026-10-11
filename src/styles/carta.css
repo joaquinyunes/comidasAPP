@@ -1,0 +1,375 @@
+/* ============================================================
+   LA CARTA y NOSOTROS — base de página
+   Paleta del home: crema, negro, amarillo y rojo, con bordes negros y
+   sombras duras. La galaxia aparece sólo como acento (planetas, el
+   viaje del encabezado y el cierre), nunca como fondo de toda la página.
+   Regla de rendimiento: nada de backdrop-filter, filtros ni animaciones
+   de pintura en listas; sólo transform/opacity.
+   Viaje: carta-viaje.css · Tarjetas: carta-tarjeta.css · Órbita: carta-orbita.css
+   ============================================================ */
+
+.carta {
+  --c1: var(--yellow);
+  --c2: var(--red);
+  --linea: var(--black);
+  position: relative;
+  min-height: 100vh;
+  /* `clip` (no `hidden`): evita desborde lateral sin romper los sticky. */
+  overflow-x: clip;
+  color: var(--black);
+  background: var(--cream);
+}
+
+.carta-main { position: relative; }
+
+/* Portada espacial: con el navbar transparente los links van en blanco. */
+.carta-portada-oscura .navbar:not(.scrolled) .nav-links:not(.open) a { color: var(--white); }
+.carta-portada-oscura .navbar:not(.scrolled) .nav-links:not(.open) a:hover { color: var(--black); }
+
+.carta-contenedor {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 48px);
+}
+.carta-contenedor-tope { padding-top: 124px; }
+.carta-cierre-caja { padding-bottom: 80px; padding-top: 24px; }
+
+/* ---------- Cabecera (sobre crema o sobre el viaje oscuro) ---------- */
+.carta-cabecera {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+.carta-eyebrow {
+  display: inline-block;
+  padding: 7px 16px;
+  font-weight: 700;
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: var(--yellow);
+  border: 3px solid var(--black);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--black);
+  transform: rotate(-2deg);
+}
+.carta-titulo {
+  font-size: clamp(2.8rem, 8.4vw, 6rem);
+  line-height: 0.92;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--white);
+  -webkit-text-stroke: 3px var(--black);
+  paint-order: stroke fill;
+  text-shadow: 5px 5px 0 var(--black);
+}
+.carta-titulo span { color: var(--yellow); }
+.carta-intro {
+  max-width: 600px;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: inherit;
+  opacity: 0.92;
+}
+.carta-datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+}
+.carta-datos li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 7px 15px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--black);
+  background: var(--white);
+  border: 3px solid var(--black);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--black);
+}
+.carta-datos strong {
+  font-family: var(--font-anton), sans-serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--red);
+}
+
+/* Cabecera sobre crema (carga, error, sin datos): título negro. */
+.carta-contenedor-tope .carta-titulo {
+  color: var(--black);
+  -webkit-text-stroke: 0;
+  text-shadow: 5px 5px 0 var(--yellow);
+}
+.carta-contenedor-tope .carta-titulo span { color: var(--red); }
+
+/* ---------- Navegación entre sectores ---------- */
+.carta-nav {
+  position: sticky;
+  top: 80px;
+  z-index: 30;
+  display: flex;
+  gap: 8px;
+  margin: 36px 0 40px;
+  padding: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--white);
+  border: 3px solid var(--black);
+  border-radius: 999px;
+  box-shadow: 5px 5px 0 var(--black);
+}
+.carta-nav::-webkit-scrollbar { display: none; }
+.carta-nav::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 3px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--red);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+@supports (animation-timeline: scroll()) {
+  .carta-nav::after {
+    animation: carta-progreso linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes carta-progreso { to { transform: scaleX(1); } }
+
+.carta-nav-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 9px 16px;
+  font-weight: 700;
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--black);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.carta-nav-punto {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--black);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--c1), var(--c2));
+}
+.carta-nav-pill:hover { border-color: var(--black); transform: translateY(-1px); }
+.carta-nav-pill[aria-current="true"] {
+  background: var(--yellow);
+  border-color: var(--black);
+}
+.carta-nav-pill:focus-visible,
+.carta-orbita-flecha:focus-visible,
+.carta-orbita-medalla:focus-visible,
+.carta-boton:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+}
+
+/* ---------- Sectores ---------- */
+.carta-sec {
+  position: relative;
+  margin-bottom: 84px;
+  scroll-margin-top: 150px;
+}
+.carta-sec-cab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 3vw, 28px);
+  margin-bottom: 34px;
+  padding-bottom: 22px;
+  border-bottom: 4px solid var(--black);
+}
+.carta-sec-num {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-anton), sans-serif;
+  font-size: clamp(5rem, 15vw, 10rem);
+  line-height: 1;
+  color: color-mix(in srgb, var(--c1) 40%, transparent);
+  -webkit-text-stroke: 2px var(--black);
+  pointer-events: none;
+  user-select: none;
+}
+.carta-sec-textos { position: relative; min-width: 0; }
+.carta-sec-sector {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: var(--c1);
+  border: 2px solid var(--black);
+  border-radius: 999px;
+  transform: rotate(-1.5deg);
+}
+.carta-sec-titulo {
+  font-family: var(--font-anton), sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 400;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--black);
+  text-shadow: 3px 3px 0 var(--c1);
+}
+.carta-sec-desc {
+  margin-top: 8px;
+  max-width: 520px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: rgba(17, 17, 17, 0.72);
+}
+.carta-sec-cuenta {
+  position: relative;
+  margin-left: auto;
+  align-self: flex-end;
+  flex-shrink: 0;
+  padding: 6px 14px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: var(--white);
+  border: 3px solid var(--black);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--black);
+}
+
+/* Planeta del sector: esfera con bandas y anillo (estático: sin pintura
+   animada, sólo se mueve por transform). */
+.carta-planeta {
+  position: relative;
+  flex-shrink: 0;
+  width: clamp(64px, 9vw, 92px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 4px solid var(--black);
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.8) 0, transparent 18%),
+    repeating-linear-gradient(
+      172deg,
+      transparent 0 9px,
+      color-mix(in srgb, var(--c2) 55%, transparent) 9px 15px,
+      transparent 15px 24px
+    ),
+    radial-gradient(circle at 36% 32%, var(--c1), var(--c2) 78%);
+  box-shadow:
+    inset -10px -8px 16px rgba(0, 0, 0, 0.28),
+    4px 4px 0 var(--black);
+}
+.carta-planeta-anillo {
+  position: absolute;
+  left: -36%;
+  right: -36%;
+  top: 50%;
+  height: 34%;
+  border-radius: 50%;
+  border: 4px solid var(--black);
+  border-bottom-color: transparent;
+  transform: translateY(-50%) rotate(-18deg);
+}
+
+/* ---------- Estados (cargando / error / vacía) ---------- */
+.carta-estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 56px 16px;
+  text-align: center;
+  font-weight: 600;
+}
+.carta-estado-planeta {
+  width: 64px;
+  height: 64px;
+  border: 4px solid var(--black);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--yellow), var(--red));
+  box-shadow: 4px 4px 0 var(--black);
+  animation: carta-latido 1.6s ease-in-out infinite;
+}
+@keyframes carta-latido {
+  50% { transform: scale(0.88); }
+}
+.carta-enlace { color: var(--red); text-decoration: underline; }
+
+/* ---------- Cierre: banner violeta como el combo del home ---------- */
+.carta-cierre {
+  position: relative;
+  overflow: hidden;
+  margin-top: 24px;
+  padding: clamp(34px, 6vw, 64px);
+  text-align: center;
+  color: var(--white);
+  border: 4px solid var(--black);
+  border-radius: var(--radius);
+  box-shadow: 12px 12px 0 var(--black);
+  background: linear-gradient(135deg, var(--purple) 0%, var(--purple-mid) 55%, var(--purple-light) 100%);
+}
+.carta-cierre h2 {
+  font-size: clamp(2rem, 5.4vw, 3.4rem);
+  text-transform: uppercase;
+  color: var(--white);
+  -webkit-text-stroke: 2px var(--black);
+  paint-order: stroke fill;
+  text-shadow: 4px 4px 0 var(--black);
+}
+.carta-cierre p { margin-top: 12px; opacity: 0.92; }
+.carta-cierre-botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 28px;
+}
+.carta-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 30px;
+  font-weight: 700;
+  font-size: 0.86rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: var(--white);
+  border: 4px solid var(--black);
+  border-radius: var(--radius);
+  box-shadow: 4px 4px 0 var(--black);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+.carta-boton:hover { transform: translate(-2px, -2px) rotate(-1deg); box-shadow: 7px 7px 0 var(--black); }
+.carta-boton:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--black); }
+.carta-boton-principal { background: var(--yellow); }
+
+@media (max-width: 640px) {
+  .carta-contenedor-tope { padding-top: 108px; }
+  .carta-sec-cab { flex-wrap: wrap; }
+  .carta-sec-cuenta { margin-left: 0; }
+  .carta-nav { top: 74px; }
+}
