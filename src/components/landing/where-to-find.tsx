@@ -1,18 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { LOCALES } from "@/config/locales";
+import WhereCard from "./where-card";
 
-const LOCATIONS = [
-  { name: "Palermo", color: "var(--red)" },
-  { name: "Villa Crespo", color: "var(--purple)" },
-];
-
-const MARKERS = [
-  { top: "22%", left: "32%" },
-  { top: "52%", left: "64%" },
-  { top: "70%", left: "28%" },
-];
-
+// Sección "Dónde encontrarnos": un mapa ilustrado animado por local.
 export default function WhereToFind() {
   return (
     <section className="where-section" id="ubicaciones">
@@ -37,20 +29,9 @@ export default function WhereToFind() {
         </h2>
       </div>
 
-      <div className="where-maps">
-        {LOCATIONS.map((loc) => (
-          <div key={loc.name} className="where-map reveal-scale">
-            <div className="where-map-circle" style={{ background: loc.color }}>
-              {MARKERS.map((m, i) => (
-                <div key={i} className="where-marker" style={{ top: m.top, left: m.left }}>
-                  ✦
-                </div>
-              ))}
-            </div>
-            <div className="where-map-label" style={{ color: "var(--black)" }}>
-              {loc.name}
-            </div>
-          </div>
+      <div className="donde-grilla">
+        {LOCALES.map((local, i) => (
+          <WhereCard key={local.id} local={local} variante={i % 2 === 0 ? "a" : "b"} />
         ))}
       </div>
 

@@ -222,6 +222,10 @@ model Producto {
   tiempoPreparacionMin Int?    @map("tiempo_preparacion_min")
   nivelPicante        Int      @default(0)
   calorias            Int?
+  // Medidas y contenido para el visor de cámara ("ver en tu mesa").
+  tamanoCm            Int?     @map("tamano_cm")
+  pesoGr              Int?     @map("peso_gr")
+  incluye             String[] @default([])
   proteinas           Decimal? @db.Decimal(5, 2)
   grasas              Decimal? @db.Decimal(5, 2)
   carbohidratos       Decimal? @db.Decimal(5, 2)

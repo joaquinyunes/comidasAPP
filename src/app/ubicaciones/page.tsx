@@ -1,23 +1,9 @@
 import Link from "next/link";
 import SiteChrome from "@/components/landing/site-chrome";
-import { SITE } from "@/config/site";
+import { LOCALES } from "@/config/locales";
 
 export const metadata = { title: "Ubicaciones" };
 
-const LOCALES = [
-  {
-    nombre: "Palermo",
-    direccion: "Av. Corrientes 1234, CABA",
-    telefono: SITE.contacto.telefono,
-    horario: "Lun a Jue 12:00–00:00 · Vie y Sáb 12:00–02:00 · Dom 18:00–00:00",
-  },
-  {
-    nombre: "Villa Crespo",
-    direccion: "Av. Corrientes 5600, CABA",
-    telefono: SITE.contacto.telefono,
-    horario: "Lun a Jue 12:00–00:00 · Vie y Sáb 12:00–02:00 · Dom 18:00–00:00",
-  },
-];
 
 export default function UbicacionesPage() {
   return (
@@ -28,7 +14,7 @@ export default function UbicacionesPage() {
     >
       <div className="loc-grid">
         {LOCALES.map((l) => (
-          <div className="loc-card" key={l.nombre}>
+          <div className="loc-card" key={l.id}>
             <h3>{l.nombre}</h3>
             <dl>
               <dt>Dirección</dt>

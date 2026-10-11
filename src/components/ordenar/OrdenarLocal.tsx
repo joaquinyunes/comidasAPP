@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { ImagenThumb } from "@/components/landing/Imagen";
+import BotonCamara from "@/components/producto-camara/BotonCamara";
 import { useLandingData } from "@/lib/landing-data";
 import { useCarrito, type ItemMenu } from "@/components/cliente/useCarrito";
 import CuponInput from "@/components/cliente/CuponInput";
@@ -93,9 +94,12 @@ export default function OrdenarLocal({ codigoQr }: { codigoQr: string }) {
               <ul className="flex flex-col gap-2">
                 {c.productos.map((p) => (
                   <li key={p.id} className="flex items-center justify-between gap-3 rounded-xl border-2 border-black bg-white p-3">
-                    {p.imagenUrl && (
-                      <ImagenThumb className="shrink-0 rounded-lg" src={p.imagenUrl} alt={p.nombre} size={56} />
-                    )}
+                    <div className="cam-thumb">
+                      {p.imagenUrl && (
+                        <ImagenThumb className="rounded-lg" src={p.imagenUrl} alt={p.nombre} size={56} />
+                      )}
+                      <BotonCamara producto={p} variante="miniatura" />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-medium">{p.nombre}</div>
                       {p.descripcion && <div className="text-xs text-zinc-500">{p.descripcion}</div>}
