@@ -42,7 +42,7 @@ export default function PanelSalon() {
         acciones={
           <Boton onClick={recargar} aria-label="Actualizar el salón">
             <RefreshCw className="size-4" aria-hidden />
-            Actualizar
+            <span className="hidden sm:inline">Actualizar</span>
           </Boton>
         }
       />

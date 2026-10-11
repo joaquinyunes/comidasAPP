@@ -1,7 +1,5 @@
-"use client";
+import PanelConfiguracion from "@/components/panel/configuracion/PanelConfiguracion";
 
-import { ConfiguracionTenant } from "@/components/configuracion";
-
-export default function ConfigPage() {
-  return <ConfiguracionTenant />;
+export default function ConfiguracionPage() {
+  return <PanelConfiguracion />;
 }

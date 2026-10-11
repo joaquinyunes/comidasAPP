@@ -45,7 +45,7 @@ export default function TableroCocina() {
         acciones={
           <Boton onClick={recargar} aria-label="Actualizar comandas">
             <RefreshCw className="size-4" aria-hidden />
-            Actualizar
+            <span className="hidden sm:inline">Actualizar</span>
           </Boton>
         }
       />

@@ -1,7 +1,5 @@
-"use client";
-
-import { PaginaMarketing } from "@/components/marketing";
+import PanelMarketing from "@/components/panel/marketing/PanelMarketing";
 
 export default function MarketingPage() {
-  return <PaginaMarketing />;
+  return <PanelMarketing />;
 }

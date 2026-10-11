@@ -1,7 +1,5 @@
-"use client";
+import PanelClientes from "@/components/panel/clientes/PanelClientes";
 
-import { PaginaCRM } from "@/components/crm";
-
-export default function CRMPage() {
-  return <PaginaCRM />;
+export default function ClientesPage() {
+  return <PanelClientes />;
 }

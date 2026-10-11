@@ -1,5 +1,5 @@
 import { Clock } from "lucide-react";
-import { formatoDuracion } from "@/lib/panel/duracion";
+import { duracionCorta } from "@/lib/panel/duracion";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/utils";
 import { visualMesa } from "../estados-visuales";
@@ -59,7 +59,7 @@ export default function MesaTile({ mesa, seleccionada, onElegir }: Props) {
           <p className="pn-num flex items-center justify-between text-xs text-pn-suave">
             <span className="inline-flex items-center gap-1">
               <Clock className="size-3.5" aria-hidden />
-              {formatoDuracion(minutos)}
+              {duracionCorta(minutos)}
             </span>
             {mesa.totalAbierto > 0 && (
               <span className="font-medium text-pn-tinta">{formatCurrency(mesa.totalAbierto)}</span>

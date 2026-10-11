@@ -25,7 +25,7 @@ export default function PedidosPanel() {
         acciones={
           <Boton onClick={recargar} aria-label="Actualizar pedidos">
             <RefreshCw className="size-4" aria-hidden />
-            Actualizar
+            <span className="hidden sm:inline">Actualizar</span>
           </Boton>
         }
       />

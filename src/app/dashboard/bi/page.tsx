@@ -1,7 +1,5 @@
-"use client";
+import PanelTendencias from "@/components/panel/tendencias/PanelTendencias";
 
-import { DashboardBI } from "@/components/dashboard-bi";
-
-export default function BIPage() {
-  return <DashboardBI />;
+export default function TendenciasPage() {
+  return <PanelTendencias />;
 }

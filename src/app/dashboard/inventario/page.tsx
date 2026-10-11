@@ -1,7 +1,5 @@
-"use client";
-
-import { GestionInventario } from "@/components/inventario";
+import PanelInventario from "@/components/panel/inventario/PanelInventario";
 
 export default function InventarioPage() {
-  return <GestionInventario />;
+  return <PanelInventario />;
 }

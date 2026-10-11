@@ -1,7 +1,5 @@
-"use client";
+import PanelEquipo from "@/components/panel/equipo/PanelEquipo";
 
-import { PaginaRRHH } from "@/components/rrhh";
-
-export default function RRHHPage() {
-  return <PaginaRRHH />;
+export default function EquipoPage() {
+  return <PanelEquipo />;
 }

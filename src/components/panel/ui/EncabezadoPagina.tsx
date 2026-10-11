@@ -12,7 +12,7 @@ export default function EncabezadoPagina({ titulo, descripcion, acciones }: Prop
     <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div className="min-w-0">
         <h1 className="text-xl font-semibold tracking-tight text-pn-tinta sm:text-2xl">{titulo}</h1>
-        {descripcion && <p className="mt-0.5 max-w-prose text-sm text-pn-suave">{descripcion}</p>}
+        {descripcion && <p className="mt-0.5 hidden max-w-prose text-sm text-pn-suave sm:block">{descripcion}</p>}
       </div>
       {acciones && <div className="flex flex-wrap items-center gap-2">{acciones}</div>}
     </header>

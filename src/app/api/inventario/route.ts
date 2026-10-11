@@ -15,10 +15,20 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    // Sin sucursal en la sesión ni en la consulta: la primera del local.
     const sucursalId =
       searchParams.get("sucursalId") ||
       context.sucursalId ||
-      "6e29ec7f-fccd-44bc-b7a2-cf50cd1c7b70";
+      (
+        await prisma.sucursal.findFirst({
+          where: { tenantId: context.tenantId },
+          orderBy: { createdAt: "asc" },
+          select: { id: true },
+        })
+      )?.id;
+    if (!sucursalId) {
+      return NextResponse.json({ error: "El local no tiene sucursales" }, { status: 404 });
+    }
     const estado = searchParams.get("estado"); // "critico", "bajo", "ok"
     const busqueda = searchParams.get("q") || undefined;
     const page = parseInt(searchParams.get("page") || "1");

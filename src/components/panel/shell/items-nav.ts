@@ -1,5 +1,6 @@
 import {
   Armchair,
+  BookOpen,
   CalendarDays,
   ChartColumn,
   ChartLine,
@@ -50,6 +51,7 @@ export const ITEMS_NAV: ItemNav[] = [
 
   { href: "/dashboard/cocina", etiqueta: "Cocina", icono: ChefHat, grupo: "cocina-caja", permiso: "pedidos:leer" },
   { href: "/dashboard/caja", etiqueta: "Caja", icono: Wallet, grupo: "cocina-caja", permiso: "caja:leer" },
+  { href: "/dashboard/carta", etiqueta: "Carta", icono: BookOpen, grupo: "cocina-caja", permiso: "pedidos:leer" },
 
   { href: "/dashboard/inventario", etiqueta: "Inventario", icono: Package, grupo: "gestion", permiso: "inventario:leer" },
   { href: "/dashboard/compras", etiqueta: "Compras", icono: ShoppingCart, grupo: "gestion", permiso: "compras:leer" },

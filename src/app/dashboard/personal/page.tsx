@@ -1,7 +1,5 @@
-"use client";
-
-import { PanelPersonal } from "@/components/personal/PanelPersonal";
+import PanelTareas from "@/components/panel/tareas/PanelTareas";
 
 export default function PersonalPage() {
-  return <PanelPersonal />;
+  return <PanelTareas />;
 }

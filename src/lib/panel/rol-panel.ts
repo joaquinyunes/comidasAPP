@@ -43,7 +43,7 @@ export const INICIO_POR_ROL: Record<RolPanel, string> = {
 // Atajos de la barra inferior del celular, en orden de uso del rol.
 export const ATAJOS_POR_ROL: Record<RolPanel, string[]> = {
   jefe: ["/dashboard", "/dashboard/mozo", "/dashboard/cocina", "/dashboard/caja"],
-  mozo: ["/dashboard/mozo", "/dashboard/pedidos", "/dashboard/reservas", "/dashboard/cuenta"],
-  cocina: ["/dashboard/cocina", "/dashboard/inventario", "/dashboard/cuenta"],
-  caja: ["/dashboard/caja", "/dashboard/pedidos", "/dashboard/reservas", "/dashboard/cuenta"],
+  mozo: ["/dashboard/mozo", "/dashboard/pedidos", "/dashboard/carta"],
+  cocina: ["/dashboard/cocina", "/dashboard/carta"],
+  caja: ["/dashboard/caja", "/dashboard/pedidos", "/dashboard/reservas"],
 };

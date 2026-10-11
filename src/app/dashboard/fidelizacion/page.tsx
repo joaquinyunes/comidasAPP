@@ -1,6 +1,4 @@
-"use client";
-
-import { PanelFidelizacion } from "@/components/fidelizacion/PanelFidelizacion";
+import PanelFidelizacion from "@/components/panel/fidelizacion/PanelFidelizacion";
 
 export default function FidelizacionPage() {
   return <PanelFidelizacion />;

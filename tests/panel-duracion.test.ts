@@ -17,3 +17,14 @@ describe("formatoDuracion", () => {
     expect(formatoDuracion(-5)).toBe("0 min");
   });
 });
+
+import { duracionCorta } from "@/lib/panel/duracion";
+
+describe("duracionCorta", () => {
+  it("cabe en una tarjeta chica", () => {
+    expect(duracionCorta(8)).toBe("8 min");
+    expect(duracionCorta(65)).toBe("1h 05m");
+    expect(duracionCorta(120)).toBe("2h");
+    expect(duracionCorta(604)).toBe("10h 04m");
+  });
+});

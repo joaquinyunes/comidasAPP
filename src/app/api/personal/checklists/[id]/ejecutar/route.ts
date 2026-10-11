@@ -18,10 +18,6 @@ export async function POST(
     }
     const { id } = await params;
     const body = await request.json();
-    const validation = validateInput(ChecklistEjecucionSchema, { ...body, plantillaId: id });
-    if (!validation.success) {
-      return NextResponse.json({ error: "Datos inválidos", details: validation.errors }, { status: 400 });
-    }
 
     const plantilla = await prisma.checklistPlantilla.findFirst({
       where: { id, tenantId: context.tenantId },
@@ -29,6 +25,24 @@ export async function POST(
     });
     if (!plantilla) {
       return NextResponse.json({ error: "Plantilla no encontrada" }, { status: 404 });
+    }
+
+    // Sin sucursal explícita: la de la plantilla o, si no tiene, la principal del local.
+    const sucursalId =
+      body?.sucursalId ||
+      plantilla.sucursalId ||
+      context.sucursalId ||
+      (
+        await prisma.sucursal.findFirst({
+          where: { tenantId: context.tenantId },
+          orderBy: { createdAt: "asc" },
+          select: { id: true },
+        })
+      )?.id;
+
+    const validation = validateInput(ChecklistEjecucionSchema, { ...body, sucursalId, plantillaId: id });
+    if (!validation.success) {
+      return NextResponse.json({ error: "Datos inválidos", details: validation.errors }, { status: 400 });
     }
 
     const itemIds = new Set(plantilla.items.map((i) => i.id));
