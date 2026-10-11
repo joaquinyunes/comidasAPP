@@ -1,8 +1,7 @@
 import { NextRequest } from "next/server";
 import { verify } from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
-
-const JWT_SECRET = process.env.JWT_SECRET || "tu-secreto-super-seguro-cambiar-en-produccion";
+import { getJwtSecret } from "@/lib/jwt-secret";
 
 export interface TenantContext {
   tenantId: string;
@@ -28,7 +27,7 @@ function extractToken(request: NextRequest): string | null {
 
 function verifyToken(token: string): TenantContext | null {
   try {
-    const decoded = verify(token, JWT_SECRET) as Record<string, unknown> & TenantContext;
+    const decoded = verify(token, getJwtSecret()) as Record<string, unknown> & TenantContext;
     return {
       tenantId: decoded.tenantId as string,
       sucursalId: decoded.sucursalId as string | undefined,

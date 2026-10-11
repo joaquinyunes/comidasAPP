@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 // PÁGINA DE LOGIN (staff del restaurante)
 // ============================================
 
+const ES_DEV = process.env.NODE_ENV !== "production";
+
 export default function LoginPage() {
   return (
     <Suspense fallback={null}>
@@ -23,8 +25,9 @@ function LoginForm() {
   const params = useSearchParams();
   const callbackUrl = params?.get("callbackUrl") || "/dashboard";
 
-  const [email, setEmail] = useState("admin@cozizina.com");
-  const [password, setPassword] = useState("admin123");
+  // Las credenciales de demo sólo se precargan en desarrollo.
+  const [email, setEmail] = useState(ES_DEV ? "admin@cozizina.com" : "");
+  const [password, setPassword] = useState(ES_DEV ? "admin123" : "");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
@@ -153,12 +156,14 @@ function LoginForm() {
             </Link>
           </p>
 
-          {/* Demo hint */}
-          <div className="mt-6 pt-5 border-t border-white/[0.08]">
-            <p className="text-[11px] text-gray-500 text-center">
-              Demo: <span className="text-gray-400">admin@cozizina.com</span> / <span className="text-gray-400">admin123</span>
-            </p>
-          </div>
+          {/* Demo hint (sólo desarrollo) */}
+          {ES_DEV && (
+            <div className="mt-6 pt-5 border-t border-white/[0.08]">
+              <p className="text-[11px] text-gray-500 text-center">
+                Demo: <span className="text-gray-400">admin@cozizina.com</span> / <span className="text-gray-400">admin123</span>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Footer */}

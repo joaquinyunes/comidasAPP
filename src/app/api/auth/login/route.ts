@@ -4,15 +4,13 @@ import { compare } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { authRateLimit } from "@/lib/rate-limit";
+import { getJwtSecret } from "@/lib/jwt-secret";
 
 // ============================================
 // POST /api/auth/login — iniciar sesión
 // DELETE /api/auth/login — cerrar sesión
 // (el alta de usuarios vive en /api/auth/register)
 // ============================================
-
-const JWT_SECRET =
-  process.env.JWT_SECRET || "tu-secreto-super-seguro-cambiar-en-produccion";
 
 const LoginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -60,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     const token = sign(
       { userId: user.id, tenantId: user.tenantId, email: user.email, roles, permisos },
-      JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: "24h" }
     );
 

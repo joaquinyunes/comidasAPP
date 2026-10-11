@@ -111,7 +111,8 @@ async function main() {
   // ============================================
   // USUARIOS
   // ============================================
-  const passwordHash = await hash("admin123", 12);
+  // En un despliegue público definí SEED_PASSWORD; "admin123" es sólo para local.
+  const passwordHash = await hash(process.env.SEED_PASSWORD || "admin123", 12);
 
   const usuarios = [
     { id: "user-admin", email: "admin@cozizina.com", nombre: "Admin Cozizina", rolId: "rol-admin" },

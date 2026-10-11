@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { getJwtSecret } from "@/lib/jwt-secret";
 
 // ============================================
 // PROXY — Autenticación y RBAC
@@ -9,9 +10,6 @@ import { jwtVerify } from "jose";
 // público, rutas inexistentes) pasa de largo y Next resuelve
 // (o devuelve 404).
 // ============================================
-
-const JWT_SECRET =
-  process.env.JWT_SECRET || "tu-secreto-super-seguro-cambiar-en-produccion";
 
 export interface JWTPayload {
   userId: string;
@@ -45,7 +43,7 @@ function extractToken(request: NextRequest): string | null {
 
 async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
-    const secret = new TextEncoder().encode(JWT_SECRET);
+    const secret = new TextEncoder().encode(getJwtSecret());
     const { payload } = await jwtVerify(token, secret);
     return payload as unknown as JWTPayload;
   } catch {
