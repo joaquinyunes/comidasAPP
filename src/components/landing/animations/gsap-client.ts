@@ -11,9 +11,12 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
 
+// Decisión de producto: la landing siempre se muestra con todos sus efectos,
+// aunque el sistema pida "reducir movimiento" (muchos celulares lo traen
+// activo por ahorro de batería y dejaban la página plana y sin 3D). Se
+// mantiene la función como único punto de control por si se revierte.
 export function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined") return true;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return false;
 }
 
 export { gsap, ScrollTrigger, useGSAP };

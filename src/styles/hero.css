@@ -208,10 +208,6 @@
   50% { transform: scale(1.25) rotate(18deg); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .hero-spark { animation: none; }
-}
-
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .hero-section {
@@ -270,14 +266,4 @@
     font-size: 0.74rem;
     white-space: nowrap;
   }
-}
-
-/* Botón para activar el viaje 3D cuando se pidió menos movimiento. */
-.hero-enable-3d {
-  position: absolute;
-  z-index: 6;
-  left: clamp(20px, 5vw, 60px);
-  bottom: 20px;
-  padding: 10px 16px;
-  font-size: 0.72rem;
 }

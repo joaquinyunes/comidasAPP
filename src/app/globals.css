@@ -138,7 +138,9 @@ body {
   font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
   background-color: var(--cream);
   color: var(--black);
-  overflow-x: hidden;
+  /* `clip` y no `hidden`: no crea contenedor de scroll, así el hero sticky del
+     3D se pega bien en Safari/Chrome del celular. */
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -270,15 +272,6 @@ img {
   display: inline-block; animation: slideMarquee 25s linear infinite;
   font-family: var(--font-anton), sans-serif; font-size: 14px; font-weight: 800;
   text-transform: uppercase; letter-spacing: 4px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .page-enter, .page-enter-delay-1, .page-enter-delay-2, .page-enter-delay-3,
-  .page-enter-delay-4, .page-enter-left, .page-enter-right, .page-enter-scale,
-  .page-enter-pop, .float-anim, .float-anim-delay {
-    animation: none !important; opacity: 1; transform: none;
-  }
-  .marquee-shared .marquee-inner { animation: none; }
 }
 
 /* ====== END SHARED PAGE ANIMATIONS ====== */
@@ -477,16 +470,6 @@ img {
 .reveal-scale.is-visible {
   opacity: 1;
   transform: scale(1) rotate(0deg);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal-up, .reveal-scale {
-    transition: none;
-    opacity: 1;
-    transform: none;
-  }
-  .float-anim { animation: none; }
-  html { scroll-behavior: auto; }
 }
 
 /* ====== NAVBAR ====== */

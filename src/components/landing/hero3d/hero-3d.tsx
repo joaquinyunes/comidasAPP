@@ -41,7 +41,8 @@ export default function Hero3D({ onFail }: { onFail: () => void }) {
 
         <div className="hero3d-hint">
           <span className="hero3d-hint-mouse" aria-hidden="true" />
-          <span>Scrolleá para viajar</span>
+          <span className="hero3d-hint-mouse-text">Scrolleá para viajar</span>
+          <span className="hero3d-hint-touch-text">Deslizá para viajar</span>
           <a href="#menu" className="hero3d-skip">
             Ir directo a la carta
           </a>

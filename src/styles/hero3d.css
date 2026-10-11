@@ -220,6 +220,18 @@
   0% { transform: translateY(0); opacity: 1; }
   100% { transform: translateY(11px); opacity: 0; }
 }
+/* Texto de la pista según el dispositivo: rueda del mouse vs dedo. */
+.hero3d-hint-touch-text {
+  display: none;
+}
+@media (hover: none) {
+  .hero3d-hint-mouse-text {
+    display: none;
+  }
+  .hero3d-hint-touch-text {
+    display: inline;
+  }
+}
 .hero3d-skip {
   color: var(--yellow);
   text-decoration: underline;
@@ -304,12 +316,6 @@
   }
   .hero3d-hint-mouse {
     display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero3d-hint-mouse::after {
-    animation: none;
   }
 }
 

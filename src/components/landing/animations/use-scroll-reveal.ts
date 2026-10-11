@@ -12,7 +12,9 @@ function directionX(el: Element): number {
   return 0;
 }
 
-function bindReveals() {
+// Engancha los reveals que todavía no tienen disparador y devuelve cuántos
+// enganchó (0 = no había nada nuevo).
+function bindReveals(): number {
   const ups = gsap.utils.toArray<HTMLElement>(UP_SELECTOR);
   if (ups.length) {
     ups.forEach((el) => el.setAttribute("data-reveal-bound", "1"));
@@ -59,6 +61,7 @@ function bindReveals() {
         }),
     });
   }
+  return ups.length + scales.length;
 }
 
 function showAllInstantly() {
@@ -92,8 +95,11 @@ export function useScrollReveal() {
       return;
     }
     try {
-      bindReveals();
-      ScrollTrigger.refresh();
+      // Sólo se refresca si había elementos nuevos. El rescan lo dispara un
+      // MutationObserver y `refresh()` desarma/rearma los pin-spacer (muta el
+      // DOM): refrescar siempre generaba un bucle infinito que congelaba la
+      // página apenas el pin de ingredientes estaba activo.
+      if (bindReveals() > 0) ScrollTrigger.refresh();
     } catch {
       showAllInstantly();
     }
