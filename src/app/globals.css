@@ -13,6 +13,7 @@
 @import "../styles/galaxy-slider.css";
 @import "../styles/specials.css";
 @import "../styles/where.css";
+@import "../styles/panel.css";
 
 @custom-variant dark (&:is(.dark *));
 

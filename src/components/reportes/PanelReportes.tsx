@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useDatos } from "@/hooks/use-datos";
+import { formatCurrency } from "@/lib/utils";
+import Bloque from "@/components/panel/ui/Bloque";
+import Cifra from "@/components/panel/ui/Cifra";
+import EstadoVacio from "@/components/panel/ui/EstadoVacio";
+import AvisoError from "@/components/panel/ui/AvisoError";
 
 interface ComparacionSucursal {
   sucursalId: string;
@@ -15,48 +20,50 @@ interface ReportesResumen {
   comparacion: ComparacionSucursal[];
 }
 
+// Ventas de los últimos 30 días, total y por sucursal.
 export default function PanelReportes() {
-  const [d, setD] = useState<ReportesResumen | null>(null);
+  const { datos, cargando, error, recargar } = useDatos<ReportesResumen>("/api/reportes/resumen", 0);
 
-  useEffect(() => {
-    fetch("/api/reportes/resumen")
-      .then((r) => r.json())
-      .then((j) => setD(j.data ?? null))
-      .catch(() => setD(null));
-  }, []);
+  if (cargando && !datos) return <p className="text-sm text-pn-suave">Armando el reporte…</p>;
+  if (error && !datos) return <AvisoError onReintentar={recargar}>{error}</AvisoError>;
+  if (!datos) return null;
 
-  if (!d) return <p className="text-sm text-zinc-500">Cargando reportes…</p>;
+  const ticket = datos.totalPedidos > 0 ? datos.totalFacturado / datos.totalPedidos : 0;
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded border border-zinc-200 p-3">
-          <div className="text-xs text-zinc-500">Pedidos (30d)</div>
-          <div className="text-2xl font-bold">{d.totalPedidos}</div>
-        </div>
-        <div className="rounded border border-zinc-200 p-3">
-          <div className="text-xs text-zinc-500">Facturado (30d)</div>
-          <div className="text-2xl font-bold">${d.totalFacturado}</div>
-        </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Cifra etiqueta="Pedidos (30 días)" valor={String(datos.totalPedidos)} />
+        <Cifra etiqueta="Facturado (30 días)" valor={formatCurrency(datos.totalFacturado)} />
+        <Cifra etiqueta="Ticket promedio" valor={formatCurrency(ticket)} />
       </div>
-      <div>
-        <h3 className="font-semibold mb-2">Comparación por sucursal</h3>
-        <div className="overflow-x-auto rounded border border-zinc-200">
+
+      <Bloque titulo="Por sucursal" sinPadding>
+        {datos.comparacion.length === 0 ? (
+          <div className="p-4">
+            <EstadoVacio titulo="Sin ventas en el período" />
+          </div>
+        ) : (
           <table className="w-full text-sm">
-            <thead className="bg-zinc-50"><tr><th className="p-2 text-left">Sucursal</th><th className="p-2 text-right">Pedidos</th><th className="p-2 text-right">Facturado</th></tr></thead>
-            <tbody>
-              {d.comparacion.map((c) => (
-                <tr key={c.sucursalId} className="border-t border-zinc-100">
-                  <td className="p-2">{c.nombre}</td>
-                  <td className="p-2 text-right">{c.pedidos}</td>
-                  <td className="p-2 text-right">${c.facturado}</td>
+            <thead>
+              <tr className="border-b border-pn-linea text-left text-xs text-pn-suave">
+                <th className="px-4 py-2 font-medium">Sucursal</th>
+                <th className="px-2 py-2 text-right font-medium">Pedidos</th>
+                <th className="px-4 py-2 text-right font-medium">Facturado</th>
+              </tr>
+            </thead>
+            <tbody className="pn-num">
+              {datos.comparacion.map((c) => (
+                <tr key={c.sucursalId} className="border-b border-pn-linea last:border-b-0">
+                  <td className="px-4 py-2.5 font-medium">{c.nombre}</td>
+                  <td className="px-2 py-2.5 text-right">{c.pedidos}</td>
+                  <td className="px-4 py-2.5 text-right font-semibold">{formatCurrency(c.facturado)}</td>
                 </tr>
               ))}
-              {d.comparacion.length === 0 && <tr><td colSpan={3} className="p-2 text-zinc-400">Sin ventas en el período.</td></tr>}
             </tbody>
           </table>
-        </div>
-      </div>
+        )}
+      </Bloque>
     </div>
   );
 }

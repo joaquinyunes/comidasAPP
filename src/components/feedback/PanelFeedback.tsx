@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useDatos } from "@/hooks/use-datos";
+import Bloque from "@/components/panel/ui/Bloque";
+import Cifra from "@/components/panel/ui/Cifra";
+import AvisoError from "@/components/panel/ui/AvisoError";
 
-interface FeedbackTriste {
+interface Queja {
   id: string;
   motivo: string | null;
   mesa: number | null;
@@ -13,49 +16,55 @@ interface FeedbackResumen {
   total: number;
   porCalificacion: Record<string, number>;
   felizPct: number;
-  tristes: FeedbackTriste[];
+  tristes: Queja[];
   alertaDueno: boolean;
 }
 
+function cuando(fecha: string): string {
+  return new Date(fecha).toLocaleString("es-AR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+// Qué dicen los clientes al cerrar su mesa.
 export default function PanelFeedback() {
-  const [d, setD] = useState<FeedbackResumen | null>(null);
+  const { datos, cargando, error, recargar } = useDatos<FeedbackResumen>("/api/feedback/resumen", 0);
 
-  useEffect(() => {
-    fetch("/api/feedback/resumen")
-      .then((r) => r.json())
-      .then((j) => setD(j.data ?? null))
-      .catch(() => setD(null));
-  }, []);
-
-  if (!d) return <p className="text-sm text-zinc-500">Cargando feedback…</p>;
+  if (cargando && !datos) return <p className="text-sm text-pn-suave">Cargando opiniones…</p>;
+  if (error && !datos) return <AvisoError onReintentar={recargar}>{error}</AvisoError>;
+  if (!datos) return null;
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-3">
-        <Tarjeta titulo="Total (30d)" valor={d.total} />
-        <Tarjeta titulo="% Feliz" valor={`${d.felizPct}%`} />
-        <Tarjeta titulo="Alertas" valor={d.tristes.length} />
+        <Cifra etiqueta="Opiniones (30 días)" valor={String(datos.total)} />
+        <Cifra
+          etiqueta="Clientes contentos"
+          valor={`${datos.felizPct}%`}
+          tono={datos.total > 0 && datos.felizPct < 70 ? "aviso" : "neutro"}
+        />
+        <Cifra
+          etiqueta="Quejas"
+          valor={String(datos.tristes.length)}
+          tono={datos.tristes.length > 0 ? "peligro" : "neutro"}
+        />
       </div>
-      <div>
-        <h3 className="font-semibold mb-2">Caritas tristes recientes</h3>
-        <ul className="text-sm space-y-1">
-          {d.tristes.map((t) => (
-            <li key={t.id} className="rounded border border-red-200 bg-red-50 p-2">
-              {t.motivo ?? "sin motivo"}{t.mesa ? ` · Mesa ${t.mesa}` : ""} <span className="text-zinc-400">· {new Date(t.fecha).toLocaleString()}</span>
-            </li>
-          ))}
-          {d.tristes.length === 0 && <li className="text-zinc-400">Sin quejas. Todo bien 🎉</li>}
-        </ul>
-      </div>
-    </div>
-  );
-}
 
-function Tarjeta({ titulo, valor }: { titulo: string; valor: string | number }) {
-  return (
-    <div className="rounded border border-zinc-200 p-3">
-      <div className="text-xs text-zinc-500">{titulo}</div>
-      <div className="text-2xl font-bold">{valor}</div>
+      <Bloque titulo="Quejas recientes" nota="Para responder o corregir" sinPadding>
+        {datos.tristes.length === 0 ? (
+          <p className="px-4 py-5 text-sm text-pn-suave">No hubo quejas. Buen turno.</p>
+        ) : (
+          <ul className="divide-y divide-pn-linea">
+            {datos.tristes.map((t) => (
+              <li key={t.id} className="px-4 py-3">
+                <p className="text-sm font-medium">{t.motivo ?? "Sin motivo"}</p>
+                <p className="mt-0.5 text-xs text-pn-suave">
+                  {t.mesa ? `Mesa ${t.mesa} · ` : ""}
+                  {cuando(t.fecha)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Bloque>
     </div>
   );
 }

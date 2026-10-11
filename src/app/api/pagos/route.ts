@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { mesaSinPendientes } from "@/lib/pedidos/mesa-sin-pendientes";
 
 // ============================================
 // POST /api/pagos — Crear pago
@@ -74,7 +75,8 @@ export async function POST(request: NextRequest) {
 
       await tx.pedido.update({ where: { id: pedidoId }, data: { estado: "pagado" } });
 
-      if (pedido.mesaId) {
+      // La mesa se libera solo si no le queda otra comanda sin cobrar.
+      if (pedido.mesaId && (await mesaSinPendientes(tx, pedido.mesaId, pedidoId))) {
         await tx.mesa.update({ where: { id: pedido.mesaId }, data: { estado: "libre" } });
       }
 

@@ -6,6 +6,7 @@
 // ============================================================
 
 import { prisma } from "@/lib/prisma";
+import { mesaSinPendientes } from "./mesa-sin-pendientes";
 
 interface Args {
   pedidoId: string;
@@ -45,7 +46,7 @@ export async function registrarPagoPedido(
     });
 
     await tx.pedido.update({ where: { id: pedido.id }, data: { estado: "pagado" } });
-    if (pedido.mesaId) {
+    if (pedido.mesaId && (await mesaSinPendientes(tx, pedido.mesaId, pedido.id))) {
       await tx.mesa.update({ where: { id: pedido.mesaId }, data: { estado: "libre" } });
     }
     await tx.pedidoEvento.create({

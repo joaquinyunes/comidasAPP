@@ -2,34 +2,37 @@
 
 import { useState } from "react";
 import { ETIQUETA_ESTADO, type EstadoReserva } from "@/lib/reservas/estados";
+import Boton from "@/components/panel/ui/Boton";
+import Etiqueta from "@/components/panel/ui/Etiqueta";
+import type { Tono } from "@/components/panel/tonos";
 import { actualizarReserva } from "./accionReserva";
 import { contacto, type ReservaApi } from "./tipos";
 
-const COLOR: Record<string, string> = {
-  pendiente: "bg-amber-100 text-amber-800",
-  confirmada: "bg-green-100 text-green-800",
-  sentada: "bg-blue-100 text-blue-800",
-  cancelada: "bg-zinc-100 text-zinc-600",
-  no_show: "bg-red-100 text-red-800",
+const TONO: Record<string, Tono> = {
+  pendiente: "aviso",
+  confirmada: "ok",
+  sentada: "info",
+  cancelada: "neutro",
+  no_show: "peligro",
 };
 
 // Acciones disponibles según el estado actual.
-const ACCIONES: Record<string, { estado: EstadoReserva; label: string }[]> = {
+const ACCIONES: Record<string, { estado: EstadoReserva; etiqueta: string; principal?: boolean }[]> = {
   pendiente: [
-    { estado: "confirmada", label: "Confirmar" },
-    { estado: "cancelada", label: "Cancelar" },
+    { estado: "confirmada", etiqueta: "Confirmar", principal: true },
+    { estado: "cancelada", etiqueta: "Cancelar" },
   ],
   confirmada: [
-    { estado: "sentada", label: "Sentar" },
-    { estado: "no_show", label: "No vino" },
-    { estado: "cancelada", label: "Cancelar" },
+    { estado: "sentada", etiqueta: "Sentar", principal: true },
+    { estado: "no_show", etiqueta: "No vino" },
+    { estado: "cancelada", etiqueta: "Cancelar" },
   ],
-  sentada: [{ estado: "cancelada", label: "Cancelar" }],
+  sentada: [{ estado: "cancelada", etiqueta: "Cancelar" }],
 };
 
 function horaLegible(hora: string): string {
   const d = new Date(hora);
-  return isNaN(d.getTime()) ? hora : d.toISOString().slice(11, 16);
+  return Number.isNaN(d.getTime()) ? hora : d.toISOString().slice(11, 16);
 }
 
 interface Props {
@@ -49,43 +52,47 @@ export default function ReservaFila({ reserva, onCambio }: Props) {
     const r = await actualizarReserva(reserva.id, { estado });
     setOcupado(false);
     if (r.ok) onCambio();
-    else setError(r.mensaje ?? "Error");
+    else setError(r.mensaje ?? "No se pudo actualizar la reserva.");
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-xl border border-zinc-200 p-3">
-      <div className="w-16 shrink-0 text-center">
-        <div className="font-semibold tabular-nums">{horaLegible(reserva.hora)}</div>
-        <div className="text-xs text-zinc-500">{reserva.cantidadPersonas} pers.</div>
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <div className="font-medium">{nombre}</div>
-        <div className="text-xs text-zinc-500">
-          {telefono ?? "sin teléfono"}
-          {reserva.mesa ? ` · Mesa ${reserva.mesa.numero}` : reserva.zona ? ` · ${reserva.zona}` : ""}
+    <li className="rounded-lg border border-pn-linea bg-pn-papel p-3">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="w-16 shrink-0">
+          <p className="pn-num text-lg font-semibold leading-none">{horaLegible(reserva.hora)}</p>
+          <p className="mt-1 text-xs text-pn-suave">{reserva.cantidadPersonas} personas</p>
         </div>
-        {reserva.notas && <div className="mt-0.5 text-xs italic text-zinc-500">{reserva.notas}</div>}
+
+        <div className="min-w-0 flex-1 basis-48">
+          <p className="font-medium">{nombre}</p>
+          <p className="text-sm text-pn-suave">
+            {telefono ?? "Sin teléfono"}
+            {reserva.mesa ? ` · Mesa ${reserva.mesa.numero}` : reserva.zona ? ` · ${reserva.zona}` : ""}
+          </p>
+          {reserva.notas && <p className="mt-1 text-sm italic text-pn-suave">{reserva.notas}</p>}
+        </div>
+
+        <Etiqueta tono={TONO[reserva.estado] ?? "neutro"}>
+          {ETIQUETA_ESTADO[reserva.estado as EstadoReserva] ?? reserva.estado}
+        </Etiqueta>
       </div>
 
-      <span className={`rounded-full px-2 py-1 text-xs font-medium ${COLOR[reserva.estado] ?? "bg-zinc-100"}`}>
-        {ETIQUETA_ESTADO[reserva.estado as EstadoReserva] ?? reserva.estado}
-      </span>
+      {acciones.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2 border-t border-pn-linea pt-3">
+          {acciones.map((a) => (
+            <Boton
+              key={a.estado}
+              variante={a.principal ? "primario" : a.estado === "cancelada" || a.estado === "no_show" ? "peligro" : "secundario"}
+              disabled={ocupado}
+              onClick={() => cambiar(a.estado)}
+            >
+              {a.etiqueta}
+            </Boton>
+          ))}
+        </div>
+      )}
 
-      <div className="flex gap-2">
-        {acciones.map((a) => (
-          <button
-            key={a.estado}
-            onClick={() => cambiar(a.estado)}
-            disabled={ocupado}
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-50 disabled:opacity-40"
-          >
-            {a.label}
-          </button>
-        ))}
-      </div>
-
-      {error && <p className="w-full text-xs text-red-600">{error}</p>}
-    </div>
+      {error && <p className="mt-2 text-sm text-pn-peligro">{error}</p>}
+    </li>
   );
 }

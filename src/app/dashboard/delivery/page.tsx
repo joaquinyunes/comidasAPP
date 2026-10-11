@@ -1,10 +1,13 @@
 import PanelDelivery from "@/components/delivery/PanelDelivery";
+import EncabezadoPagina from "@/components/panel/ui/EncabezadoPagina";
 
 export default function PaginaDelivery() {
   return (
-    <div className="mx-auto max-w-4xl p-6">
-      <h1 className="mb-1 text-2xl font-bold">Delivery Propio</h1>
-      <p className="mb-6 text-sm text-zinc-500">Micro-fase 2.10 — asignación de repartidor, estado en vivo y zonas de reparto.</p>
+    <div className="mx-auto max-w-3xl">
+      <EncabezadoPagina
+        titulo="Delivery"
+        descripcion="Repartos en curso. Avanzá cada uno cuando sale y cuando se entrega."
+      />
       <PanelDelivery />
     </div>
   );

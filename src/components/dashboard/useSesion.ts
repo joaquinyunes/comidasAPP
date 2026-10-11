@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+export { tienePermiso } from "@/lib/panel/permisos";
+
 export interface Sesion {
   id: string;
   email: string;
@@ -30,13 +32,4 @@ export function useSesion() {
   }, []);
 
   return sesion;
-}
-
-// ¿El usuario tiene este permiso? (soporta comodines "recurso:*" y "*")
-export function tienePermiso(permisos: string[] | undefined, requerido: string): boolean {
-  if (!permisos) return false;
-  if (permisos.includes("*")) return true;
-  if (permisos.includes(requerido)) return true;
-  const [recurso] = requerido.split(":");
-  return permisos.includes(`${recurso}:*`);
 }

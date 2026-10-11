@@ -1,65 +1,63 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { RefreshCw } from "lucide-react";
+import { GRUPOS_PEDIDOS, pedidosDeGrupo } from "@/lib/pedidos/grupos-lista";
+import EncabezadoPagina from "@/components/panel/ui/EncabezadoPagina";
+import EstadoVacio from "@/components/panel/ui/EstadoVacio";
+import AvisoError from "@/components/panel/ui/AvisoError";
+import Boton from "@/components/panel/ui/Boton";
+import Filtros from "@/components/panel/ui/Filtros";
 import { useListaPedidos } from "./useListaPedidos";
 import PedidoFila from "./PedidoFila";
 
-const GRUPOS: { clave: string; label: string; estados: string[] }[] = [
-  { clave: "activos", label: "Activos", estados: ["recibido", "en_preparacion", "listo", "entregado"] },
-  { clave: "por_cobrar", label: "Por cobrar", estados: ["entregado", "listo"] },
-  { clave: "cerrados", label: "Cerrados", estados: ["pagado", "cancelado"] },
-];
-
 export default function PedidosPanel() {
   const { pedidos, cargando, error, recargar } = useListaPedidos();
-  const [grupo, setGrupo] = useState("activos");
+  const [grupo, setGrupo] = useState<string>("abiertos");
 
-  const def = GRUPOS.find((g) => g.clave === grupo)!;
-  const visibles = useMemo(
-    () => pedidos.filter((p) => def.estados.includes(p.estado)),
-    [pedidos, def]
-  );
+  const visibles = useMemo(() => pedidosDeGrupo(pedidos, grupo), [pedidos, grupo]);
 
   return (
-    <div className="mx-auto max-w-3xl p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Pedidos</h1>
-        <button
-          onClick={recargar}
-          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-50"
-        >
-          Actualizar
-        </button>
+    <div className="mx-auto max-w-3xl">
+      <EncabezadoPagina
+        titulo="Pedidos"
+        descripcion="Todo lo que entró hoy, con su estado. Tocá un pedido para ver el detalle o cobrarlo."
+        acciones={
+          <Boton onClick={recargar} aria-label="Actualizar pedidos">
+            <RefreshCw className="size-4" aria-hidden />
+            Actualizar
+          </Boton>
+        }
+      />
+
+      <div className="mb-4">
+        <Filtros
+          aria-label="Estado de los pedidos"
+          valor={grupo}
+          onCambio={setGrupo}
+          opciones={GRUPOS_PEDIDOS.map((g) => ({
+            valor: g.clave,
+            etiqueta: g.etiqueta,
+            cantidad: pedidosDeGrupo(pedidos, g.clave).length,
+          }))}
+        />
       </div>
 
-      <div className="mb-4 flex gap-2">
-        {GRUPOS.map((g) => {
-          const n = pedidos.filter((p) => g.estados.includes(p.estado)).length;
-          return (
-            <button
-              key={g.clave}
-              onClick={() => setGrupo(g.clave)}
-              className={`rounded-full px-3 py-1 text-xs font-medium ${
-                grupo === g.clave ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-              }`}
-            >
-              {g.label} ({n})
-            </button>
-          );
-        })}
-      </div>
-
-      {error && <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {cargando && pedidos.length === 0 && <p className="text-sm text-zinc-500">Cargando…</p>}
-      {!cargando && visibles.length === 0 && (
-        <p className="text-sm text-zinc-500">No hay pedidos en este grupo.</p>
+      {error && (
+        <div className="mb-4">
+          <AvisoError onReintentar={recargar}>{error}</AvisoError>
+        </div>
+      )}
+      {cargando && pedidos.length === 0 && <p className="text-sm text-pn-suave">Cargando pedidos…</p>}
+      {!cargando && !error && visibles.length === 0 && (
+        <EstadoVacio titulo="No hay pedidos en esta lista" detalle="Cuando entren, aparecen solos." />
       )}
 
-      <div className="space-y-2">
+      <ul className="space-y-2">
         {visibles.map((p) => (
           <PedidoFila key={p.id} pedido={p} onCambio={recargar} />
         ))}
-      </div>
+      </ul>
     </div>
   );
 }

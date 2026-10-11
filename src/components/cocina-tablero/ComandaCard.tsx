@@ -1,82 +1,82 @@
 "use client";
 
 import { useState } from "react";
-import { cambiarEstadoItem, siguienteEstado, etiquetaAccion } from "./cambiarItem";
+import { cn } from "@/lib/utils";
+import { minutosDesde, nivelDemora, type NivelDemora } from "@/lib/cocina/demora";
+import { formatoDuracion } from "@/lib/panel/duracion";
+import Boton from "@/components/panel/ui/Boton";
+import ItemComandaFila from "./ItemComandaFila";
+import { avanzarVarios } from "./accionesCocina";
 import type { Comanda } from "./tipos";
 
-const ESTADO_ITEM_COLOR: Record<string, string> = {
-  recibido: "bg-zinc-100",
-  en_preparacion: "bg-amber-100",
-  en_pausa: "bg-orange-100",
-  listo: "bg-green-100",
+const BORDE: Record<NivelDemora, string> = {
+  normal: "border-pn-linea",
+  atencion: "border-pn-aviso",
+  critica: "border-pn-peligro",
 };
 
-function minutosDesde(iso: string): number {
-  return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
-}
+const TIEMPO: Record<NivelDemora, string> = {
+  normal: "text-pn-suave",
+  atencion: "text-pn-aviso",
+  critica: "text-pn-peligro",
+};
 
 interface Props {
   comanda: Comanda;
+  ahora: number;
   onCambio: () => void;
 }
 
-export default function ComandaCard({ comanda, onCambio }: Props) {
-  const [ocupado, setOcupado] = useState<string | null>(null);
-  const mins = minutosDesde(comanda.desde);
-  const demorada = mins >= 15;
+export default function ComandaCard({ comanda, ahora, onCambio }: Props) {
+  const [ocupado, setOcupado] = useState(false);
+  const minutos = minutosDesde(comanda.desde, ahora);
+  const nivel = nivelDemora(minutos);
+  const conMesa = Boolean(comanda.mesa);
 
-  async function avanzar(itemId: string, actual: string) {
-    const proximo = siguienteEstado(actual);
-    if (!proximo) return;
-    setOcupado(itemId);
-    const r = await cambiarEstadoItem(comanda.pedidoId, itemId, proximo);
-    setOcupado(null);
-    if (r.ok) onCambio();
+  const sinEmpezar = comanda.items.filter((i) => i.estado === "recibido");
+  const enMarcha = comanda.items.filter((i) => i.estado === "en_preparacion");
+
+  async function todo(items: Comanda["items"], hacia: string) {
+    setOcupado(true);
+    await avanzarVarios(comanda.pedidoId, items, hacia);
+    setOcupado(false);
+    onCambio();
   }
 
   return (
-    <article
-      className={`flex flex-col rounded-2xl border-2 p-3 ${
-        demorada ? "border-red-400" : "border-zinc-200"
-      }`}
-    >
-      <header className="mb-2 flex items-center justify-between">
-        <span className="font-bold">
-          {comanda.mesa ? `Mesa ${comanda.mesa}` : comanda.tipo}
-        </span>
-        <span className={`text-xs ${demorada ? "font-semibold text-red-600" : "text-zinc-500"}`}>
-          {mins} min
-        </span>
+    <article className={cn("flex flex-col overflow-hidden rounded-lg border-2 bg-pn-papel", BORDE[nivel])}>
+      <header className="flex items-center justify-between border-b border-pn-linea px-3 py-2">
+        <h3 className="text-lg font-semibold">
+          {comanda.mesa ? `Mesa ${comanda.mesa}` : comanda.tipo === "delivery" ? "Delivery" : "Para llevar"}
+        </h3>
+        <p className={cn("pn-num text-base font-semibold", TIEMPO[nivel], nivel === "critica" && "pn-latido")}>
+          {formatoDuracion(minutos)}
+          {nivel !== "normal" && (
+            <span className="ml-1.5 text-xs font-medium">{nivel === "critica" ? "demorada" : "atención"}</span>
+          )}
+        </p>
       </header>
 
-      <ul className="space-y-1.5">
-        {comanda.items.map((it) => {
-          const accion = etiquetaAccion(it.estado);
-          return (
-            <li
-              key={it.id}
-              className={`flex items-center gap-2 rounded-lg px-2 py-1.5 ${
-                ESTADO_ITEM_COLOR[it.estado] ?? "bg-zinc-100"
-              }`}
-            >
-              <span className="flex-1 text-sm">
-                {it.urgente && <span className="text-red-600">⚡ </span>}
-                <strong>{it.cantidad}×</strong> {it.nombre}
-                {it.notas && <em className="block text-xs text-zinc-600">{it.notas}</em>}
-              </span>
-              {accion && (
-                <button
-                  onClick={() => avanzar(it.id, it.estado)}
-                  disabled={ocupado === it.id}
-                  className="rounded-md bg-zinc-900 px-2.5 py-1 text-xs font-medium text-white disabled:opacity-40"
-                >
-                  {ocupado === it.id ? "…" : accion}
-                </button>
-              )}
-            </li>
-          );
-        })}
+      <ul className="divide-y divide-pn-linea">
+        {comanda.items.map((it) => (
+          <ItemComandaFila key={it.id} pedidoId={comanda.pedidoId} item={it} conMesa={conMesa} onCambio={onCambio} />
+        ))}
       </ul>
+
+      {(sinEmpezar.length > 1 || enMarcha.length > 1) && (
+        <footer className="flex gap-2 border-t border-pn-linea bg-pn-fondo p-2">
+          {sinEmpezar.length > 1 && (
+            <Boton className="flex-1" disabled={ocupado} onClick={() => todo(sinEmpezar, "en_preparacion")}>
+              Empezar todo
+            </Boton>
+          )}
+          {enMarcha.length > 1 && (
+            <Boton className="flex-1" disabled={ocupado} onClick={() => todo(enMarcha, "listo")}>
+              Todo listo
+            </Boton>
+          )}
+        </footer>
+      )}
     </article>
   );
 }

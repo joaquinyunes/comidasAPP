@@ -26,6 +26,8 @@ export interface CrearPedidoInput {
   idempotencyKey?: string;
   cuponCodigo?: string;
   items: LineaEntrada[];
+  // Pedido tomado por un mozo desde el panel (el cliente por QR no lo manda).
+  mozoId?: string;
 }
 
 export type CrearPedidoResult =
@@ -192,6 +194,8 @@ export async function crearPedidoCliente(input: CrearPedidoInput): Promise<Crear
         sucursalId: mesa.sucursalId,
         mesaId: mesa.id,
         clienteId: input.clienteId ?? null,
+        mozoId: input.mozoId ?? null,
+        creadoPorId: input.mozoId ?? null,
         tipo: "mesa",
         estado: "recibido",
         total,
@@ -210,7 +214,7 @@ export async function crearPedidoCliente(input: CrearPedidoInput): Promise<Crear
         pedidoId: creado.id,
         evento: EVENTO_CREADO,
         metadata: {
-          origen: "cliente_mesa",
+          origen: input.mozoId ? "salon_mozo" : "cliente_mesa",
           idempotencyKey: input.idempotencyKey ?? null,
           subtotal,
           descuento,

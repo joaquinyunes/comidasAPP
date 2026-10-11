@@ -72,7 +72,9 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     ventasHoy,
     ventasAyer,
-    ticketPromedio: pedidosActivos > 0 ? Math.round(ventasHoy / pedidosActivos) : 0,
+    // Ticket = lo cobrado dividido por la cantidad de cobros del día.
+    ticketPromedio: pagosHoy.length > 0 ? Math.round(ventasHoy / pagosHoy.length) : 0,
+    cobrosHoy: pagosHoy.length,
     mesasOcupadas,
     mesasTotales: mesas.length,
     pedidosActivos,

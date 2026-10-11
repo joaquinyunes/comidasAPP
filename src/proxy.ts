@@ -81,6 +81,7 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   "/dashboard/fidelizacion": "clientes:leer",
   "/dashboard/configuracion": "config:leer",
   "/api/caja": "caja:leer",
+  "/api/salon": "mesas:leer",
   "/api/cocina": "pedidos:leer",
   "/api/reservas": "reservas:leer",
   "/api/inventario": "inventario:leer",

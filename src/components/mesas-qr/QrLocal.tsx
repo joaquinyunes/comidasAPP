@@ -28,15 +28,15 @@ export default function QrLocal({ url }: Props) {
   }, [url]);
 
   return (
-    <figure className="qr-mesa flex flex-col items-center gap-2 rounded-2xl border border-zinc-200 p-4 text-center">
+    <figure className="qr-mesa flex flex-col items-center gap-2 rounded-lg border border-pn-linea bg-pn-papel p-4 text-center">
       <span className="text-lg font-bold">Pedir en el local</span>
-      <p className="text-xs text-zinc-500">Para salón sin QR por mesa: el cliente escanea y escribe su mesa o mozo.</p>
-      {error && <span className="text-xs text-red-600">No se pudo generar el QR</span>}
+      <p className="text-xs text-pn-suave">Para salón sin QR por mesa: el cliente escanea y escribe su mesa o mozo.</p>
+      {error && <span className="text-xs text-pn-peligro">No se pudo generar el QR</span>}
       {dataUrl && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={dataUrl} alt="QR para pedir en el local" width={200} height={200} />
       )}
-      <figcaption className="break-all text-[10px] text-zinc-400">{url}</figcaption>
+      <figcaption className="break-all text-[10px] text-pn-suave">{url}</figcaption>
     </figure>
   );
 }

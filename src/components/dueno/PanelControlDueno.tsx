@@ -1,58 +1,69 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useDatos } from "@/hooks/use-datos";
+import Bloque from "@/components/panel/ui/Bloque";
+import Cifra from "@/components/panel/ui/Cifra";
+import AvisoError from "@/components/panel/ui/AvisoError";
+import RendimientoMozos from "@/components/panel/inicio/RendimientoMozos";
+import type { ControlApi } from "@/components/panel/inicio/tipos";
+import { MIN_CRITICA } from "@/lib/cocina/demora";
 
-interface RendimientoMozo {
-  mozo: string | null;
-  pedidos: number;
-}
-
-interface ControlOperativo {
-  platosDevueltos: number;
-  porMotivo: Record<string, number>;
-  tiempoPromedioServicioMin: number;
-  mermas: number;
-  mesasDesatendidas: Array<number | string>;
-  rendimiento: RendimientoMozo[];
-}
-
+// Control operativo de los últimos 30 días: dónde se pierde plata y tiempo.
 export default function PanelControlDueno() {
-  const [d, setD] = useState<ControlOperativo | null>(null);
+  const { datos: d, cargando, error, recargar } = useDatos<ControlApi>("/api/dueno/control-operativo", 0);
 
-  useEffect(() => {
-    fetch("/api/dueno/control-operativo")
-      .then((r) => r.json())
-      .then((j) => setD(j.data ?? null))
-      .catch(() => setD(null));
-  }, []);
+  if (cargando && !d) return <p className="text-sm text-pn-suave">Calculando…</p>;
+  if (error && !d) return <AvisoError onReintentar={recargar}>{error}</AvisoError>;
+  if (!d) return null;
 
-  if (!d) return <p className="text-sm text-zinc-500">Cargando control operativo…</p>;
+  const motivos = Object.entries(d.porMotivo).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      <Tarjeta titulo="Platos devueltos (30d)" valor={d.platosDevueltos} detalle={Object.entries(d.porMotivo).map(([k, v]) => `${k}: ${v}`).join(", ") || "—"} />
-      <Tarjeta titulo="Tiempo promedio servicio" valor={`${d.tiempoPromedioServicioMin} min`} />
-      <Tarjeta titulo="Mermas / quiebres" valor={d.mermas} />
-      <Tarjeta titulo="Mesas desatendidas" valor={d.mesasDesatendidas.length} detalle={d.mesasDesatendidas.map((m) => `M${m}`).join(", ") || "ninguna"} />
-      <div className="rounded border border-zinc-200 p-3">
-        <div className="font-medium mb-2">Rendimiento de mozos</div>
-        <ul className="text-sm space-y-1">
-          {d.rendimiento.map((r, i) => (
-            <li key={i} className="flex justify-between"><span>{r.mozo}</span><span className="text-zinc-500">{r.pedidos} pedidos</span></li>
-          ))}
-          {d.rendimiento.length === 0 && <li className="text-zinc-400">Sin datos</li>}
-        </ul>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Cifra
+          etiqueta="Platos anulados"
+          valor={String(d.platosDevueltos)}
+          detalle="En 30 días"
+          tono={d.platosDevueltos > 0 ? "aviso" : "neutro"}
+        />
+        <Cifra
+          etiqueta="Tiempo por plato"
+          valor={`${d.tiempoPromedioServicioMin} min`}
+          detalle="De cocina, en promedio"
+          tono={d.tiempoPromedioServicioMin > MIN_CRITICA ? "aviso" : "neutro"}
+        />
+        <Cifra
+          etiqueta="Faltantes de stock"
+          valor={String(d.mermas)}
+          detalle="Ingredientes en mínimo"
+          tono={d.mermas > 0 ? "peligro" : "neutro"}
+        />
+        <Cifra
+          etiqueta="Mesas sin atender"
+          valor={String(d.mesasDesatendidas.length)}
+          detalle={d.mesasDesatendidas.length ? d.mesasDesatendidas.map((m) => `Mesa ${m}`).join(", ") : "Ninguna ahora"}
+          tono={d.mesasDesatendidas.length > 0 ? "peligro" : "neutro"}
+        />
       </div>
-    </div>
-  );
-}
 
-function Tarjeta({ titulo, valor, detalle }: { titulo: string; valor: string | number; detalle?: string }) {
-  return (
-    <div className="rounded border border-zinc-200 p-3">
-      <div className="text-xs text-zinc-500">{titulo}</div>
-      <div className="text-2xl font-bold">{valor}</div>
-      {detalle && <div className="text-xs text-zinc-400 mt-1">{detalle}</div>}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Bloque titulo="Por qué se anulan platos" nota="Motivos más frecuentes">
+          {motivos.length === 0 ? (
+            <p className="text-sm text-pn-suave">No hubo anulaciones.</p>
+          ) : (
+            <ul className="space-y-2 text-sm">
+              {motivos.map(([motivo, n]) => (
+                <li key={motivo} className="flex justify-between gap-3">
+                  <span>{motivo}</span>
+                  <span className="pn-num font-semibold">{n}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Bloque>
+        <RendimientoMozos filas={d.rendimiento} />
+      </div>
     </div>
   );
 }

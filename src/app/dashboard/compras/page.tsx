@@ -1,10 +1,13 @@
 import PanelCompras from "@/components/compras/PanelCompras";
+import EncabezadoPagina from "@/components/panel/ui/EncabezadoPagina";
 
 export default function PaginaCompras() {
   return (
-    <div className="mx-auto max-w-4xl p-6">
-      <h1 className="mb-1 text-2xl font-bold">Compras y Proveedores</h1>
-      <p className="mb-6 text-sm text-zinc-500">Micro-fase 2.11 — sugerencia automática de compra por quiebre de stock.</p>
+    <div className="mx-auto max-w-3xl">
+      <EncabezadoPagina
+        titulo="Compras"
+        descripcion="Lo que conviene pedir a proveedores según el stock actual y los mínimos."
+      />
       <PanelCompras />
     </div>
   );

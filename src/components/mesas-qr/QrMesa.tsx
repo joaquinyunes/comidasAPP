@@ -28,14 +28,14 @@ export default function QrMesa({ numero, url }: Props) {
   }, [url]);
 
   return (
-    <figure className="qr-mesa flex flex-col items-center gap-2 rounded-2xl border border-zinc-200 p-4 text-center">
+    <figure className="qr-mesa flex flex-col items-center gap-2 rounded-lg border border-pn-linea bg-pn-papel p-4 text-center">
       <span className="text-lg font-bold">Mesa {numero}</span>
-      {error && <span className="text-xs text-red-600">No se pudo generar el QR</span>}
+      {error && <span className="text-xs text-pn-peligro">No se pudo generar el QR</span>}
       {dataUrl && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={dataUrl} alt={`QR mesa ${numero}`} width={200} height={200} />
       )}
-      <figcaption className="break-all text-[10px] text-zinc-400">{url}</figcaption>
+      <figcaption className="break-all text-[10px] text-pn-suave">{url}</figcaption>
     </figure>
   );
 }

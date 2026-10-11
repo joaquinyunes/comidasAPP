@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
+import Boton from "@/components/panel/ui/Boton";
+import AvisoError from "@/components/panel/ui/AvisoError";
 
 export default function CambiarPassword() {
+  const idActual = useId();
+  const idNueva = useId();
   const [actual, setActual] = useState("");
   const [nueva, setNueva] = useState("");
   const [estado, setEstado] = useState<"idle" | "enviando" | "ok">("idle");
@@ -12,56 +16,71 @@ export default function CambiarPassword() {
     e.preventDefault();
     setEstado("enviando");
     setError(null);
-    const res = await fetch("/api/auth/password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ actual, nueva }),
-    });
-    if (res.ok) {
-      setEstado("ok");
-      setActual("");
-      setNueva("");
-    } else {
+    try {
+      const res = await fetch("/api/auth/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actual, nueva }),
+      });
+      if (res.ok) {
+        setEstado("ok");
+        setActual("");
+        setNueva("");
+        return;
+      }
       const json = await res.json().catch(() => ({}));
-      setEstado("idle");
       setError(json?.error ?? "No se pudo cambiar la contraseña.");
+    } catch {
+      setError("Sin conexión. Probá de nuevo.");
     }
+    setEstado("idle");
   }
 
+  const campo =
+    "min-h-11 w-full rounded-md border border-pn-linea-fuerte bg-pn-papel px-3 text-base";
+
   return (
-    <form onSubmit={guardar} className="space-y-3 rounded-2xl border border-zinc-200 p-5">
+    <form onSubmit={guardar} className="space-y-4 rounded-lg border border-pn-linea bg-pn-papel p-4">
       <div>
-        <label className="mb-1 block text-xs font-medium text-zinc-500">Contraseña actual</label>
+        <label htmlFor={idActual} className="mb-1 block text-sm font-medium">
+          Contraseña actual
+        </label>
         <input
+          id={idActual}
           type="password"
+          autoComplete="current-password"
           required
           value={actual}
           onChange={(e) => setActual(e.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className={campo}
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-zinc-500">Nueva contraseña (mín. 8)</label>
+        <label htmlFor={idNueva} className="mb-1 block text-sm font-medium">
+          Contraseña nueva <span className="font-normal text-pn-suave">(mínimo 8 caracteres)</span>
+        </label>
         <input
+          id={idNueva}
           type="password"
+          autoComplete="new-password"
           required
           minLength={8}
           value={nueva}
           onChange={(e) => setNueva(e.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className={campo}
         />
       </div>
-      {error && <p className="rounded-lg bg-red-50 p-2 text-sm text-red-700">{error}</p>}
+
+      {error && <AvisoError>{error}</AvisoError>}
       {estado === "ok" && (
-        <p className="rounded-lg bg-green-50 p-2 text-sm text-green-700">Contraseña actualizada.</p>
+        <p role="status" className="rounded-md bg-pn-ok-fondo px-3 py-2 text-sm text-pn-ok">
+          Listo, la contraseña se actualizó.
+        </p>
       )}
-      <button
-        type="submit"
-        disabled={estado === "enviando"}
-        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
-      >
+
+      <Boton type="submit" variante="primario" tamano="grande" className="w-full" disabled={estado === "enviando"}>
         {estado === "enviando" ? "Guardando…" : "Cambiar contraseña"}
-      </button>
+      </Boton>
     </form>
   );
 }

@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Printer } from "lucide-react";
 import { urlClienteMesa } from "@/lib/mesas/url-cliente";
 import { urlPedirLocal } from "@/lib/mesas/url-local";
+import EncabezadoPagina from "@/components/panel/ui/EncabezadoPagina";
+import EstadoVacio from "@/components/panel/ui/EstadoVacio";
+import AvisoError from "@/components/panel/ui/AvisoError";
+import Boton from "@/components/panel/ui/Boton";
 import { useMesas } from "./useMesas";
 import QrMesa from "./QrMesa";
 import QrLocal from "./QrLocal";
@@ -20,23 +25,21 @@ export default function PanelMesasQr() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
-      <div className="mb-4 flex items-center justify-between print:hidden">
-        <div>
-          <h1 className="text-2xl font-bold">QR de mesas</h1>
-          <p className="text-sm text-zinc-500">
-            Imprimí y pegá un QR en cada mesa. El cliente escanea y pide desde el celular.
-          </p>
-        </div>
-        <button
-          onClick={() => window.print()}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm text-white"
-        >
-          Imprimir todos
-        </button>
+    <div className="mx-auto max-w-5xl">
+      <div className="print:hidden">
+        <EncabezadoPagina
+          titulo="QR de mesas"
+          descripcion="Imprimí uno por mesa. El cliente lo escanea y pide desde el celular, sin descargar nada."
+          acciones={
+            <Boton variante="primario" onClick={() => window.print()}>
+              <Printer className="size-4" aria-hidden />
+              Imprimir todos
+            </Boton>
+          }
+        />
       </div>
 
-      {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && <AvisoError>{error}</AvisoError>}
 
       {origin && QR_LOCAL_CODIGO && (
         <div className="mb-6 max-w-xs">
@@ -44,16 +47,14 @@ export default function PanelMesasQr() {
         </div>
       )}
 
-      {cargando && <p className="text-sm text-zinc-500">Cargando mesas…</p>}
+      {cargando && <p className="text-sm text-pn-suave">Cargando mesas…</p>}
       {!cargando && !error && mesas.length === 0 && (
-        <p className="text-sm text-zinc-500">No hay mesas cargadas.</p>
+        <EstadoVacio titulo="No hay mesas cargadas" detalle="Cargalas desde Configuración para generar sus QR." />
       )}
 
       <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
         {origin &&
-          mesas.map((m) => (
-            <QrMesa key={m.id} numero={m.numero} url={urlClienteMesa(origin, m.id)} />
-          ))}
+          mesas.map((m) => <QrMesa key={m.id} numero={m.numero} url={urlClienteMesa(origin, m.id)} />)}
       </div>
     </div>
   );

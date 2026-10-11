@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useDatos } from "@/hooks/use-datos";
+import Bloque from "@/components/panel/ui/Bloque";
+import EstadoVacio from "@/components/panel/ui/EstadoVacio";
+import AvisoError from "@/components/panel/ui/AvisoError";
 
 interface SugerenciaCompra {
   ingredienteId: string;
@@ -11,35 +14,55 @@ interface SugerenciaCompra {
   sugeridoComprar: number;
 }
 
-export default function PanelCompras() {
-  const [sugerencias, setSugerencias] = useState<SugerenciaCompra[]>([]);
+interface Respuesta {
+  sugerencias: SugerenciaCompra[];
+}
 
-  useEffect(() => {
-    fetch("/api/compras/sugerencia-automatica")
-      .then((r) => r.json())
-      .then((j) => setSugerencias(j.data?.sugerencias ?? []))
-      .catch(() => setSugerencias([]));
-  }, []);
+// Qué conviene comprar hoy: lo que está por debajo del mínimo.
+export default function PanelCompras() {
+  const { datos, cargando, error, recargar } = useDatos<Respuesta>("/api/compras/sugerencia-automatica", 0);
+  const sugerencias = datos?.sugerencias ?? [];
+
+  if (cargando && !datos) return <p className="text-sm text-pn-suave">Calculando qué falta…</p>;
+  if (error && !datos) return <AvisoError onReintentar={recargar}>{error}</AvisoError>;
+  if (sugerencias.length === 0) {
+    return <EstadoVacio titulo="Todo abastecido" detalle="Ningún ingrediente está por debajo de su mínimo." />;
+  }
 
   return (
-    <div className="space-y-2">
-      <p className="text-sm text-zinc-500">Sugerencia automática de compra según quiebres de stock.</p>
-      <div className="overflow-x-auto rounded border border-zinc-200">
+    <Bloque
+      titulo="Para comprar"
+      nota={`${sugerencias.length} ${sugerencias.length === 1 ? "ingrediente" : "ingredientes"} por debajo del mínimo`}
+      sinPadding
+    >
+      <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-zinc-50"><tr><th className="p-2 text-left">Insumo</th><th className="p-2 text-right">Actual</th><th className="p-2 text-right">Mín</th><th className="p-2 text-right">Sugerir</th></tr></thead>
-          <tbody>
+          <thead>
+            <tr className="border-b border-pn-linea text-left text-xs text-pn-suave">
+              <th className="px-4 py-2 font-medium">Ingrediente</th>
+              <th className="px-2 py-2 text-right font-medium">Hay</th>
+              <th className="px-2 py-2 text-right font-medium">Mínimo</th>
+              <th className="px-4 py-2 text-right font-medium">Comprar</th>
+            </tr>
+          </thead>
+          <tbody className="pn-num">
             {sugerencias.map((s) => (
-              <tr key={s.ingredienteId} className="border-t border-zinc-100">
-                <td className="p-2">{s.nombre}</td>
-                <td className="p-2 text-right text-red-600">{s.cantidadActual}</td>
-                <td className="p-2 text-right">{s.stockMinimo}</td>
-                <td className="p-2 text-right font-semibold">{s.sugeridoComprar} {s.unidad}</td>
+              <tr key={s.ingredienteId} className="border-b border-pn-linea last:border-b-0">
+                <td className="px-4 py-2.5 font-medium">{s.nombre}</td>
+                <td className="px-2 py-2.5 text-right font-medium text-pn-peligro">
+                  {s.cantidadActual} {s.unidad}
+                </td>
+                <td className="px-2 py-2.5 text-right text-pn-suave">
+                  {s.stockMinimo} {s.unidad}
+                </td>
+                <td className="px-4 py-2.5 text-right font-semibold">
+                  {s.sugeridoComprar} {s.unidad}
+                </td>
               </tr>
             ))}
-            {sugerencias.length === 0 && <tr><td colSpan={4} className="p-2 text-zinc-400">Sin quiebres. Todo abastecido.</td></tr>}
           </tbody>
         </table>
       </div>
-    </div>
+    </Bloque>
   );
 }

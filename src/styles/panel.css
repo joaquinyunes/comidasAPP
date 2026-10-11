@@ -1,0 +1,51 @@
+/* ============================================================
+   Panel interno (mozos, cocina, caja, jefes).
+   Papel cálido, tinta firme, color solo para decir algo
+   (estado, alerta). Sin degradés, sin sombras de adorno.
+   Acento de marca: el amarillo del home.
+   ============================================================ */
+
+@theme {
+  --color-pn-fondo: #f6f3ec;
+  --color-pn-papel: #ffffff;
+  --color-pn-hundido: #ece7db;
+  --color-pn-linea: #ddd7c8;
+  --color-pn-linea-fuerte: #b9b2a0;
+  --color-pn-tinta: #1c1b18;
+  --color-pn-suave: #6b665b;
+
+  --color-pn-marca: #f6be3b;
+  --color-pn-marca-fondo: #fdf1cf;
+
+  --color-pn-ok: #2e7d4f;
+  --color-pn-ok-fondo: #e4f1e8;
+  --color-pn-aviso: #9a6200;
+  --color-pn-aviso-fondo: #fbefd2;
+  --color-pn-peligro: #b4281f;
+  --color-pn-peligro-fondo: #f9e1de;
+  --color-pn-info: #2a5b8c;
+  --color-pn-info-fondo: #e1ecf6;
+}
+
+/* Cifras alineadas en columnas (precios, minutos, contadores). */
+.pn-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Foco visible y consistente en todo el panel. */
+.pn-raiz :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-pn-tinta);
+  outline-offset: 2px;
+}
+
+/* Pulso suave para lo que pide atención (se apaga con reduced-motion). */
+@keyframes pn-latido {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.pn-latido {
+  animation: pn-latido 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pn-latido { animation: none; }
+}
