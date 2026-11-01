@@ -99,6 +99,9 @@
 }
 .donde-boton { padding: 12px 24px; }
 .donde-enlace {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-weight: 700;
   font-size: 0.82rem;
   letter-spacing: 0.06em;

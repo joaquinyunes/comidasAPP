@@ -345,6 +345,12 @@ img {
   transform: scale(0.97);
   box-shadow: 2px 2px 0px var(--black);
 }
+/* Foco visible en cualquier fondo: aro negro + aro amarillo. Con :where() no pisa los anillos propios de shadcn/Tailwind. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--black);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--yellow);
+}
 .pop-btn:focus-visible {
   outline: 3px solid var(--black);
   outline-offset: 3px;
@@ -757,6 +763,12 @@ img {
   text-transform: uppercase;
   -webkit-text-stroke: 3px var(--white);
   color: transparent;
+}
+.pop-footer-fine a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
 }
 .pop-footer-fine {
   text-align: center;
