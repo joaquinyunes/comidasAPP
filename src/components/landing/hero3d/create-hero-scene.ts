@@ -6,7 +6,7 @@ import { buildSticker } from "./build-sticker";
 import { buildStarfield } from "./build-starfield";
 import { cameraPose } from "./camera-path";
 import { loadTexture } from "./load-texture";
-import { layoutForAspect, stickerLayout, type StickerDef } from "./sticker-layout";
+import { layoutForAspect, srcParaPantalla, stickerLayout, type StickerDef } from "./sticker-layout";
 
 export interface HeroSceneOptions {
   host: HTMLElement;
@@ -91,7 +91,7 @@ export function createHeroScene(opts: HeroSceneOptions): HeroSceneHandle {
 
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
   const addSticker = (def: StickerDef, role: "hero" | "product") => {
-    loadTexture(def.src, maxAniso)
+    loadTexture(srcParaPantalla(def.src, window.innerWidth), maxAniso)
       .then((tex) => {
         if (disposed) {
           tex.dispose();

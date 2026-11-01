@@ -60,6 +60,12 @@ export function stickerLayout(spread: number, anchorX: number, anchorY = 0): Sti
   };
 }
 
+// En celulares los stickers se piden en la variante de 640 px (`-m.webp`, ~1/3 del peso).
+export const ANCHO_MOVIL = 768;
+export function srcParaPantalla(src: string, ancho: number): string {
+  return ancho < ANCHO_MOVIL ? src.replace(/\.webp$/, "-m.webp") : src;
+}
+
 // Ancla horizontal y factor de apertura según la proporción del viewport.
 // En vertical el texto ocupa la parte alta: la escena baja (anchorY < 0).
 export function layoutForAspect(aspect: number): { spread: number; anchorX: number; anchorY: number } {

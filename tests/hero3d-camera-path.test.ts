@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { cameraPose, CAMERA_START_Z, CAMERA_END_Z } from "@/components/landing/hero3d/camera-path";
-import { layoutForAspect, stickerLayout } from "@/components/landing/hero3d/sticker-layout";
+import { layoutForAspect, srcParaPantalla, stickerLayout } from "@/components/landing/hero3d/sticker-layout";
 
 describe("cameraPose", () => {
   it("arranca y termina en los extremos del recorrido", () => {
@@ -38,5 +38,12 @@ describe("layoutForAspect / stickerLayout", () => {
   it("deja los productos del recorrido detrás de la cámara inicial", () => {
     const { products } = stickerLayout(1, 2.5);
     products.forEach((p) => expect(p.z).toBeLessThan(CAMERA_START_Z));
+  });
+});
+
+describe("srcParaPantalla", () => {
+  it("usa la variante de 640 px en celular y el original en escritorio", () => {
+    expect(srcParaPantalla("/assets/3d/pizzanaut.webp", 375)).toBe("/assets/3d/pizzanaut-m.webp");
+    expect(srcParaPantalla("/assets/3d/pizzanaut.webp", 1280)).toBe("/assets/3d/pizzanaut.webp");
   });
 });
