@@ -12,7 +12,7 @@ imágenes sin `alt`, desborde) y lectura del código con `web-design-guidelines`
 | Página | `<h1>` | Controles < 44 px antes → después |
 |---|---|---|
 | `/` | 1 | 18 de 52 → 0 de 52 |
-| `/menu` | 1 | 3 de 14 (enlace dentro de una frase; ver #7) |
+| `/menu` | 1 | 3 de 14 → esperado 1 (solo queda el enlace dentro de una frase, ver #7); no se volvió a medir tras el cambio |
 | `/nosotros` | 1 | 2 de 13 → 0 |
 | `/ordenar` | 1 | 2 de 14 → 0 |
 | `/reservar` | 1 | 2 de 19 → 0 |
@@ -45,4 +45,4 @@ Héroe 3D y viaje de scroll (GSAP/three.js), paleta pop, tipografías, bordes y 
 - Páginas con sesión o base de datos (panel, cliente, pedido en mesa): no hay `.env` en la copia aislada ni BD.
 - Lector de pantalla real y contraste sobre las capas 3D.
 - `prefers-reduced-motion` en la landing (ver #6): el navegador integrado lo emula activo, y aun así la landing anima por la decisión de producto.
-- `eslint` sobre `src/app/login/page.tsx` no corrió: la config del proyecto ignora ese patrón; `tsc` y los 354 tests sí pasan.
+- `eslint src/app/login/page.tsx` pasa sin avisos; `tsc`, los 354 tests y `next build` pasan.
