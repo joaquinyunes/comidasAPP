@@ -14,6 +14,7 @@ import Seccion from "./Seccion";
 import { elegirOrbita } from "./elegir-orbita";
 import { useCategoriaActiva } from "./use-categoria-activa";
 import { useRevelar } from "./use-revelar";
+import { useSaltarAHash } from "./use-saltar-a-hash";
 
 // Página /menu: la carta con el viaje por la galaxia como portada y, debajo,
 // el estilo pop del home. Esta pieza sólo compone; cada efecto vive en su
@@ -31,6 +32,7 @@ export default function CartaPagina() {
 
   const activa = useCategoriaActiva(categorias.map((c) => `cat-${c.id}`));
   useRevelar(mainRef, hayCarta);
+  useSaltarAHash(hayCarta);
 
   const cabecera = <CartaCabecera sabores={sabores} sectores={categorias.length} />;
 

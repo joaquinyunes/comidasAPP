@@ -2,14 +2,6 @@
 
 import { useRef } from "react";
 import { SectionTitle } from "./ui";
-import {
-  IllustrationBun,
-  IllustrationMeat,
-  IllustrationCheese,
-  IllustrationTomato,
-  IllustrationLettuce,
-  IllustrationSauce,
-} from "./illustrations";
 import { useIngredientsScrolly } from "./animations/use-ingredients-scrolly";
 
 const ingredients = [
@@ -17,37 +9,37 @@ const ingredients = [
     name: "Pan",
     desc: "Suave, dorado y recién horneado cada mañana.",
     color: "#F6BE3B",
-    illustration: <IllustrationBun />,
+    foto: "/assets/real/ingrediente-pan.webp",
   },
   {
     name: "Carne",
     desc: "Angus premium, jugosa y cocinada a la perfección.",
     color: "#8A4A2F",
-    illustration: <IllustrationMeat />,
+    foto: "/assets/real/ingrediente-carne.webp",
   },
   {
     name: "Queso",
     desc: "Cheddar fundido que estira como un cable galáctico.",
     color: "#FFC800",
-    illustration: <IllustrationCheese />,
+    foto: "/assets/real/ingrediente-queso.webp",
   },
   {
     name: "Tomate",
     desc: "Fresco, rojo y lleno de sabor en cada mordida.",
     color: "#EF4136",
-    illustration: <IllustrationTomato />,
+    foto: "/assets/real/ingrediente-tomate.webp",
   },
   {
     name: "Lechuga",
     desc: "Crujiente y verde, traída fresquita cada día.",
     color: "#67C158",
-    illustration: <IllustrationLettuce />,
+    foto: "/assets/real/ingrediente-lechuga.webp",
   },
   {
     name: "Salsas",
     desc: "Recetas secretas que explotan en tu paladar.",
     color: "#EF4136",
-    illustration: <IllustrationSauce />,
+    foto: "/assets/real/ingrediente-salsas.webp",
   },
 ];
 
@@ -73,14 +65,17 @@ export default function Ingredients() {
       <div className="ingredients-grid">
         {ingredients.map((ing, i) => (
           <article className="ingredient-card pop-card reveal-scale" key={ing.name}>
-            <div className="ingredient-illu float-anim" style={{ animationDelay: `${i * 0.3}s` }}>
-              {ing.illustration}
+            <div className="ingredient-foto">
+              {/* eslint-disable-next-line @next/next/no-img-element -- webp local de 640px, sin optimizador */}
+              <img src={ing.foto} alt={ing.name} loading="lazy" decoding="async" />
+              <div className="ingredient-num" style={{ background: ing.color }}>
+                {String(i + 1).padStart(2, "0")}
+              </div>
             </div>
-            <div className="ingredient-num" style={{ background: ing.color }}>
-              {String(i + 1).padStart(2, "0")}
+            <div className="ingredient-cuerpo">
+              <h3 className="font-display ingredient-name">{ing.name}</h3>
+              <p className="ingredient-desc">{ing.desc}</p>
             </div>
-            <h3 className="font-display ingredient-name">{ing.name}</h3>
-            <p className="ingredient-desc">{ing.desc}</p>
           </article>
         ))}
       </div>

@@ -107,6 +107,44 @@
   transform: rotate(-6deg);
 }
 
+/* ---------- Foto real (reemplaza a la ilustración tras su animación) ---------- */
+.carta-foto-real {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(1.12);
+  transition: opacity 0.6s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.carta-foto-real[data-real] {
+  opacity: 1;
+  transform: scale(1);
+}
+.carta-foto-real img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* La ilustración queda por encima hasta que la foto se revela. */
+.carta-tarjeta-halo,
+.carta-tarjeta-img {
+  transition: opacity 0.5s ease;
+}
+.carta-foto-real[data-real] ~ .carta-tarjeta-halo,
+.carta-foto-real[data-real] ~ .carta-tarjeta-foto .carta-tarjeta-img {
+  opacity: 0;
+}
+/* Mientras espera, la ilustración hace un saludo corto (sólo transform). */
+.carta-foto-real:not([data-real]) ~ .carta-tarjeta-foto {
+  animation: carta-saludo 1.2s ease-in-out 1;
+}
+@keyframes carta-saludo {
+  0%, 100% { transform: rotate(0) scale(1); }
+  30% { transform: rotate(-6deg) scale(1.08); }
+  65% { transform: rotate(5deg) scale(1.04); }
+}
+
 /* ---------- Cuerpo ---------- */
 .carta-tarjeta-cuerpo {
   display: flex;

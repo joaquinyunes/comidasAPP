@@ -15,6 +15,10 @@ export function useIngredientsScrolly(sectionRef: RefObject<HTMLElement | null>)
       const cards = gsap.utils.toArray<HTMLElement>(".ingredient-card", section);
       if (!cards.length) return;
 
+      // Una sección más alta que la pantalla (celular/tablet: grilla en varias filas)
+      // no se ancla: quedaría cortada. Ahí entran con el reveal normal por scroll.
+      if (section.offsetHeight + 72 > window.innerHeight) return;
+
       cards.forEach((c) => c.setAttribute("data-reveal-bound", "1"));
 
       if (prefersReducedMotion()) {
@@ -33,7 +37,7 @@ export function useIngredientsScrolly(sectionRef: RefObject<HTMLElement | null>)
         scrollTrigger: {
           trigger: section,
           start: "top top+=72",
-          end: () => "+=" + Math.round(window.innerHeight * 1.4),
+          end: () => "+=" + Math.round(window.innerHeight * 0.9),
           pin: true,
           scrub: 0.6,
           anticipatePin: 1,
@@ -41,7 +45,7 @@ export function useIngredientsScrolly(sectionRef: RefObject<HTMLElement | null>)
       });
 
       cards.forEach((card, i) => {
-        tl.to(card, { autoAlpha: 1, y: 0, scale: 1, rotation: 0, duration: 1, ease: "power2.out" }, i * 0.85);
+        tl.to(card, { autoAlpha: 1, y: 0, scale: 1, rotation: 0, duration: 1, ease: "power2.out" }, i * 0.3);
       });
     },
     { scope: sectionRef }

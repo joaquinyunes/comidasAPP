@@ -4,6 +4,7 @@ import { ImagenThumb } from "@/components/landing/Imagen";
 import BotonCamara from "@/components/producto-camara/BotonCamara";
 import type { ProductoLanding } from "@/lib/landing-data";
 import { formatearPrecio } from "./formatear-precio";
+import FotoReal from "./FotoReal";
 
 const PICANTE = ["", "🌶", "🌶🌶", "🌶🌶🌶"];
 
@@ -20,6 +21,7 @@ export default function Tarjeta({ producto: p }: { producto: ProductoLanding }) 
       data-destacado={p.destacado ? "1" : undefined}
     >
       <div className="carta-tarjeta-escena">
+        <FotoReal imagenUrl={p.imagenUrl} alt={p.nombre} />
         <span className="carta-tarjeta-halo" aria-hidden="true" />
         <div className="cam-thumb carta-tarjeta-foto">
           {p.imagenUrl ? (

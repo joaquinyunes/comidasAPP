@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
-import { ImagenThumb } from "@/components/landing/Imagen";
+import FotoProducto from "@/components/producto/FotoProducto";
 import BotonCamara from "@/components/producto-camara/BotonCamara";
 import { useLandingData } from "@/lib/landing-data";
 import { useCarrito, type ItemMenu } from "@/components/cliente/useCarrito";
@@ -96,7 +96,7 @@ export default function OrdenarLocal({ codigoQr }: { codigoQr: string }) {
                   <li key={p.id} className="flex items-center justify-between gap-3 rounded-xl border-2 border-black bg-white p-3">
                     <div className="cam-thumb">
                       {p.imagenUrl && (
-                        <ImagenThumb className="rounded-lg" src={p.imagenUrl} alt={p.nombre} size={56} />
+                        <FotoProducto className="h-14 w-14 rounded-lg object-cover" imagenUrl={p.imagenUrl} alt={p.nombre} />
                       )}
                       <BotonCamara producto={p} variante="miniatura" />
                     </div>

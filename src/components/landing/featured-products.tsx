@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Sticker } from "./ui";
-import { Imagen } from "./Imagen";
+import FotoProducto from "@/components/producto/FotoProducto";
 import BotonCamara from "@/components/producto-camara/BotonCamara";
 import { useLandingData, type ProductoLanding } from "@/lib/landing-data";
 
@@ -49,7 +49,7 @@ export default function FeaturedProducts() {
                   Destacado
                 </div>
               )}
-              <Imagen src={p.imagenUrl || "/assets/galaxy-bite.png"} alt={p.nombre} />
+              <FotoProducto imagenUrl={p.imagenUrl || "/assets/galaxy-bite.png"} alt={p.nombre} real={!!data} />
               <BotonCamara producto={p} variante="flotante" />
             </div>
             <div className="product-body">
