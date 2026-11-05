@@ -32,11 +32,31 @@ Peso: los cambios son ~50 líneas de CSS y marcado; no se agregó JS ni dependen
 | 4 | Alta | Foco de teclado: solo `.pop-btn`, la carta y el panel tenían estilo; el resto (enlaces del menú, pie, sliders) dependía del contorno del navegador, invisible sobre fondos oscuros | `globals.css` | Corregido: `:where(...):focus-visible` aro negro + aro amarillo (especificidad 0: no pisa los anillos de shadcn/Tailwind ni el del panel) |
 | 4b | Media | Textos de error del login: "Credenciales inválidas" / "Error de conexión" sin salida; el bloque de error sin `role="alert"` | login | Corregido: "El email o la contraseña no coinciden. Revisalos y probá de nuevo." / "No pudimos conectarnos. Revisá tu internet y probá de nuevo." + `role="alert"`; íconos decorativos `aria-hidden` |
 | 5 | Media | Animaciones decorativas del login (`animate-pulse`, `fadeIn`) sin `motion-reduce` | login | Corregido |
-| 6 | **Decisión de producto** | La landing **ignora** `prefers-reduced-motion` a propósito: `prefersReducedMotion()` devuelve siempre `false` (`src/components/landing/animations/gsap-client.ts`) porque muchos celulares lo traen activo por ahorro de batería y dejaban el sitio plano y sin 3D. Los testimonios rotan solos cada 5 s sin botón de pausa | `gsap-client.ts`, `testimonials.tsx:86` | **No se tocó** (conservar el héroe 3D era parte del alcance). Recomendación: mantener el 3D pero que `prefers-reduced-motion` frene la rotación automática y los bucles `infinite`, o agregar un botón "Pausar" (WCAG 2.2.2) |
+| 6 | **Decisión de producto** | La landing **ignora** `prefers-reduced-motion` a propósito: `prefersReducedMotion()` devuelve siempre `false` (`src/components/landing/animations/gsap-client.ts`) porque muchos celulares lo traen activo por ahorro de batería y dejaban el sitio plano y sin 3D. Los testimonios rotaban solos cada 5 s sin botón de pausa | `gsap-client.ts`, `testimonials.tsx` | **Decidido 05/11:** el héroe 3D y el scroll **siguen animados** (decisión de producto). Se arregló lo que sí incumple WCAG 2.2.2: la rotación automática de testimonios **no arranca con `prefers-reduced-motion`** y hay un botón **Pausar/Reanudar** (verificado en el navegador) |
 | 7 | Baja | Enlaces dentro de una frase ("hacé tu pedido" en `/menu`, "Horarios completos"): menores de 44 px | `CartaEstados.tsx:18` | No se cambió (los enlaces en línea están exentos del tamaño mínimo) |
-| 8 | Baja | `.cam-boton-miniatura` (insignia de cámara sobre la miniatura) de 28 px | `camara.css:424`, `carta-tarjeta.css:83` | Pendiente: pisa la foto de la miniatura; requiere decisión visual. `carta-tarjeta.css` además tiene cambios sin commitear de otra sesión en la copia principal |
-| 9 | Baja | La landing consulta `/api/publico/landing` y, si falla, muestra datos por defecto sin avisar | log de `next dev` (500 sin BD) | Pendiente: mostrar un aviso/estado vacío si el menú queda con datos de ejemplo |
-| 10 | Baja | Páginas del panel (`/dashboard/*`), `/cliente`, `/pedir-local`, `/recuperar` no se midieron (requieren sesión/BD) | — | Pendiente |
+| 8 | Baja | `.cam-boton-miniatura` (insignia de cámara sobre la miniatura) de 28 px | `camara.css:424`, `carta-tarjeta.css:83` | Corregido 05/11: la insignia se ve igual (28 px) pero su área táctil es de 44 px (`::after` con `inset: -8px` en `camara.css`); en la carta ya medía 38 px |
+| 9 | Baja | La landing consulta `/api/publico/landing` y, si falla, muestra datos por defecto sin avisar | log de `next dev` (500 sin BD) | Corregido 05/11: si termina de cargar y no hay carta real, `featured-products.tsx` muestra «los productos y precios de abajo son de ejemplo» (verificado sin BD) |
+| 10 | Baja | Páginas del panel (`/dashboard/*`), `/cliente`, `/pedir-local`, `/recuperar` no se midieron (requieren sesión/BD) | — | Medido 05/11 (ver sección siguiente); corregido |
+
+## Medición del panel y páginas con sesión (05/11/2026, 375 px)
+Método: `next dev` local **sin base de datos** (la API responde 500, se ven los estados de error/vacío) y una sesión de prueba firmada con el secreto de desarrollo; mismo script de DOM que arriba. Controles menores de 44 px (excluidos enlaces dentro de frases):
+
+| Página | Antes | Después |
+|---|---|---|
+| `/dashboard` | 0 de 1 | 0 de 1 |
+| `/dashboard/pedidos` | 5 de 6 (botones y filtros de 36 px, «Reintentar» 20 px) | 0 de 6 |
+| `/dashboard/cocina`, `caja`, `inventario`, `carta` | solo «Actualizar» (42×36) y «Reintentar» (20 px) | 0 |
+| `/dashboard/reservas` | 10 de 11 (fecha, «Hoy», filtros de 36 px) | 0 de 11 |
+| `/dashboard/mesas` | «Imprimir todos» 36 px | 0 |
+| `/dashboard/cuenta` | «Cerrar sesión en todos» 36 px | 0 |
+| `/pedir-local` | 0 de 13 | 0 de 13 |
+| `/recuperar` | 1 campo **sin etiqueta**, campo 38 px, botón 36 px, «Volver al login» 17 px | 0 y con etiqueta |
+| `/cliente/pago-error` | sin controles | — |
+
+Corrección: en celular los botones, filtros y campos del panel miden 44 px (`min-h-11 md:min-h-9`: en pantallas anchas siguen en 36 px). Sin imágenes sin `alt` ni desborde horizontal en ninguna. **No medido:** `/dashboard/{compras,crm,rrhh,personal,marketing,delivery,reportes,bi,dueno,feedback,fidelizacion,configuracion,mozo}` (misma estructura y componentes; no se abrieron una por una), `/cliente` con un pedido real, ni nada con datos reales (sin BD).
+
+## Aviso sobre los testimonios
+Los 4 testimonios de la landing (`testimonials.tsx`) son **texto de ejemplo inventado**. Antes de mostrar el sitio a un comprador o publicarlo para un restaurante real hay que reemplazarlos por reseñas reales o quitar la sección (criterio 6 del tribunal: nada de datos inventados). Decisión del dueño 👤.
 
 ## Lo que se conservó a propósito
 Héroe 3D y viaje de scroll (GSAP/three.js), paleta pop, tipografías, bordes y sombras duras, textos de marca.

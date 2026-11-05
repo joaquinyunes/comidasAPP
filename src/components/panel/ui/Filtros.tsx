@@ -26,7 +26,7 @@ export default function Filtros({ opciones, valor, onCambio, ...resto }: Props) 
             aria-pressed={activo}
             onClick={() => onCambio(o.valor)}
             className={cn(
-              "min-h-9 rounded-md border px-3 text-sm font-medium transition-colors",
+              "min-h-11 rounded-md border px-3 text-sm font-medium transition-colors md:min-h-9",
               activo
                 ? "border-pn-tinta bg-pn-tinta text-white"
                 : "border-pn-linea-fuerte bg-pn-papel text-pn-tinta hover:bg-pn-hundido"

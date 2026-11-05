@@ -45,7 +45,7 @@ export default function ReservasPanel() {
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
               aria-label="Fecha"
-              className="min-h-9 rounded-md border border-pn-linea-fuerte bg-pn-papel px-3 text-sm"
+              className="min-h-11 rounded-md border border-pn-linea-fuerte bg-pn-papel px-3 text-sm md:min-h-9"
             />
             <Boton onClick={() => setFecha(hoyISO())}>Hoy</Boton>
             <Boton onClick={recargar} aria-label="Actualizar reservas">

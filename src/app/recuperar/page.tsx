@@ -22,7 +22,7 @@ function Recuperar() {
         </h1>
         {token ? <Confirmar token={token} /> : <Solicitar />}
         <p className="mt-6 text-center text-xs text-gray-500">
-          <Link href="/login" className="underline">Volver al login</Link>
+          <Link href="/login" className="inline-flex min-h-11 items-center px-2 underline">Volver al login</Link>
         </p>
       </div>
     </div>
@@ -56,13 +56,15 @@ function Solicitar() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="tu@correo.com"
-        className="w-full rounded-lg bg-white/[0.06] border border-white/10 px-3 py-2 text-sm"
+        aria-label="Correo electrónico"
+        autoComplete="email"
+        className="min-h-11 w-full rounded-lg bg-white/[0.06] border border-white/10 px-3 py-2 text-sm"
       />
       {msg && <p className="rounded-lg bg-green-500/10 p-2 text-sm text-green-300">{msg}</p>}
       <button
         type="submit"
         disabled={enviando}
-        className="w-full rounded-lg bg-red-600 py-2 text-sm font-semibold disabled:opacity-40"
+        className="min-h-11 w-full rounded-lg bg-red-600 py-2 text-sm font-semibold disabled:opacity-40"
       >
         {enviando ? "Enviando…" : "Enviar enlace"}
       </button>
@@ -97,7 +99,7 @@ function Confirmar({ token }: { token: string }) {
     return (
       <div className="space-y-3 text-sm">
         <p className="text-green-300">Contraseña actualizada.</p>
-        <Link href="/login" className="block rounded-lg bg-red-600 py-2 text-center font-semibold">
+        <Link href="/login" className="block min-h-11 rounded-lg bg-red-600 py-2.5 text-center font-semibold">
           Ir al login
         </Link>
       </div>
@@ -112,14 +114,15 @@ function Confirmar({ token }: { token: string }) {
         minLength={12}
         value={nueva}
         onChange={(e) => setNueva(e.target.value)}
-        placeholder="Nueva contraseña (mín. 8)"
-        className="w-full rounded-lg bg-white/[0.06] border border-white/10 px-3 py-2 text-sm"
+        placeholder="Nueva contraseña (mín. 12)"
+        aria-label="Nueva contraseña"
+        className="min-h-11 w-full rounded-lg bg-white/[0.06] border border-white/10 px-3 py-2 text-sm"
       />
       {error && <p className="rounded-lg bg-red-500/10 p-2 text-sm text-red-300">{error}</p>}
       <button
         type="submit"
         disabled={estado === "enviando"}
-        className="w-full rounded-lg bg-red-600 py-2 text-sm font-semibold disabled:opacity-40"
+        className="min-h-11 w-full rounded-lg bg-red-600 py-2 text-sm font-semibold disabled:opacity-40"
       >
         {estado === "enviando" ? "Guardando…" : "Guardar contraseña"}
       </button>

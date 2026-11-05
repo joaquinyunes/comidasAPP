@@ -14,7 +14,7 @@ export default function AvisoError({ children, onReintentar }: Props) {
     >
       <span>{children}</span>
       {onReintentar && (
-        <button onClick={onReintentar} className="font-medium underline underline-offset-2">
+        <button onClick={onReintentar} className="min-h-11 px-2 font-medium underline underline-offset-2 md:min-h-0">
           Reintentar
         </button>
       )}

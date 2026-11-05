@@ -18,15 +18,17 @@ const FALLBACK: ProductoLanding[] = [
 ];
 
 export default function FeaturedProducts() {
-  const { data } = useLandingData();
+  const { data, loading } = useLandingData();
 
-  const productos = (() => {
-    if (!data) return FALLBACK;
+  const reales = (() => {
+    if (!data) return [];
     const todos = data.carta.flatMap((c) => c.productos);
     const destacados = todos.filter((p) => p.destacado);
-    const lista = (destacados.length >= 3 ? destacados : todos).slice(0, 6);
-    return lista.length ? lista : FALLBACK;
+    return (destacados.length >= 3 ? destacados : todos).slice(0, 6);
   })();
+  const productos = reales.length ? reales : FALLBACK;
+  // Terminó de cargar y no hay carta real: los productos y precios de abajo son de ejemplo.
+  const esEjemplo = !loading && reales.length === 0;
 
   return (
     <section className="products-section" id="menu">
@@ -39,6 +41,12 @@ export default function FeaturedProducts() {
           Elegí tu destino y dejá que tus papilas viajen por el universo.
         </p>
       </div>
+
+      {esEjemplo && (
+        <p role="status" className="products-sub">
+          Estamos actualizando la carta: los productos y precios de abajo son de ejemplo. Mirá la carta completa o consultanos antes de pedir.
+        </p>
+      )}
 
       <div className="products-grid">
         {productos.map((p, i) => (

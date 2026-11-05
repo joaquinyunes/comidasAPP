@@ -55,7 +55,7 @@ export default function FilaCliente({ cliente: c }: { cliente: ClientePanel }) {
           href={wa}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-pn-linea-fuerte px-3 text-sm font-medium hover:bg-pn-hundido"
+          className="inline-flex min-h-11 md:min-h-9 items-center gap-1.5 rounded-md border border-pn-linea-fuerte px-3 text-sm font-medium hover:bg-pn-hundido"
         >
           <MessageCircle className="size-4" aria-hidden />
           WhatsApp

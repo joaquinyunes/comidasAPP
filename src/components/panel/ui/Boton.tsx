@@ -19,7 +19,7 @@ const VARIANTE: Record<Variante, string> = {
 // "grande" es para pantallas que se tocan con las manos ocupadas
 // (salón, cocina, caja): objetivo táctil de al menos 48 px.
 const TAMANO: Record<Tamano, string> = {
-  normal: "min-h-9 px-3 text-sm",
+  normal: "min-h-11 min-w-11 px-3 text-sm md:min-h-9 md:min-w-0",
   grande: "min-h-12 px-4 text-base",
 };
 

@@ -432,3 +432,11 @@
   border-width: 2px;
   box-shadow: 2px 2px 0 var(--black);
 }
+
+/* WCAG 2.5.8: la insignia se ve de 28 px pero el área que responde al toque es de 44 px. */
+.cam-boton-miniatura::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+}

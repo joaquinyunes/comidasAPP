@@ -35,7 +35,7 @@ export default function ListaAlertas({ alertas }: { alertas: Alerta[] }) {
               </Etiqueta>
               <Link
                 href={a.href}
-                className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-md border border-pn-linea-fuerte px-3 text-sm font-medium hover:bg-pn-hundido"
+                className="inline-flex min-h-11 md:min-h-9 shrink-0 items-center gap-1.5 rounded-md border border-pn-linea-fuerte px-3 text-sm font-medium hover:bg-pn-hundido"
               >
                 {a.accion}
                 <ArrowRight className="size-4" aria-hidden />

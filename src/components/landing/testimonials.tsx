@@ -52,6 +52,7 @@ function Stars({ count }: { count: number }) {
 
 export default function Testimonials() {
   const [active, setActive] = useState(0);
+  const [pausado, setPausado] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
 
   const { contextSafe } = useGSAP(() => {}, { scope: boxRef });
@@ -82,10 +83,13 @@ export default function Testimonials() {
   const prev = useCallback(() => swapTo(() => setActive((a) => (a - 1 + testimonials.length) % testimonials.length)), [swapTo]);
   const goTo = useCallback((i: number) => swapTo(() => setActive(i)), [swapTo]);
 
+  // WCAG 2.2.2: la rotación automática se puede pausar, y no arranca si el sistema pide menos movimiento.
+  // (El héroe 3D sigue animado a propósito: ver docs/DISENO.md #6.)
   useEffect(() => {
+    if (pausado || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const id = setInterval(next, 5000);
     return () => clearInterval(id);
-  }, [next]);
+  }, [next, pausado]);
 
   const t = testimonials[active];
 
@@ -127,6 +131,14 @@ export default function Testimonials() {
           ))}
         </div>
         <button className="galaxy-arrow" onClick={next} aria-label="Siguiente">&#8594;</button>
+        <button
+          className="galaxy-arrow"
+          onClick={() => setPausado((p) => !p)}
+          aria-pressed={pausado}
+          aria-label={pausado ? "Reanudar el cambio automático de testimonios" : "Pausar el cambio automático de testimonios"}
+        >
+          {pausado ? "▶" : "⏸"}
+        </button>
       </div>
     </section>
   );
