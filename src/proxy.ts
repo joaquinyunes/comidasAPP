@@ -118,7 +118,11 @@ export async function proxy(request: NextRequest) {
   const payload = await verifyToken(token);
   if (!payload) {
     if (esApi) return NextResponse.json({ error: "Token inválido o expirado" }, { status: 401 });
-    return NextResponse.redirect(new URL("/login", request.url));
+    // Acceso vencido (dura 15 min): intentamos renovarlo con el refresco y volver acá.
+    // Si no hay refresco válido, esa ruta manda al login.
+    const renovar = new URL("/api/auth/refresh", request.url);
+    renovar.searchParams.set("volver", pathname + request.nextUrl.search);
+    return NextResponse.redirect(renovar);
   }
 
   const requerido = getRequiredPermission(pathname);

@@ -205,9 +205,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run npm audit
-        run: npm audit --audit-level=high
-        continue-on-error: true
+      - name: Run npm audit (falla con altas o críticas en producción)
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Run Snyk security scan
         uses: snyk/actions/node@master

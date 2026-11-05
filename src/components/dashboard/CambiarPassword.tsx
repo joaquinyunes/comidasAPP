@@ -57,14 +57,14 @@ export default function CambiarPassword() {
       </div>
       <div>
         <label htmlFor={idNueva} className="mb-1 block text-sm font-medium">
-          Contraseña nueva <span className="font-normal text-pn-suave">(mínimo 8 caracteres)</span>
+          Contraseña nueva <span className="font-normal text-pn-suave">(mínimo 12 caracteres)</span>
         </label>
         <input
           id={idNueva}
           type="password"
           autoComplete="new-password"
           required
-          minLength={8}
+          minLength={12}
           value={nueva}
           onChange={(e) => setNueva(e.target.value)}
           className={campo}

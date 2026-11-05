@@ -4,6 +4,7 @@ import { hash, compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { getTenantContext } from "@/lib/auth-context";
 import { authRateLimit } from "@/lib/rate-limit";
+import { revocarTodas } from "@/lib/auth/sesion-refresh";
 
 // ============================================
 // POST /api/auth/password — cambiar la propia contraseña
@@ -11,7 +12,7 @@ import { authRateLimit } from "@/lib/rate-limit";
 
 const Schema = z.object({
   actual: z.string().min(1),
-  nueva: z.string().min(8, "La nueva contraseña debe tener al menos 8 caracteres"),
+  nueva: z.string().min(12, "La nueva contraseña debe tener al menos 12 caracteres"),
 });
 
 export async function POST(request: NextRequest) {
@@ -43,6 +44,8 @@ export async function POST(request: NextRequest) {
     where: { id: usuario.id },
     data: { passwordHash: await hash(parsed.data.nueva, 12) },
   });
+  // Cambiar la clave cierra las demás sesiones (los accesos de 15 min vencen solos).
+  await revocarTodas(usuario.id);
 
   return NextResponse.json({ success: true });
 }

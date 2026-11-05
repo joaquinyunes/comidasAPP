@@ -11,7 +11,7 @@ import { hashTokenReset } from "@/lib/auth/token-reset";
 
 const Schema = z.object({
   token: z.string().min(10),
-  nueva: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
+  nueva: z.string().min(12, "La contraseña debe tener al menos 12 caracteres"),
 });
 
 export async function POST(request: NextRequest) {
@@ -49,6 +49,8 @@ export async function POST(request: NextRequest) {
       where: { usuarioId: reset.usuarioId, usado: false },
       data: { usado: true },
     }),
+    // olvidó la clave: cualquier sesión abierta con la vieja deja de renovarse
+    prisma.sesion.deleteMany({ where: { usuarioId: reset.usuarioId } }),
   ]);
 
   return NextResponse.json({ success: true });

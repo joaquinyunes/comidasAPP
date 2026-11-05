@@ -22,7 +22,7 @@ export default function FormularioAcceso({ roles, onCerrar, onCreado }: Props) {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const completo = nombre.trim() && email.includes("@") && password.length >= 8 && rolId;
+  const completo = nombre.trim() && email.includes("@") && password.length >= 12 && rolId;
 
   async function guardar(e: React.FormEvent) {
     e.preventDefault();
@@ -66,7 +66,7 @@ export default function FormularioAcceso({ roles, onCerrar, onCreado }: Props) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="off"
-          ayuda="Mínimo 8 caracteres. Pedile que la cambie en Mi cuenta."
+          ayuda="Mínimo 12 caracteres. Pedile que la cambie en Mi cuenta."
         />
 
         {error && <AvisoError>{error}</AvisoError>}

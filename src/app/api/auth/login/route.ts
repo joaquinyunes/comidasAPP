@@ -1,29 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sign } from "jsonwebtoken";
 import { compare } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { authRateLimit } from "@/lib/rate-limit";
-import { getJwtSecret } from "@/lib/jwt-secret";
+import { estaBloqueado, registrarFallo, limpiarFallos } from "@/lib/auth/bloqueo-login";
+import { verificarTotp } from "@/lib/auth/totp";
+import { emitirSesion, borrarCookiesSesion } from "@/lib/auth/emitir-sesion";
+import { revocarRefresco, revocarTodas } from "@/lib/auth/sesion-refresh";
+import { getTenantContext } from "@/lib/auth-context";
 
 // ============================================
-// POST /api/auth/login — iniciar sesión
-// DELETE /api/auth/login — cerrar sesión
-// (el alta de usuarios vive en /api/auth/register)
+// POST /api/auth/login — iniciar sesión (con código 2FA si el usuario lo activó)
+// DELETE /api/auth/login — cerrar sesión (?todas=1: en todos los dispositivos)
+// Refresco de sesión: /api/auth/refresh. Alta de usuarios: /api/auth/register.
 // ============================================
 
 const LoginSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Contraseña demasiado corta"),
+  email: z.string().email("Email inválido").max(255),
+  password: z.string().min(6, "Contraseña demasiado corta").max(200),
+  codigo: z.string().regex(/^\d{6}$/, "El código tiene 6 números").optional(),
 });
-
-const COOKIE_OPCIONES = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
-  maxAge: 60 * 60 * 24,
-  path: "/",
-};
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +35,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, password } = parsed.data;
+    const { email, password, codigo } = parsed.data;
+    const clave = email.toLowerCase();
+
+    const espera = estaBloqueado(clave);
+    if (espera > 0) {
+      return NextResponse.json(
+        { error: "Demasiados intentos. Probá de nuevo en unos minutos.", retryAfter: espera },
+        { status: 429, headers: { "Retry-After": String(espera) } }
+      );
+    }
 
     const user = await prisma.usuario.findFirst({
       where: { email },
@@ -47,26 +52,34 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user || !(await compare(password, user.passwordHash))) {
+      registrarFallo(clave);
       return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
     }
     if (!user.activo) {
       return NextResponse.json({ error: "Usuario desactivado" }, { status: 403 });
     }
 
-    const roles = user.usuarioRoles.map((ur) => ur.rol.nombre);
-    const permisos = user.usuarioRoles.flatMap((ur) => ur.rol.permisos as string[]);
+    if (user.totpActivo && user.totpSecreto) {
+      if (!codigo) {
+        // Contraseña correcta, falta el segundo factor: el formulario pide el código.
+        return NextResponse.json(
+          { error: "Ingresá el código de tu app de verificación.", requiere2fa: true },
+          { status: 401 }
+        );
+      }
+      if (!verificarTotp(user.totpSecreto, codigo)) {
+        registrarFallo(clave);
+        return NextResponse.json({ error: "El código no es correcto.", requiere2fa: true }, { status: 401 });
+      }
+    }
 
-    const token = sign(
-      { userId: user.id, tenantId: user.tenantId, email: user.email, roles, permisos },
-      getJwtSecret(),
-      { expiresIn: "24h" }
-    );
+    limpiarFallos(clave);
 
     const response = NextResponse.json({
       success: true,
-      user: { id: user.id, email: user.email, nombre: user.nombre, roles },
+      user: { id: user.id, email: user.email, nombre: user.nombre },
     });
-    response.cookies.set("token", token, COOKIE_OPCIONES);
+    await emitirSesion(response, user);
     return response;
   } catch (error) {
     console.error("Error en login:", error);
@@ -74,14 +87,19 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  try {
+    const refresco = request.cookies.get("refresh")?.value;
+    if (request.nextUrl.searchParams.get("todas") === "1") {
+      const ctx = await getTenantContext(request);
+      if (ctx) await revocarTodas(ctx.usuarioId);
+    } else if (refresco) {
+      await revocarRefresco(refresco);
+    }
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+  }
   const response = NextResponse.json({ success: true });
-  response.cookies.set("token", "", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 0,
-    path: "/",
-  });
+  borrarCookiesSesion(response);
   return response;
 }

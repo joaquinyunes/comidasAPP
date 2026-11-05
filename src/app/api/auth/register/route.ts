@@ -14,7 +14,7 @@ import { getTenantContext } from "@/lib/auth-context";
 
 const RegisterSchema = z.object({
   email: z.string().email("Email inválido"),
-  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
+  password: z.string().min(12, "La contraseña debe tener al menos 12 caracteres"),
   nombre: z.string().min(1, "Nombre requerido").max(100),
   tenantId: z.string().uuid("Tenant inválido"),
   rolId: z.string().optional(),

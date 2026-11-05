@@ -1,0 +1,4 @@
+# Contacto para reportar vulnerabilidades. COMPLETAR el mail antes de publicar (ver docs/SEGURIDAD.md).
+Contact: mailto:seguridad@CAMBIAR-DOMINIO.example
+Expires: 2027-11-05T00:00:00.000Z
+Preferred-Languages: es, en

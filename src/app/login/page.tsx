@@ -29,6 +29,8 @@ function LoginForm() {
   const [email, setEmail] = useState(ES_DEV ? "admin@cozizina.com" : "");
   const [password, setPassword] = useState(ES_DEV ? "admin123" : "");
   const [error, setError] = useState("");
+  const [pide2fa, setPide2fa] = useState(false);
+  const [codigo, setCodigo] = useState("");
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
 
@@ -40,10 +42,11 @@ function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, ...(pide2fa ? { codigo } : {}) }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (data.requiere2fa) setPide2fa(true);
         setError(data.error || "El email o la contraseña no coinciden. Revisalos y probá de nuevo.");
         setLoading(false);
         return;
@@ -128,6 +131,23 @@ function LoginForm() {
                 </div>
               </div>
             </div>
+
+            {pide2fa && (
+              <div className="space-y-1.5">
+                <label htmlFor="login-codigo" className="text-xs font-medium text-gray-300 uppercase tracking-wider">Código de verificación</label>
+                <Input
+                  id="login-codigo"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))}
+                  placeholder="6 números"
+                  required
+                  className="h-12 bg-white/[0.06] border-white/[0.1] text-white placeholder:text-gray-500"
+                />
+              </div>
+            )}
 
             {/* Error */}
             {error && (

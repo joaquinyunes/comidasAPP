@@ -4,6 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { mpDisponible, consultarPago } from "@/lib/pagos/mercadopago";
 import { firmaMpValida } from "@/lib/pagos/firma-webhook";
 import { registrarPagoPedido } from "@/lib/pedidos/registrar-pago";
+import { rateLimit } from "@/lib/rate-limit";
+
+// Tope por IP: MP reintenta, pero nunca cientos de veces por minuto.
+const limiteWebhook = rateLimit({ maxRequests: 120, windowMs: 60_000, keyGenerator: (r) => "mp-webhook:" + (r.headers.get("x-forwarded-for") ?? "?").split(",")[0].trim() });
 
 // ============================================
 // POST /api/pagos/mercadopago/webhook
@@ -15,6 +19,8 @@ import { registrarPagoPedido } from "@/lib/pedidos/registrar-pago";
 
 export async function POST(req: NextRequest) {
   if (!mpDisponible()) return NextResponse.json({ ok: true });
+  const limitada = await limiteWebhook(req);
+  if (limitada) return limitada;
 
   // MP manda el id como query (?type=payment&data.id=) o en el body.
   const url = new URL(req.url);

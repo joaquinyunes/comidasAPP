@@ -1,0 +1,18 @@
+# S11: actualizaciones semanales agrupadas. Pocos PR abiertos a la vez para no
+# disparar un montón de previews de Vercel; las de seguridad llegan igual.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    groups:
+      menores-y-parches:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 2

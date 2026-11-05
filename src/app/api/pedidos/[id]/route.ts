@@ -245,6 +245,14 @@ export async function DELETE(
       return NextResponse.json({ error: "No se pueden eliminar items de un pedido cerrado" }, { status: 409 });
     }
 
+    const itemPrevio = await prisma.pedidoItem.findFirst({
+      where: { id: itemId, pedidoId: id, tenantId: context.tenantId },
+      select: { productoId: true, cantidad: true, subtotal: true },
+    });
+    if (!itemPrevio) {
+      return NextResponse.json({ error: "Ítem no encontrado" }, { status: 404 });
+    }
+
     await prisma.pedidoItem.delete({ where: { id: itemId, pedidoId: id } });
 
     // Recalcular total
@@ -261,6 +269,25 @@ export async function DELETE(
         usuarioId: context.usuarioId,
       },
     });
+
+    // S7: borrar un ítem cambia el total del pedido, queda registrado quién y qué.
+    await prisma.auditLog
+      .create({
+        data: {
+          tenantId: context.tenantId,
+          usuarioId: context.usuarioId,
+          accion: "ELIMINAR_ITEM",
+          entidad: "PedidoItem",
+          entidadId: itemId,
+          valorAnterior: {
+            productoId: itemPrevio.productoId,
+            cantidad: Number(itemPrevio.cantidad),
+            subtotal: Number(itemPrevio.subtotal),
+          },
+          valorNuevo: { pedidoId: id, total },
+        },
+      })
+      .catch((e) => console.error("[DELETE item] auditoría falló:", e));
 
     return NextResponse.json({ success: true });
   } catch (error) {

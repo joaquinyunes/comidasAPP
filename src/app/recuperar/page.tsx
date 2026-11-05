@@ -109,7 +109,7 @@ function Confirmar({ token }: { token: string }) {
       <input
         type="password"
         required
-        minLength={8}
+        minLength={12}
         value={nueva}
         onChange={(e) => setNueva(e.target.value)}
         placeholder="Nueva contraseña (mín. 8)"

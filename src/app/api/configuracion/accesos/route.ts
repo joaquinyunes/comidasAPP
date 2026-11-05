@@ -15,7 +15,7 @@ import { tienePermiso } from "@/lib/panel/permisos";
 const Alta = z.object({
   nombre: z.string().trim().min(1).max(100),
   email: z.string().trim().toLowerCase().email().max(255),
-  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres").max(100),
+  password: z.string().min(12, "La contraseña debe tener al menos 12 caracteres").max(100),
   rolId: z.string().uuid(),
 });
 

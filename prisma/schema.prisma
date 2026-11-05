@@ -67,6 +67,9 @@ model Usuario {
   avatarUrl       String?   @map("avatar_url")
   passwordHash    String    @map("password_hash")
   emailVerificado Boolean   @default(false) @map("email_verificado")
+  // 2FA (TOTP). El secreto solo existe mientras totpActivo o durante el alta.
+  totpSecreto     String?   @map("totp_secreto")
+  totpActivo      Boolean   @default(false) @map("totp_activo")
   activo          Boolean   @default(true)
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
