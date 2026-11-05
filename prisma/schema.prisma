@@ -455,11 +455,16 @@ model Pago {
   estado        String   @default("completado") @db.VarChar(50)
   comprobanteUrl String? @map("comprobante_url")
   usuarioId     String?  @map("usuario_id") @db.Uuid
+  // Id externo del cobro (ej. "mp:123"). Nulo en efectivo/tarjeta manual.
+  referencia    String?  @db.VarChar(100)
   createdAt     DateTime @default(now()) @map("created_at")
 
   pedido Pedido @relation(fields: [pedidoId], references: [id])
   caja   Caja?  @relation(fields: [cajaId], references: [id])
 
+  // Un mismo cobro externo no puede registrarse dos veces para un pedido
+  // (webhooks simultáneos de MercadoPago). Los nulos no chocan.
+  @@unique([pedidoId, referencia])
   @@index([tenantId, pedidoId])
   @@map("pagos")
 }
