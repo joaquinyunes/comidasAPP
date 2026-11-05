@@ -1,0 +1,22 @@
+name: Disponibilidad del sitio
+
+# V7. Cada 15 minutos pide la portada y /api/salud (que prueba la base de datos).
+# Si falla 3 veces seguidas, el workflow queda en rojo y GitHub avisa por correo a quien
+# tenga activadas las notificaciones de Actions (cuenta → Settings → Notifications → Actions).
+# URL: variable del repositorio SITE_URL (Settings → Variables); sin ella, la de Vercel.
+# Nota: los workflows programados se desactivan solos tras 60 días sin actividad en el repo.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portada:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/uptime.sh "${{ vars.SITE_URL || 'https://cozizina.vercel.app' }}"

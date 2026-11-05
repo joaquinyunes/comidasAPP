@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cozizina para restaurantes — carta, pedidos y delivery propios, sin comisión por pedido</title>
+<meta name="description" content="Carta digital, pedidos por QR de mesa, retiro y delivery propios, con cobro por Mercado Pago que no cobra dos veces y sin comisión por pedido a una app.">
+<meta name="robots" content="noindex">
+<style>
+  :root { --tinta:#1b1b1f; --suave:#55555f; --fondo:#fffaf0; --papel:#fff; --acento:#b3261e; --linea:#e4dccb; --ok:#1d6b3a; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--tinta); background:var(--fondo); }
+  a { color:var(--acento); }
+  a:focus-visible, button:focus-visible { outline:3px solid #1b1b1f; outline-offset:2px; }
+  .ancho { max-width:960px; margin:0 auto; padding:0 20px; }
+  header.top { padding:56px 0 40px; }
+  h1 { font-size:clamp(28px,5vw,44px); line-height:1.15; margin:0 0 16px; }
+  h2 { font-size:clamp(22px,3.5vw,30px); margin:0 0 12px; }
+  section { padding:36px 0; border-top:1px solid var(--linea); }
+  .lead { font-size:19px; color:var(--suave); max-width:60ch; }
+  .cta { display:inline-flex; align-items:center; min-height:48px; padding:0 22px; background:var(--tinta); color:#fff; text-decoration:none; border-radius:8px; font-weight:600; }
+  .grilla { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+  .tarjeta { background:var(--papel); border:1px solid var(--linea); border-radius:12px; padding:20px; }
+  .tarjeta h3 { margin:0 0 6px; font-size:19px; }
+  .precio { font-size:30px; font-weight:700; margin:4px 0; }
+  .precio small { font-size:15px; font-weight:400; color:var(--suave); }
+  ul { padding-left:20px; margin:8px 0; }
+  .nota { font-size:15px; color:var(--suave); }
+  .pronto { font-size:13px; background:#f3e6c8; border-radius:4px; padding:1px 6px; white-space:nowrap; }
+  table { width:100%; border-collapse:collapse; background:var(--papel); border:1px solid var(--linea); }
+  th, td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--linea); vertical-align:top; }
+  th { background:#f6efe0; }
+  .aviso { border-left:4px solid var(--acento); background:var(--papel); padding:12px 16px; border-radius:0 8px 8px 0; }
+  footer { padding:32px 0 56px; color:var(--suave); font-size:15px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="ancho">
+    <p class="nota">Cozizina · sistema para restaurantes</p>
+    <h1>Carta, pedidos y delivery propios para tu restaurante, con pago por Mercado Pago que nunca cobra dos veces y sin comisión por pedido a una app.</h1>
+    <p class="lead">Tus clientes piden desde el QR de la mesa o desde tu propia página. Cocina ve las comandas, caja cobra, y vos ves las ventas. Todo a tu nombre: tu dominio, tus datos.</p>
+    <p><a class="cta" href="#contacto">Quiero ser restaurante piloto</a></p>
+  </div>
+</header>
+
+<main>
+<section aria-labelledby="problema">
+  <div class="ancho">
+    <h2 id="problema">El problema</h2>
+    <p>Hoy muchos restaurantes venden por apps de delivery que se quedan con una parte de cada pedido. En fuentes comerciales, esa comisión se ubica entre <strong>18 % y 30 %</strong> según la app y el plan; no hay una tarifa pública oficial, la tuya es la de tu contrato. Además, los datos de tus clientes quedan en la app, no en tu negocio.</p>
+    <p>Un canal de pedidos propio evita esa comisión. Lo que sí pagás es el costo de cobrar con Mercado Pago, que va de <strong>1,49 % a 6,29 % + IVA</strong> según en cuánto tiempo quieras recibir la plata (comparador de terceros, 2026; confirmalo en tu cuenta).</p>
+  </div>
+</section>
+
+<section aria-labelledby="que">
+  <div class="ancho">
+    <h2 id="que">Qué hace hoy</h2>
+    <div class="grilla">
+      <div class="tarjeta"><h3>Pedidos por QR y online</h3><p>Pedido en mesa, retiro y delivery con zonas y costo de envío. Carta con fotos propias.</p></div>
+      <div class="tarjeta"><h3>Cobro sin duplicados</h3><p>Pago con Mercado Pago con firma verificada. Si Mercado Pago avisa dos veces, el pedido se cobra una sola vez (probado con tests).</p></div>
+      <div class="tarjeta"><h3>Salón, cocina y caja</h3><p>Tablero de comandas, cuenta dividida, propinas, anulaciones registradas y resumen de caja del día.</p></div>
+      <div class="tarjeta"><h3>Stock y compras</h3><p>Descuento de ingredientes por receta, alertas de stock bajo, proveedores y órdenes de compra.</p></div>
+      <div class="tarjeta"><h3>Seguridad</h3><p>Verificación en dos pasos, sesiones que se renuevan solas, registro de cambios de precio, y copias de seguridad programadas con prueba de restauración (se activan al instalar).</p></div>
+      <div class="tarjeta"><h3>Tus datos son tuyos</h3><p>Exportación y borrado de los datos de un cliente a pedido (Ley 25.326).</p></div>
+    </div>
+    <p class="nota" style="margin-top:16px">Lo que <strong>todavía no hace</strong>: cierre de caja por turno, factura electrónica <span class="pronto">en desarrollo</span>, aviso de pedido por WhatsApp <span class="pronto">en desarrollo</span>, recibir pedidos de PedidosYa/Rappi, seguimiento del repartidor en mapa.</p>
+  </div>
+</section>
+
+<section aria-labelledby="demo">
+  <div class="ancho">
+    <h2 id="demo">Demo</h2>
+    <p class="aviso">La demo en vivo, con un entorno aparte y cartel «demo», <strong>todavía no está publicada</strong>. Cuando lo esté vas a poder probar todo con datos de ejemplo, sin tocar el sistema de ningún restaurante real.</p>
+  </div>
+</section>
+
+<section aria-labelledby="precio">
+  <div class="ancho">
+    <h2 id="precio">Precio</h2>
+    <p class="nota">Precios de lanzamiento en dólares, sin impuestos. Son una propuesta para el primer restaurante piloto.</p>
+    <div class="grilla">
+      <div class="tarjeta"><h3>Instalación</h3><p class="precio">USD 3.500 <small>único</small></p><ul><li>Tu base de datos y dominio</li><li>Carta y datos cargados</li><li>Capacitación del equipo</li></ul></div>
+      <div class="tarjeta"><h3>Mensual</h3><p class="precio">USD 120 <small>por mes</small></p><ul><li>Hosting y copias de seguridad</li><li>Actualizaciones de seguridad</li><li>Soporte por escrito (respuesta en 1 día hábil)</li></ul></div>
+      <div class="tarjeta"><h3>Completo</h3><p class="precio">USD 10.000 <small>único</small></p><ul><li>Instalación + integraciones locales (Mercado Pago, WhatsApp, factura electrónica)</li><li>Migración de tus datos</li><li>12 meses de Mensual incluidos</li></ul></div>
+    </div>
+
+    <h3 style="margin-top:28px">¿Conviene frente a un sistema por suscripción?</h3>
+    <p>Depende de cuánto vendés por apps. Comparación a 3 años con precios de hoy (Fudo, plan Avanzado + factura electrónica + mesas, ARS 65.900 por mes, <em>fu.do/precios, leído el 05/11/2026</em>):</p>
+    <table>
+      <thead><tr><th scope="col">Opción</th><th scope="col">Costo en 3 años</th></tr></thead>
+      <tbody>
+        <tr><td>Fudo (pagando por mes)</td><td>≈ USD 1.500</td></tr>
+        <tr><td>Cozizina Instalación + Mensual</td><td>USD 7.820</td></tr>
+        <tr><td>Cozizina Completo</td><td>USD 12.880</td></tr>
+      </tbody>
+    </table>
+    <p>Cozizina cuesta <strong>mucho más</strong> que una suscripción. Se paga solo si pasás a tu canal propio unos <strong>USD 1.900 por mes (≈ ARS 3 millones)</strong> de ventas que hoy pagan comisión a una app. Por debajo de eso, una suscripción te sale más barata y te lo vamos a decir. Los números y supuestos están en <code>docs/VENTA-PRECIOS.md</code>; el cálculo se rehace con <code>node scripts/tabla-3-anios.mjs</code>.</p>
+  </div>
+</section>
+
+<section aria-labelledby="real">
+  <div class="ancho">
+    <h2 id="real">Caso real</h2>
+    <p class="aviso">Todavía no hay un restaurante en producción con este sistema. Por eso buscamos un <strong>restaurante piloto</strong>: lo instalamos juntos, medimos cuántos pedidos pasan a tu canal propio y publicamos el resultado con tu permiso. No mostramos opiniones de clientes inventadas.</p>
+  </div>
+</section>
+
+<section aria-labelledby="contacto">
+  <div class="ancho">
+    <h2 id="contacto">Contacto</h2>
+    <p>Escribinos contando cuántos pedidos recibís por semana y por qué canales.</p>
+    <p><a class="cta" href="mailto:COMPLETAR@dominio.example">COMPLETAR@dominio.example</a></p>
+    <p class="nota">(Antes de publicar esta página hay que reemplazar el contacto y cargar la demo: ver <code>docs/PENDIENTES-VENTA.md</code>.)</p>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="ancho">Cozizina · Los precios de terceros se leyeron el 05/11/2026 y pueden cambiar. Esta página es un borrador y no se debe publicar sin revisar los puntos pendientes.</div>
+</footer>
+</body>
+</html>

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { MEDIDAS_PRODUCTOS } from "./seed-medidas";
+import { ROLES_BASE } from "./roles-base";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { hash } from "bcryptjs";
@@ -77,32 +78,18 @@ async function main() {
   // ============================================
   // ROLES
   // ============================================
-  const roles = [
-    { id: "rol-admin", nombre: "Administrador", permisos: ["*"] },
-    {
-      id: "rol-gerente",
-      nombre: "Gerente",
-      permisos: [
-        "pedidos:*", "caja:*", "pagos:*", "reservas:*", "mesas:*",
-        "inventario:leer", "clientes:leer", "reportes:leer",
-      ],
-    },
-    { id: "rol-mozo", nombre: "Mozo", permisos: ["pedidos:crear", "pedidos:leer", "pedidos:actualizar", "mesas:leer", "mesas:actualizar", "reservas:leer"] },
-    { id: "rol-cocinero", nombre: "Cocinero", permisos: ["pedidos:leer", "pedidos:actualizar", "productos:leer"] },
-    { id: "rol-barman", nombre: "Barman", permisos: ["pedidos:leer", "pedidos:actualizar", "productos:leer"] },
-    { id: "rol-cajero", nombre: "Cajero", permisos: ["caja:*", "pagos:*", "pedidos:leer", "pedidos:actualizar", "reservas:leer", "clientes:leer"] },
-  ];
+  const roles = ROLES_BASE;
 
   for (const rol of roles) {
     const id = uid(rol.id);
     await prisma.rol.upsert({
       where: { id },
-      update: { permisos: rol.permisos },
+      update: { permisos: [...rol.permisos] },
       create: {
         id,
         tenantId: TENANT_ID,
         nombre: rol.nombre,
-        permisos: rol.permisos,
+        permisos: [...rol.permisos],
       },
     });
   }

@@ -26,6 +26,7 @@ const API_PUBLICAS = [
   "/api/cliente",
   "/api/pagos/mercadopago/webhook",
   "/api/csp", // reportes que manda el navegador
+  "/api/salud", // chequeo de disponibilidad (V7)
 ];
 
 function requiereSesion(pathname: string): boolean {
