@@ -1,23 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { validarAPIKey } from "@/lib/api-v1/validar-api-key";
+import { z } from "zod";
+
+const NuevoCliente = z.object({
+  nombre: z.string().trim().min(1).max(120),
+  email: z.string().email().max(255).optional(),
+  telefono: z.string().trim().max(40).optional(),
+});
 
 // ============================================
 // MIDDLEWARE DE API KEY
 // ============================================
 
-async function validarAPIKey(request: NextRequest): Promise<{ tenantId: string; scopes: string[] } | null> {
-  const apiKey = request.headers.get("X-API-Key") || request.nextUrl.searchParams.get("api_key");
-  if (!apiKey) return null;
-
-  const apiKeys: Record<string, { tenantId: string; scopes: string[] }> = {
-    "demo-key-123": {
-      tenantId: "390af144-25d4-41c8-a026-21e27a4c9fbc",
-      scopes: ["productos:leer", "pedidos:crear", "pedidos:leer", "clientes:leer", "clientes:crear"],
-    },
-  };
-
-  return apiKeys[apiKey] || null;
-}
 
 // ============================================
 // GET /api/v1/clientes — Listar clientes
@@ -86,12 +81,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { nombre, email, telefono } = body;
-
-    if (!nombre) {
-      return NextResponse.json({ error: "nombre es requerido" }, { status: 400 });
+    const parsed = NuevoCliente.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Datos inválidos", details: parsed.error.issues }, { status: 400 });
     }
+    const { nombre, email, telefono } = parsed.data;
 
     const cliente = await prisma.cliente.create({
       data: {

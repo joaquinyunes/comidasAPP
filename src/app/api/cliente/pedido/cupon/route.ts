@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
 import { prisma, getTenantBySlug } from "@/lib/prisma";
 import { evaluarCupon } from "@/lib/pedidos/cupon";
 import { SITE_TENANT_SLUG } from "@/lib/tenant-slug";
@@ -27,7 +28,13 @@ async function resolverTenantId(mesaId?: string, tenant?: string): Promise<strin
   return t?.id ?? null;
 }
 
+// S3: por IP; frena el adivinado de códigos y el martilleo de cobros.
+const limite = rateLimit({ maxRequests: 20, windowMs: 60_000, keyGenerator: (r) => "cupon:" + (r.headers.get("x-forwarded-for") ?? "?").split(",")[0].trim() });
+
 export async function POST(req: NextRequest) {
+  const limitada = await limite(req);
+  if (limitada) return limitada;
+
   const parsed = Schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Datos inválidos" }, { status: 422 });
 

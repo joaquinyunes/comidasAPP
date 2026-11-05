@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { aJson } from "@/lib/audit-json";
 import { getTenantContext } from "@/lib/auth-context";
+import { z } from "zod";
+
+const Movimiento = z.object({
+  sucursalId: z.string().uuid(),
+  ingredienteId: z.string().uuid(),
+  tipo: z.enum(["entrada", "salida", "ajuste", "merma", "transferencia_entrada", "transferencia_salida"]),
+  cantidad: z.coerce.number().positive().max(10_000_000),
+  motivo: z.string().trim().max(300).optional(),
+  pedidoId: z.string().uuid().optional(),
+  lote: z.string().trim().max(60).optional(),
+  fechaVencimiento: z.string().date().optional(),
+});
 
 // ============================================
 // POST /api/inventario/movimientos — Registrar movimiento de stock
@@ -13,21 +25,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { sucursalId, ingredienteId, tipo, cantidad, motivo, pedidoId, lote, fechaVencimiento } = body;
-
-    // Validaciones
-    if (!sucursalId || !ingredienteId || !tipo || !cantidad) {
-      return NextResponse.json(
-        { error: "sucursalId, ingredienteId, tipo y cantidad son requeridos" },
-        { status: 400 }
-      );
+    const parsed = Movimiento.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Datos inválidos", details: parsed.error.issues }, { status: 400 });
     }
-
-    const tiposValidos = ["entrada", "salida", "ajuste", "merma", "transferencia_entrada", "transferencia_salida"];
-    if (!tiposValidos.includes(tipo)) {
-      return NextResponse.json({ error: "Tipo de movimiento inválido" }, { status: 400 });
-    }
+    const { sucursalId, ingredienteId, tipo, cantidad, motivo, pedidoId, lote, fechaVencimiento } = parsed.data;
 
     // Verificar ingrediente y sucursal
     const [ingrediente, sucursal] = await Promise.all([

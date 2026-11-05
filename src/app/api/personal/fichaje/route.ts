@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         },
       });
       if (turnoId) {
-        await prisma.turno.update({ where: { id: turnoId }, data: { estado: "en_curso" } });
+        await prisma.turno.updateMany({ where: { id: turnoId, tenantId: context.tenantId }, data: { estado: "en_curso" } });
       }
       return NextResponse.json({ success: true, asistencia, tipo }, { status: 201 });
     }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         data: { salida: now, tipo: "SALIDA", horasTrabajadas: Math.round(horas * 100) / 100 },
       });
       if (abierto.turnoId) {
-        await prisma.turno.update({ where: { id: abierto.turnoId }, data: { estado: "completado" } });
+        await prisma.turno.updateMany({ where: { id: abierto.turnoId, tenantId: context.tenantId }, data: { estado: "completado" } });
       }
       return NextResponse.json({ success: true, asistencia: actualizado, tipo });
     }

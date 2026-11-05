@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AuditService } from "@/lib/audit";
 import { getTenantContext } from "@/lib/auth-context";
+import { z } from "zod";
 
 // ============================================
 // GET /api/audit — Consultar logs de auditoría
@@ -48,17 +49,28 @@ export async function GET(request: NextRequest) {
 // POST /api/audit — Registrar evento manual
 // ============================================
 
+const EventoManual = z.object({
+  accion: z.enum(["create", "update", "delete", "login", "logout", "export", "config_change"]),
+  entidad: z.string().trim().min(1).max(100),
+  entidadId: z.string().uuid().optional(),
+  valorAnterior: z.record(z.string(), z.unknown()).optional(),
+  valorNuevo: z.record(z.string(), z.unknown()).optional(),
+});
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { tenantId, usuarioId, accion, entidad, entidadId, valorAnterior, valorNuevo } = body;
+    // S7: el tenant y el autor salen de la sesión; si vinieran del body cualquiera podría
+    // escribir eventos falsos a nombre de otro usuario o de otro restaurante.
+    const ctx = await getTenantContext(request);
+    if (!ctx) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-    if (!tenantId || !accion || !entidad) {
-      return NextResponse.json(
-        { error: "tenantId, accion y entidad son requeridos" },
-        { status: 400 }
-      );
+    const parsed = EventoManual.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Datos inválidos", details: parsed.error.issues }, { status: 400 });
     }
+    const { accion, entidad, entidadId, valorAnterior, valorNuevo } = parsed.data;
+    const tenantId = ctx.tenantId;
+    const usuarioId = ctx.usuarioId;
 
     const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined;
     const userAgent = request.headers.get("user-agent") || undefined;

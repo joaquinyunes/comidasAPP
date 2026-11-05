@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTenantContext } from "@/lib/auth-context";
 import { sincronizarEstadoPedido } from "@/lib/pedidos/sincronizar-estado";
+import { z } from "zod";
+
+const CambioEstado = z.object({
+  estado: z.enum(["recibido", "aceptado", "en_preparacion", "listo", "entregado", "esperando_cuenta", "pagado", "cerrado", "cancelado"]).optional(),
+  itemId: z.string().uuid().optional(),
+  itemEstado: z.string().trim().min(1).max(50).optional(),
+});
+
+const NuevoItem = z.object({
+  productoId: z.string().uuid(),
+  cantidad: z.number().int().min(1).max(100),
+  notas: z.string().trim().max(300).optional(),
+});
 
 // ============================================
 // GET /api/pedidos/[id] — Obtener pedido
@@ -55,8 +68,11 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const body = await request.json();
-    const { estado, itemId, itemEstado } = body;
+    const parsedPut = CambioEstado.safeParse(await request.json().catch(() => null));
+    if (!parsedPut.success) {
+      return NextResponse.json({ error: "Datos inválidos", details: parsedPut.error.issues }, { status: 400 });
+    }
+    const { estado, itemId, itemEstado } = parsedPut.data;
 
     const pedido = await prisma.pedido.findFirst({
       where: { id, tenantId: context.tenantId },
@@ -155,8 +171,11 @@ export async function POST(
     }
 
     const { id } = await params;
-    const body = await request.json();
-    const { productoId, cantidad, notas } = body;
+    const parsedItem = NuevoItem.safeParse(await request.json().catch(() => null));
+    if (!parsedItem.success) {
+      return NextResponse.json({ error: "Datos inválidos", details: parsedItem.error.issues }, { status: 400 });
+    }
+    const { productoId, cantidad, notas } = parsedItem.data;
 
     const pedido = await prisma.pedido.findFirst({
       where: { id, tenantId: context.tenantId },

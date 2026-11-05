@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { mesaSinPendientes } from "@/lib/pedidos/mesa-sin-pendientes";
+import { getTenantContext } from "@/lib/auth-context";
+import { z } from "zod";
+
+const METODOS = ["efectivo", "tarjeta", "qr", "transferencia", "tarjeta_credito", "tarjeta_debito", "qr_mp"] as const; // los 3 últimos: compat
+
+const PagoSchema = z.object({
+  pedidoId: z.string().uuid(),
+  monto: z.number().positive().max(100_000_000),
+  propina: z.number().min(0).max(100_000_000).default(0),
+  metodoPago: z.enum(METODOS),
+  cajaId: z.string().uuid().nullish(),
+});
 
 // ============================================
 // POST /api/pagos — Crear pago
@@ -8,38 +20,18 @@ import { mesaSinPendientes } from "@/lib/pedidos/mesa-sin-pendientes";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { pedidoId, monto, propina = 0, metodoPago, cajaId } = body;
+    const ctx = await getTenantContext(request);
+    if (!ctx) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-    // Validación básica
-    if (!pedidoId || !monto || !metodoPago) {
-      return NextResponse.json(
-        { error: "pedidoId, monto y metodoPago son requeridos" },
-        { status: 400 }
-      );
+    const parsed = PagoSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Datos inválidos", details: parsed.error.issues }, { status: 400 });
     }
-
-    if (monto <= 0) {
-      return NextResponse.json(
-        { error: "El monto debe ser mayor a 0" },
-        { status: 400 }
-      );
-    }
-
-    const metodosValidos = [
-      "efectivo", "tarjeta", "qr", "transferencia",
-      "tarjeta_credito", "tarjeta_debito", "qr_mp", // compat
-    ];
-    if (!metodosValidos.includes(metodoPago)) {
-      return NextResponse.json(
-        { error: `Método de pago inválido. Válidos: ${metodosValidos.join(", ")}` },
-        { status: 400 }
-      );
-    }
+    const { pedidoId, monto, propina, metodoPago, cajaId } = parsed.data;
 
     // Verificar que el pedido existe
-    const pedido = await prisma.pedido.findUnique({
-      where: { id: pedidoId },
+    const pedido = await prisma.pedido.findFirst({
+      where: { id: pedidoId, tenantId: ctx.tenantId },
       include: { pagos: { where: { estado: "completado" }, select: { id: true } } },
     });
 
@@ -48,6 +40,10 @@ export async function POST(request: NextRequest) {
         { error: "Pedido no encontrado" },
         { status: 404 }
       );
+    }
+
+    if (cajaId && !(await prisma.caja.findFirst({ where: { id: cajaId, tenantId: ctx.tenantId }, select: { id: true } }))) {
+      return NextResponse.json({ error: "Caja no encontrada" }, { status: 404 });
     }
 
     // Idempotente: si ya tiene un pago completado, no duplicamos.
@@ -65,7 +61,7 @@ export async function POST(request: NextRequest) {
         data: {
           tenantId: pedido.tenantId,
           pedidoId,
-          cajaId: cajaId || null,
+          cajaId: cajaId ?? null,
           monto,
           propina,
           metodoPago,
@@ -118,13 +114,16 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    const ctx = await getTenantContext(request);
+    if (!ctx) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+
     const { searchParams } = new URL(request.url);
     const pedidoId = searchParams.get("pedidoId");
     const cajaId = searchParams.get("cajaId");
     const desde = searchParams.get("desde");
     const hasta = searchParams.get("hasta");
 
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = { tenantId: ctx.tenantId };
 
     if (pedidoId) where.pedidoId = pedidoId;
     if (cajaId) where.cajaId = cajaId;

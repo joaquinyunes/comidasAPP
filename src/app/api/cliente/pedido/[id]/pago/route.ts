@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
 import { pagarPedidoCliente, METODOS_PAGO } from "@/lib/pedidos/pagar";
 
 const Schema = z.object({
@@ -18,7 +19,13 @@ const HTTP_POR_CODIGO = {
   EFECTIVO_INSUFICIENTE: 422,
 } as const;
 
+// S3: por IP; frena el adivinado de códigos y el martilleo de cobros.
+const limite = rateLimit({ maxRequests: 20, windowMs: 60_000, keyGenerator: (r) => "pago:" + (r.headers.get("x-forwarded-for") ?? "?").split(",")[0].trim() });
+
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const limitada = await limite(req);
+  if (limitada) return limitada;
+
   const { id } = await params;
 
   let body: unknown;

@@ -25,6 +25,7 @@ const API_PUBLICAS = [
   "/api/publico",
   "/api/cliente",
   "/api/pagos/mercadopago/webhook",
+  "/api/csp", // reportes que manda el navegador
 ];
 
 function requiereSesion(pathname: string): boolean {

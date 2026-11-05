@@ -1,26 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { validarAPIKey } from "@/lib/api-v1/validar-api-key";
 
 // ============================================
 // MIDDLEWARE DE API KEY
 // ============================================
 
-async function validarAPIKey(request: NextRequest): Promise<{ tenantId: string; scopes: string[] } | null> {
-  const apiKey = request.headers.get("X-API-Key") || request.nextUrl.searchParams.get("api_key");
-
-  if (!apiKey) return null;
-
-  // En producción: buscar en tabla de api_keys
-  // Por ahora: mock validation
-  const apiKeys: Record<string, { tenantId: string; scopes: string[] }> = {
-    "demo-key-123": {
-      tenantId: "390af144-25d4-41c8-a026-21e27a4c9fbc",
-      scopes: ["productos:leer", "pedidos:crear", "pedidos:leer", "clientes:leer"],
-    },
-  };
-
-  return apiKeys[apiKey] || null;
-}
 
 // ============================================
 // GET /api/v1/productos — Listar productos (público)
@@ -31,7 +16,7 @@ export async function GET(request: NextRequest) {
 
   if (!auth) {
     return NextResponse.json(
-      { error: "API key requerida. Envía X-API-Key header o ?api_key=..." },
+      { error: "API key requerida. Enviá la cabecera X-API-Key." },
       { status: 401 }
     );
   }

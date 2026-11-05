@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 import { montoPropina, totalConPropina } from "@/lib/pedidos/precio";
 import { mpDisponible, crearPreferencia } from "@/lib/pagos/mercadopago";
@@ -15,7 +16,13 @@ const Schema = z.object({
   porcentajePropina: z.coerce.number().min(0).max(100).optional(),
 });
 
+// S3: por IP; frena el adivinado de códigos y el martilleo de cobros.
+const limite = rateLimit({ maxRequests: 20, windowMs: 60_000, keyGenerator: (r) => "pago-mp:" + (r.headers.get("x-forwarded-for") ?? "?").split(",")[0].trim() });
+
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const limitada = await limite(req);
+  if (limitada) return limitada;
+
   if (!mpDisponible()) {
     return NextResponse.json({ error: "MercadoPago no está configurado." }, { status: 501 });
   }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { validarAPIKey } from "@/lib/api-v1/validar-api-key";
 import { z } from "zod";
 
 // ============================================
@@ -20,19 +21,6 @@ const CrearPedidoSchema = z.object({
 // MIDDLEWARE DE API KEY
 // ============================================
 
-async function validarAPIKey(request: NextRequest): Promise<{ tenantId: string; scopes: string[] } | null> {
-  const apiKey = request.headers.get("X-API-Key") || request.nextUrl.searchParams.get("api_key");
-  if (!apiKey) return null;
-
-  const apiKeys: Record<string, { tenantId: string; scopes: string[] }> = {
-    "demo-key-123": {
-      tenantId: "tenant-demo-001",
-      scopes: ["productos:leer", "pedidos:crear", "pedidos:leer", "clientes:leer"],
-    },
-  };
-
-  return apiKeys[apiKey] || null;
-}
 
 // ============================================
 // POST /api/v1/pedidos — Crear pedido

@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTenantContext } from "@/lib/auth-context";
+import { z } from "zod";
+
+const Fichaje = z.object({
+  empleadoId: z.string().uuid(),
+  turnoId: z.string().uuid().nullish(),
+  tipo: z.enum(["entrada", "salida"]),
+});
 
 // ============================================
 // POST /api/rrhh/asistencia — Registrar entrada/salida
@@ -12,12 +19,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { empleadoId, turnoId, tipo } = body; // tipo: "entrada" | "salida"
-
-    if (!empleadoId || !tipo) {
-      return NextResponse.json({ error: "empleadoId y tipo son requeridos" }, { status: 400 });
+    const parsed = Fichaje.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Datos inválidos", details: parsed.error.issues }, { status: 400 });
     }
+    const { empleadoId, turnoId, tipo } = parsed.data;
 
     const empleado = await prisma.empleado.findFirst({
       where: { id: empleadoId, tenantId: context.tenantId },
@@ -48,7 +54,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (turnoId) {
-        await prisma.turno.update({ where: { id: turnoId }, data: { estado: "en_curso" } });
+        await prisma.turno.updateMany({ where: { id: turnoId, tenantId: context.tenantId }, data: { estado: "en_curso" } });
       }
 
       return NextResponse.json({ success: true, asistencia, tipo: "entrada" }, { status: 201 });
@@ -72,7 +78,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (asistencia.turnoId) {
-        await prisma.turno.update({ where: { id: asistencia.turnoId }, data: { estado: "completado" } });
+        await prisma.turno.updateMany({ where: { id: asistencia.turnoId, tenantId: context.tenantId }, data: { estado: "completado" } });
       }
 
       return NextResponse.json({ success: true, asistencia: updated, tipo: "salida" });

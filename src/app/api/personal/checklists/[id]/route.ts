@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTenantContext } from "@/lib/auth-context";
+import { z } from "zod";
+
+const Cambios = z.object({
+  nombre: z.string().trim().min(1).max(100).optional(),
+  tipo: z.string().trim().min(1).max(20).optional(),
+  activo: z.boolean().optional(),
+});
 
 // ============================================
 // GET /api/personal/checklists/[id] — Obtener plantilla
@@ -44,7 +51,11 @@ export async function PUT(
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
     const { id } = await params;
-    const body = await request.json();
+    const parsed = Cambios.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Datos inválidos", details: parsed.error.issues }, { status: 400 });
+    }
+    const body = parsed.data;
 
     const plantilla = await prisma.checklistPlantilla.findFirst({
       where: { id, tenantId: context.tenantId },
