@@ -233,6 +233,9 @@
   }
 }
 .hero3d-skip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--yellow);
   text-decoration: underline;
   text-underline-offset: 3px;

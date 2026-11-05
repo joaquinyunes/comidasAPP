@@ -44,14 +44,14 @@ function LoginForm() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || "Credenciales inválidas");
+        setError(data.error || "El email o la contraseña no coinciden. Revisalos y probá de nuevo.");
         setLoading(false);
         return;
       }
       router.push(callbackUrl);
       router.refresh();
     } catch {
-      setError("Error de conexión");
+      setError("No pudimos conectarnos. Revisá tu internet y probá de nuevo.");
       setLoading(false);
     }
   };
@@ -60,13 +60,13 @@ function LoginForm() {
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
       {/* Fondo animado */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-red-950 to-gray-950">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse motion-reduce:animate-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl animate-pulse motion-reduce:animate-none" style={{ animationDelay: "1s" }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-600/5 rounded-full blur-3xl" />
       </div>
 
       {/* Contenido */}
-      <div className="relative z-10 w-full max-w-md animate-fadeIn">
+      <div className="relative z-10 w-full max-w-md animate-fadeIn motion-reduce:animate-none">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500 to-orange-600 shadow-lg shadow-red-500/25 mb-4 text-4xl">
@@ -83,10 +83,12 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-gray-300 uppercase tracking-wider">Email</label>
+              <label htmlFor="login-email" className="text-xs font-medium text-gray-300 uppercase tracking-wider">Email</label>
               <div className="relative">
                 <Input
+                  id="login-email"
                   type="email"
+                  autoComplete="username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onFocus={() => setFocused("email")}
@@ -97,7 +99,7 @@ function LoginForm() {
                     focused === "email" ? "ring-2 ring-red-500/20 border-red-500/50" : ""
                   }`}
                 />
-                <div className={`absolute right-3 top-1/2 -translate-y-1/2 text-lg transition-opacity duration-300 ${focused === "email" ? "opacity-100" : "opacity-30"}`}>
+                <div aria-hidden="true" className={`absolute right-3 top-1/2 -translate-y-1/2 text-lg transition-opacity duration-300 ${focused === "email" ? "opacity-100" : "opacity-30"}`}>
                   ✉️
                 </div>
               </div>
@@ -105,10 +107,12 @@ function LoginForm() {
 
             {/* Contraseña */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-gray-300 uppercase tracking-wider">Contraseña</label>
+              <label htmlFor="login-password" className="text-xs font-medium text-gray-300 uppercase tracking-wider">Contraseña</label>
               <div className="relative">
                 <Input
+                  id="login-password"
                   type="password"
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onFocus={() => setFocused("password")}
@@ -119,7 +123,7 @@ function LoginForm() {
                     focused === "password" ? "ring-2 ring-red-500/20 border-red-500/50" : ""
                   }`}
                 />
-                <div className={`absolute right-3 top-1/2 -translate-y-1/2 text-lg transition-opacity duration-300 ${focused === "password" ? "opacity-100" : "opacity-30"}`}>
+                <div aria-hidden="true" className={`absolute right-3 top-1/2 -translate-y-1/2 text-lg transition-opacity duration-300 ${focused === "password" ? "opacity-100" : "opacity-30"}`}>
                   🔒
                 </div>
               </div>
@@ -127,8 +131,8 @@ function LoginForm() {
 
             {/* Error */}
             {error && (
-              <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 animate-fadeIn">
-                <span className="text-sm">⚠️</span>
+              <div role="alert" className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 animate-fadeIn">
+                <span aria-hidden="true" className="text-sm">⚠️</span>
                 <p className="text-sm text-red-300">{error}</p>
               </div>
             )}
@@ -151,7 +155,7 @@ function LoginForm() {
           </form>
 
           <p className="mt-4 text-center">
-            <Link href="/recuperar" className="text-[11px] text-gray-400 hover:text-gray-300 underline">
+            <Link href="/recuperar" className="inline-flex min-h-11 items-center px-2 text-sm text-gray-300 hover:text-white underline">
               ¿Olvidaste tu contraseña?
             </Link>
           </p>
