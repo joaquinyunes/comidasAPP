@@ -16,7 +16,7 @@ Revisión del 05/11/2026 sobre la rama `feat/venta-10k`. Leyenda: ✅ hecho y ve
 | S10 | Backups + restauración | ☐ | Workflow `backup-db.yml` y `docs/BACKUPS.md` listos, **sin ejecutar** (faltan 2 secretos, 👤). No hay Postgres ni Docker en esta máquina, así que no se pudo probar una restauración. Sin esa prueba no se vende. |
 | S11 | Dependabot y CI | ✅ | `.github/dependabot.yml` semanal agrupado (máx. 3 PR). `npm audit --omit=dev --audit-level=high` bloquea el CI. |
 | S12 | Datos personales | 🟡 | ✅ `GET/DELETE /api/clientes/[id]/datos`: exporta y anonimiza (cliente, pedidos con dirección/teléfono, reservas, favoritos), con auditoría y permisos. Sin datos personales en logs. ☐ texto legal de privacidad y términos: lo revisa un profesional (👤). |
-| S13 | Revisión final | 🟡 | Este documento + revisión manual de rutas. Hallazgos graves corregidos abajo. Falta la pasada con `/security-review` sobre la rama final. |
+| S13 | Revisión final | ✅ | Revisión manual de rutas (arriba) + pasada de seguridad sobre el diff completo de la rama (05/11): 0 hallazgos explotables de confianza alta. Observaciones menores abajo. La hizo la misma sesión que escribió el código, sin revisor independiente: conviene una segunda mirada humana antes de vender. |
 
 ## Hallazgos corregidos en esta revisión (por gravedad)
 1. **`/api/pagos` sin aislamiento entre restaurantes.** Cualquier usuario con sesión podía cobrar el pedido de otro restaurante (`findUnique` por id) y `GET /api/pagos` listaba los pagos de todos. Ahora todo filtra por el restaurante de la sesión y valida la entrada (monto > 0, método permitido, uuid).
@@ -32,6 +32,12 @@ Revisión del 05/11/2026 sobre la rama `feat/venta-10k`. Leyenda: ✅ hecho y ve
 
 ## Variables nuevas
 `MERCADOPAGO_WEBHOOK_SECRET`, `API_V1_KEYS` (ver `.env.example`).
+
+## Observaciones de la pasada de seguridad (S13), sin explotación concreta
+- Activar el 2FA (`PUT /api/auth/2fa`) no vuelve a pedir la contraseña: quien robe una sesión viva podría enrolar su propio TOTP. Desactivarlo sí pide contraseña y código. Mejora pendiente: pedir contraseña también al activar.
+- `GET /api/auth/refresh` tiene efecto (rota el token); un sitio ajeno puede dispararlo con una navegación, pero solo renueva la sesión de la propia víctima.
+- `GET /api/clientes/[id]/datos` exporta datos personales con el permiso `clientes:leer`; si ese permiso llega a roles de salón conviene exigir uno propio.
+- `/api/pagos` no pide un permiso por rol (cualquier usuario del restaurante con sesión puede cobrar); ya existía, ahora al menos queda dentro de su restaurante.
 
 ## Riesgos que quedan
 - Límites de intentos en memoria del proceso (por instancia en Vercel).
