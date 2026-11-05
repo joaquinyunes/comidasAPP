@@ -32,3 +32,20 @@ Nota de método: en la medición "después" las texturas ya estaban en caché (r
 - ✘ No probé la calidad visual en un celular real (640 px a 375 px CSS × DPR 2 deja ~1,7 px/px de sobra, pero no lo vi en pantalla).
 - ✘ Sin throttling de red: "menos de 3 s" no está confirmado en un celular real; por bytes (≈0,9 MB) debería cumplirlo.
 - Las rutas `/menu`, `/ordenar`, etc. no se midieron.
+
+## Medición con red y CPU limitadas (Z7, 05/11/2026)
+Método: `next build` + `next start` de la rama `feat/venta-10k`, Chromium (Playwright) a 375 px con **Slow 4G** (1,6 Mbps bajada, 750 kbps subida, 150 ms de latencia), **CPU 4× más lenta** y caché desactivada. Base de datos inexistente: la API responde 500 y las páginas usan sus estados de error/datos de ejemplo. Una carga por ruta; tiempos en ms.
+
+| Ruta | FCP | LCP | `load` | Pedidos | KB (comprimido) |
+|---|---|---|---|---|---|
+| `/` (hero estático medido primero) | 2044 | 2044 | 2433 | 32 | 327 |
+| `/` (WebGL activo, texturas 3D cargadas, 4 s después) | — | 1444 | 2152 | — | 682 |
+| `/menu` | 1304 | 1304 | 2131 | 32 | 330 |
+| `/ordenar` | 1056 | 1056 | 1688 | 28 | 310 |
+| `/nosotros` | 1124 | 1124 | 2576 | 31 | 412 |
+| `/reservar` | 1256 | 1256 | 1658 | 25 | 290 |
+| `/login` | 2136 | 2136 | 1685 | 21 | 234 |
+
+**Resultado: las 6 rutas cargan (`load`) en menos de 3 s y el LCP queda ≤ 2,1 s (objetivo V9: < 2,5 s) con ese perfil.**
+
+Límites de esta medición: es localhost (sin la latencia real de Vercel ni arranques en frío, que pueden sumar segundos si la función está dormida); una sola corrida por ruta, sin mediana; Chromium de escritorio con CPU limitada, no un celular real; con datos reales de la carta (fotos de productos) la portada pesará más; **no se re-midió producción** (`cozizina.vercel.app` sigue con la versión anterior). Lighthouse no se corrió (V9 sigue abierto).
