@@ -9,7 +9,9 @@
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import { carpetaTemporal, cargarEmbeddedPg, correr, cronometro, esperarHttp, urlBase } from "./ayudas.mts";
+import { carpetaTemporal, cargarEmbeddedPg, correr, cronometro, esperarHttp, ignorarCierreDeConexiones, urlBase } from "./ayudas.mts";
+
+ignorarCierreDeConexiones();
 import { codigoTotp } from "../../src/lib/auth/totp";
 
 const PG = 54329;
@@ -191,3 +193,6 @@ try {
 
 console.log(resultados.join("\n"));
 console.log("\n" + cron.tabla());
+
+// El pool de Prisma y los procesos hijos pueden dejar el proceso colgado: salir explícitamente.
+process.exit(process.exitCode ?? 0);

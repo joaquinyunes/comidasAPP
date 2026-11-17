@@ -79,3 +79,11 @@ export async function esperarHttp(url: string, ms = 90_000) {
   }
   throw new Error(`El servidor no respondió en ${ms / 1000} s: ${url}`);
 }
+
+// Al apagar Postgres, el pool de `src/lib/prisma` (que Prisma no cierra) recibe un error de
+// conexión caída sin manejar. Es esperado en estas pruebas y no es un fallo.
+export function ignorarCierreDeConexiones() {
+  process.on("uncaughtException", (e) => {
+    if (!/Connection terminated|terminating connection|ECONNRESET/.test(String(e))) throw e;
+  });
+}
