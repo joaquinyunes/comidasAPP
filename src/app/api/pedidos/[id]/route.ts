@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTenantContext } from "@/lib/auth-context";
 import { sincronizarEstadoPedido } from "@/lib/pedidos/sincronizar-estado";
+import { transicionPermitida } from "@/lib/pedidos/transicion-permitida";
 import { z } from "zod";
 
 const CambioEstado = z.object({
@@ -73,6 +74,9 @@ export async function PUT(
       return NextResponse.json({ error: "Datos inválidos", details: parsedPut.error.issues }, { status: 400 });
     }
     const { estado, itemId, itemEstado } = parsedPut.data;
+
+    const veredicto = transicionPermitida(estado, context.permisos);
+    if (!veredicto.ok) return NextResponse.json({ error: veredicto.error }, { status: veredicto.status });
 
     const pedido = await prisma.pedido.findFirst({
       where: { id, tenantId: context.tenantId },

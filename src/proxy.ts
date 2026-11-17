@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { getJwtSecret } from "@/lib/jwt-secret";
+import { permisoRequeridoApi, tienePermisoRuta } from "@/lib/auth/permiso-ruta";
 
 // ============================================
 // PROXY — Autenticación y RBAC
@@ -83,15 +84,6 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   "/dashboard/fidelizacion": "clientes:leer",
   "/dashboard/configuracion": "config:leer",
   "/dashboard/carta": "pedidos:leer",
-  "/api/caja": "caja:leer",
-  "/api/salon": "mesas:leer",
-  "/api/carta": "pedidos:leer",
-  "/api/clientes": "clientes:leer",
-  "/api/reportes": "reportes:leer",
-  "/api/configuracion": "config:leer",
-  "/api/cocina": "pedidos:leer",
-  "/api/reservas": "reservas:leer",
-  "/api/inventario": "inventario:leer",
 };
 
 function getRequiredPermission(pathname: string): string | null {
@@ -127,8 +119,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(renovar);
   }
 
-  const requerido = getRequiredPermission(pathname);
-  if (requerido && !hasPermission(payload.permisos, requerido)) {
+  // API: permiso por método (mínimo privilegio). Páginas del panel: permiso de la sección.
+  const requerido = esApi ? permisoRequeridoApi(pathname, request.method) : getRequiredPermission(pathname);
+  if (requerido && !(esApi ? tienePermisoRuta(payload.permisos ?? [], requerido) : hasPermission(payload.permisos, requerido))) {
     if (esApi) return NextResponse.json({ error: "Permisos insuficientes" }, { status: 403 });
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }

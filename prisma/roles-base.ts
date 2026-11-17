@@ -6,7 +6,7 @@ export const ROLES_BASE = [
     nombre: "Gerente",
     permisos: [
       "pedidos:*", "caja:*", "pagos:*", "reservas:*", "mesas:*",
-      "inventario:leer", "clientes:leer", "reportes:leer",
+      "inventario:*", "compras:*", "clientes:leer", "reportes:leer",
     ],
   },
   { id: "rol-mozo", nombre: "Mozo", permisos: ["pedidos:crear", "pedidos:leer", "pedidos:actualizar", "mesas:leer", "mesas:actualizar", "reservas:leer"] },

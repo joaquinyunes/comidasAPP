@@ -102,6 +102,15 @@ try {
     ok(bloqueadoDel, "el trigger impide borrar el registro de auditoría");
   });
 
+  await cron.medir("6b. Migración 0006: un Gerente viejo recibe inventario y compras (idempotente)", async () => {
+    await bd!.query(`update roles set permisos = '["pedidos:*","inventario:leer"]'::jsonb where nombre = 'Gerente'`);
+    const sql = readFileSync("prisma/migrations/0006_permisos_gerente/migration.sql", "utf8");
+    await bd!.query(sql);
+    await bd!.query(sql);
+    const p = (await bd!.query("select permisos from roles where nombre = 'Gerente'")).rows[0].permisos as string[];
+    ok(p.includes("inventario:*") && p.includes("compras:*") && p.filter((x) => x === "compras:*").length === 1, "0006 agrega inventario:* y compras:* una sola vez aunque se corra dos veces");
+  });
+
   await cron.medir("7. Pago duplicado: 10 webhooks simultáneos en Postgres real", async () => {
     process.env.DATABASE_URL = url;
     const { prisma } = await import("../../src/lib/prisma");
