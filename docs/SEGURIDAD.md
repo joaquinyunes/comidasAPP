@@ -28,7 +28,7 @@ Revisión del 05/11/2026 sobre la rama `feat/venta-10k`. Leyenda: ✅ hecho y ve
 7. Webhook: el id va a una URL de MercadoPago → solo dígitos; si falla algo transitorio responde 500 (MP reintenta, es seguro por la idempotencia).
 
 ## Migraciones SQL pendientes de aplicar (👤, **no aplicadas a producción**)
-`0002_pago_referencia_unica`, `0003_audit_log_inmutable`, `0004_usuario_2fa`. Aplicar con `npx prisma migrate deploy` después de un backup (S10) y de revisar duplicados (consulta incluida en `0002`). Hasta entonces el código nuevo falla al tocar las columnas nuevas (`referencia`, `totp_*`) — **no desplegar sin migrar**.
+`0002_pago_referencia_unica`, `0003_audit_log_inmutable`, `0004_usuario_2fa` (y `0005_alinear_esquema`, que producción ya cumple por `db push`). **Producción no tiene historial de migraciones: seguir el procedimiento de `docs/PENDIENTES-VENTA.md` (baseline con `migrate resolve`), no un `migrate deploy` a secas.** Aplicar después de un backup (S10) y de revisar duplicados (consulta incluida en `0002`). Hasta entonces el código nuevo falla al tocar las columnas nuevas (`referencia`, `totp_*`) — **no desplegar sin migrar**.
 
 ## Variables nuevas
 `MERCADOPAGO_WEBHOOK_SECRET`, `API_V1_KEYS` (ver `.env.example`).

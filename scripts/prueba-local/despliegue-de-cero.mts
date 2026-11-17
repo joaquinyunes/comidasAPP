@@ -173,6 +173,9 @@ try {
 
     const home = await fetch(base + "/");
     ok(home.status === 200, "la portada responde 200");
+
+    const up = correr("bash", ["scripts/uptime.sh", base], {}, { sinFallar: true });
+    ok(up.codigo === 0 && /OK .*\/api\/salud/.test(up.salida), "scripts/uptime.sh (V7) da OK para la portada y /api/salud");
   });
 
 } catch (e) {
