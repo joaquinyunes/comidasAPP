@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { MEDIDAS_PRODUCTOS } from "./seed-medidas";
 import { ROLES_BASE } from "./roles-base";
+import { claveDelSeed } from "./seed-guard";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { hash } from "bcryptjs";
@@ -99,7 +100,7 @@ async function main() {
   // USUARIOS
   // ============================================
   // En un despliegue público definí SEED_PASSWORD; "admin123" es sólo para local.
-  const passwordHash = await hash(process.env.SEED_PASSWORD || "admin123", 12);
+  const passwordHash = await hash(claveDelSeed(process.env), 12);
 
   const usuarios = [
     { id: "user-admin", email: "admin@cozizina.com", nombre: "Admin Cozizina", rolId: "rol-admin" },

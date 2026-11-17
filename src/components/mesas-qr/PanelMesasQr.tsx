@@ -12,9 +12,7 @@ import { useMesas } from "./useMesas";
 import QrMesa from "./QrMesa";
 import QrLocal from "./QrLocal";
 
-const QR_LOCAL_CODIGO = process.env.NEXT_PUBLIC_QR_LOCAL_CODIGO ?? "";
-
-export default function PanelMesasQr() {
+export default function PanelMesasQr({ codigoQr }: { codigoQr: string }) {
   const { mesas, cargando, error } = useMesas();
   const [origin, setOrigin] = useState("");
 
@@ -41,9 +39,9 @@ export default function PanelMesasQr() {
 
       {error && <AvisoError>{error}</AvisoError>}
 
-      {origin && QR_LOCAL_CODIGO && (
+      {origin && codigoQr && (
         <div className="mb-6 max-w-xs">
-          <QrLocal url={urlPedirLocal(origin, QR_LOCAL_CODIGO)} />
+          <QrLocal url={urlPedirLocal(origin, codigoQr)} />
         </div>
       )}
 

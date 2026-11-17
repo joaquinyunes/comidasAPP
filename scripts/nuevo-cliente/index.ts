@@ -17,6 +17,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../../src/generated/prisma/client";
 import { generarSecreto, generarClaveAdmin, slugValido, hostDe } from "./secretos";
 import { crearBaseCliente } from "./crear-base";
+import { hash } from "bcryptjs";
 
 function args(): Record<string, string> {
   const out: Record<string, string> = {};
@@ -38,7 +39,7 @@ function comandoEnv(a: Record<string, string>) {
     `# Cliente: ${a.slug}. NO se sube al repo (.env* está ignorado). Cargá estos valores en Vercel (Production).`,
     `TENANT_SLUG=${a.slug}`,
     `JWT_SECRET=${generarSecreto(48)}`,
-    `NEXT_PUBLIC_QR_LOCAL_CODIGO=${generarSecreto(9)}`,
+    `QR_LOCAL_CODIGO=${generarSecreto(9)}`,
     `NEXT_PUBLIC_APP_URL=https://COMPLETAR-DOMINIO-DEL-CLIENTE`,
     `DATABASE_URL=COMPLETAR-cadena-de-conexion-de-Supabase-del-cliente`,
     `MERCADOPAGO_ACCESS_TOKEN=`,
@@ -78,8 +79,30 @@ async function comandoBase(a: Record<string, string>) {
   }
 }
 
+// Recuperación de clave SIN email (en producción el enlace por mail no existe todavía).
+//   npx tsx scripts/nuevo-cliente/index.ts clave --email dueno@correo.com --confirmo-base <host>
+async function comandoClave(a: Record<string, string>) {
+  const url = process.env.DATABASE_URL;
+  if (!url || !a.email) fallar("Faltan DATABASE_URL y --email.");
+  const host = hostDe(url);
+  if (!host || a["confirmo-base"] !== host) fallar(`Pasá --confirmo-base ${host}`);
+  const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
+  try {
+    const u = await prisma.usuario.findFirst({ where: { email: a.email, activo: true }, select: { id: true } });
+    if (!u) fallar("No hay un usuario activo con ese email.");
+    const nueva = generarClaveAdmin();
+    await prisma.usuario.update({ where: { id: u.id }, data: { passwordHash: await hash(nueva, 12) } });
+    await prisma.sesion.deleteMany({ where: { usuarioId: u.id } });
+    console.log(`✔ Clave nueva para ${a.email} (se muestra una sola vez; pedí que la cambie en Mi cuenta): ${nueva}`);
+    console.log("  Se cerraron todas sus sesiones.");
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
 const comando = process.argv[2];
 const a = args();
 if (comando === "env") comandoEnv(a);
+else if (comando === "clave") comandoClave(a).catch((e) => fallar(e instanceof Error ? e.message : String(e)));
 else if (comando === "base") comandoBase(a).catch((e) => fallar(e instanceof Error ? e.message : String(e)));
-else fallar('Uso: index.ts env|base --slug ... (ver el encabezado del archivo)');
+else fallar('Uso: index.ts env|base|clave ... (ver el encabezado del archivo)');

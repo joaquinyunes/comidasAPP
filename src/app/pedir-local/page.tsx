@@ -1,6 +1,7 @@
 import SiteChrome from "@/components/landing/site-chrome";
 import OrdenarLocal from "@/components/ordenar/OrdenarLocal";
 import CodigoLocalForm from "@/components/ordenar/CodigoLocalForm";
+import { codigoQrValido } from "@/lib/qr-local";
 
 export default async function PedirLocalPage({
   searchParams,
@@ -8,7 +9,7 @@ export default async function PedirLocalPage({
   searchParams: Promise<{ codigo?: string }>;
 }) {
   const { codigo } = await searchParams;
-  const codigoValido = !!codigo && codigo === process.env.NEXT_PUBLIC_QR_LOCAL_CODIGO;
+  const codigoValido = codigoQrValido(codigo);
 
   return (
     <SiteChrome
