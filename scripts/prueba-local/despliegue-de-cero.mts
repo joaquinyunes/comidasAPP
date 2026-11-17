@@ -124,6 +124,21 @@ try {
     ok(pagos === 1, `un solo pago en la base (hay ${pagos})`);
     ok(res.filter((r) => "yaPagado" in r && !r.yaPagado).length === 1, "exactamente uno lo creó; los otros 9 recibieron el mismo pago");
     ok((await prisma.pedido.findUniqueOrThrow({ where: { id: pedido.id } })).estado === "pagado", "el pedido quedó pagado");
+
+    // Dos cobros con DISTINTA referencia a la vez: el bloqueo de fila hace que solo uno salde el pedido.
+    const p2 = await prisma.pedido.create({ data: { tenantId: tenant.id, sucursalId: sucursal.id, tipo: "delivery", estado: "recibido", total: 8000 } });
+    await Promise.all([
+      registrarPagoPedido({ pedidoId: p2.id, monto: 8000, metodo: "qr", referencia: "mp:aaa" }),
+      registrarPagoPedido({ pedidoId: p2.id, monto: 8000, metodo: "qr", referencia: "mp:bbb" }),
+    ]);
+    ok((await prisma.pago.count({ where: { pedidoId: p2.id } })) === 1, "dos pagos distintos simultáneos: un solo pago en la base (FOR UPDATE real)");
+    ok((await prisma.pedidoEvento.count({ where: { pedidoId: p2.id, evento: "PAGO_MP_SOBRANTE" } })) === 1, "el segundo quedó como alerta PAGO_MP_SOBRANTE");
+    ok((await prisma.notificacion.count({ where: { tipo: "pago_sobrante" } })) === 1, "y se avisó al personal");
+
+    // Pago menor al saldo: no marca pagado.
+    const p3 = await prisma.pedido.create({ data: { tenantId: tenant.id, sucursalId: sucursal.id, tipo: "delivery", estado: "recibido", total: 6000 } });
+    await registrarPagoPedido({ pedidoId: p3.id, monto: 2000, metodo: "qr", referencia: "mp:parcial" });
+    ok((await prisma.pedido.findUniqueOrThrow({ where: { id: p3.id } })).estado === "recibido", "un pago menor al saldo NO marca el pedido como pagado");
     await prisma.$disconnect();
   });
 
@@ -200,7 +215,11 @@ try {
     /* ya detenido */
   }
   if (existsSync(envFile)) rmSync(envFile);
-  rmSync(datos, { recursive: true, force: true });
+  try {
+    rmSync(datos, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
+  } catch {
+    /* Windows aún tiene archivos abiertos: es una carpeta temporal, se limpia sola */
+  }
 }
 
 console.log(resultados.join("\n"));

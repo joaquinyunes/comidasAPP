@@ -49,8 +49,13 @@ export async function POST(req: NextRequest) {
       dataId: url.searchParams.get("data.id") || String(paymentId),
     });
     if (!ok) return NextResponse.json({ error: "firma inválida" }, { status: 401 });
+  } else if (process.env.NODE_ENV === "production") {
+    // Falla cerrado: sin secreto no hay forma de saber quién llama. MP reintenta, así que no se
+    // pierde el aviso: se normaliza apenas se cargue MERCADOPAGO_WEBHOOK_SECRET en el servidor.
+    console.error("[mp/webhook] MERCADOPAGO_WEBHOOK_SECRET sin configurar en producción: se rechaza el aviso");
+    return NextResponse.json({ error: "webhook sin configurar" }, { status: 500 });
   } else {
-    console.warn("[mp/webhook] MERCADOPAGO_WEBHOOK_SECRET sin configurar: firma sin verificar");
+    console.warn("[mp/webhook] MERCADOPAGO_WEBHOOK_SECRET sin configurar (solo desarrollo): firma sin verificar");
   }
 
   try {

@@ -112,6 +112,34 @@ describe("webhook de MercadoPago", () => {
   });
 });
 
+describe("webhook de MercadoPago — producción sin secreto (falla cerrado)", () => {
+  it("en producción sin MERCADOPAGO_WEBHOOK_SECRET responde 500 y no consulta ni registra nada", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000 });
+      const res = await post("type=payment&data.id=123");
+      expect(res.status).toBe(500);
+      expect(mocks.consultarPago).not.toHaveBeenCalled();
+      expect(mocks.registrarPagoPedido).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("en producción CON secreto y firma válida procesa normalmente", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    process.env.MERCADOPAGO_WEBHOOK_SECRET = SECRET;
+    try {
+      mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000 });
+      const res = await post("type=payment&data.id=123", firmar("123"));
+      expect(res.status).toBe(200);
+      expect(mocks.registrarPagoPedido).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+});
+
 describe("webhook de MercadoPago — firma x-signature (S6)", () => {
   beforeEach(() => {
     process.env.MERCADOPAGO_WEBHOOK_SECRET = SECRET;

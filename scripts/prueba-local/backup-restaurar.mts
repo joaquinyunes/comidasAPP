@@ -122,7 +122,11 @@ try {
   process.exitCode = 1;
 } finally {
   if (existsSync(envFile)) rmSync(envFile);
-  rmSync(raiz, { recursive: true, force: true });
+  try {
+    rmSync(raiz, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
+  } catch {
+    /* carpeta temporal */
+  }
 }
 
 console.log(resultados.join("\n"));
