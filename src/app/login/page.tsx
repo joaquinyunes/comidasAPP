@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { destinoSeguro } from "@/lib/auth/destino-seguro";
 
 // ============================================
 // PÁGINA DE LOGIN (staff del restaurante)
@@ -23,7 +24,8 @@ export default function LoginPage() {
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const callbackUrl = params?.get("callbackUrl") || "/dashboard";
+  // Solo rutas internas del panel: un enlace /login?callbackUrl=https://sitio-falso no redirige afuera.
+  const callbackUrl = destinoSeguro(params?.get("callbackUrl") ?? null);
 
   // Las credenciales de demo sólo se precargan en desarrollo.
   const [email, setEmail] = useState(ES_DEV ? "admin@cozizina.com" : "");

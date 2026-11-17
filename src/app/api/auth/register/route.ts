@@ -3,6 +3,17 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getTenantContext } from "@/lib/auth-context";
+import { timingSafeEqual } from "node:crypto";
+
+// Token de instalación (variable de servidor BOOTSTRAP_TOKEN): sin él nadie puede crear el primer
+// usuario de un restaurante vacío. El alta normal de un cliente nuevo la hace scripts/nuevo-cliente.
+function tokenInstalacionValido(recibido: string | null): boolean {
+  const esperado = process.env.BOOTSTRAP_TOKEN ?? "";
+  if (esperado.length < 16 || !recibido) return false;
+  const a = Buffer.from(recibido);
+  const b = Buffer.from(esperado);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 // ============================================
 // POST /api/auth/register — alta de personal
@@ -17,7 +28,7 @@ const RegisterSchema = z.object({
   password: z.string().min(12, "La contraseña debe tener al menos 12 caracteres"),
   nombre: z.string().min(1, "Nombre requerido").max(100),
   tenantId: z.string().uuid("Tenant inválido"),
-  rolId: z.string().optional(),
+  rolId: z.string().uuid().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -33,7 +44,12 @@ export async function POST(request: NextRequest) {
     const { email, password, nombre, tenantId, rolId } = parsed.data;
 
     const usuariosDelTenant = await prisma.usuario.count({ where: { tenantId } });
-    if (usuariosDelTenant > 0) {
+    if (usuariosDelTenant === 0) {
+      if (!tokenInstalacionValido(request.headers.get("x-bootstrap-token"))) {
+        return NextResponse.json({ error: "El primer usuario solo se crea con el token de instalación." }, { status: 403 });
+      }
+      if (!rolId) return NextResponse.json({ error: "El primer usuario necesita un rol." }, { status: 400 });
+    } else {
       const ctx = await getTenantContext(request);
       const esAdmin = ctx?.tenantId === tenantId && ctx.permisos.includes("*");
       if (!esAdmin) {
@@ -46,6 +62,10 @@ export async function POST(request: NextRequest) {
 
     const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { id: true } });
     if (!tenant) return NextResponse.json({ error: "Tenant no encontrado" }, { status: 404 });
+
+    if (rolId && !(await prisma.rol.findFirst({ where: { id: rolId, tenantId }, select: { id: true } }))) {
+      return NextResponse.json({ error: "Rol inválido para este restaurante." }, { status: 400 });
+    }
 
     const existe = await prisma.usuario.findFirst({ where: { email, tenantId }, select: { id: true } });
     if (existe) return NextResponse.json({ error: "El email ya está registrado" }, { status: 409 });

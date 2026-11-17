@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { cabecerasCsp, modoCsp } from "./src/config/csp";
+import { patronesImagenes } from "./src/config/imagenes";
 
 // CSP: política e interruptor reporte/bloqueo en src/config/csp.ts (variable CSP_MODO).
 const securityHeaders = [
@@ -18,10 +19,8 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
-    // Fotos de la carta que carga el restaurante (URLs propias).
-    remotePatterns: [
-      { protocol: "https", hostname: "**" },
-    ],
+    // Fotos externas: solo los dominios de IMAGENES_HOSTS (ver src/config/imagenes.ts).
+    remotePatterns: patronesImagenes(process.env.IMAGENES_HOSTS),
   },
 };
 

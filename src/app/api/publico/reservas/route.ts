@@ -11,15 +11,15 @@ import { strictRateLimit } from "@/lib/rate-limit";
 export const runtime = "nodejs";
 
 const ReservaSchema = z.object({
-  nombre: z.string().min(2, "Nombre requerido"),
-  telefono: z.string().min(6, "Teléfono inválido"),
-  email: z.string().email().optional().or(z.literal("")),
-  fecha: z.string().min(1),
-  hora: z.string().min(1),
+  nombre: z.string().trim().min(2, "Nombre requerido").max(100),
+  telefono: z.string().trim().min(6, "Teléfono inválido").max(30),
+  email: z.string().email().max(255).optional().or(z.literal("")),
+  fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida (AAAA-MM-DD)"),
+  hora: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "Hora inválida (HH:MM)"),
   cantidadPersonas: z.coerce.number().int().min(1).max(20),
-  zona: z.string().optional(),
-  notas: z.string().optional(),
-  tenant: z.string().optional(),
+  zona: z.string().max(50).optional(),
+  notas: z.string().max(500).optional(),
+  tenant: z.string().max(100).optional(),
 });
 
 export async function POST(request: NextRequest) {
