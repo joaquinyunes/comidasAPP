@@ -33,6 +33,9 @@ Revisión del 05/11/2026 sobre la rama `feat/venta-10k`. Leyenda: ✅ hecho y ve
 ## Variables nuevas
 `MERCADOPAGO_WEBHOOK_SECRET`, `API_V1_KEYS` (ver `.env.example`).
 
+## Segunda revisión (17/11/2026)
+**Una revisión independiente encontró 1 falla crítica, 2 altas, 3 medias y 5 bajas que esta pasada no vio; todas corregidas.** Detalle, commits y lo que queda para el usuario en `docs/SEGURIDAD-REVISION-2.md`. Lo más importante: la ruta pública de pago ya no marca pedidos como pagados, la API exige permisos por rol y método, y el webhook de Mercado Pago falla cerrado sin su secreto.
+
 ## Observaciones de la pasada de seguridad (S13), sin explotación concreta
 - Activar el 2FA (`PUT /api/auth/2fa`) no vuelve a pedir la contraseña: quien robe una sesión viva podría enrolar su propio TOTP. Desactivarlo sí pide contraseña y código. Mejora pendiente: pedir contraseña también al activar.
 - `GET /api/auth/refresh` tiene efecto (rota el token); un sitio ajeno puede dispararlo con una navegación, pero solo renueva la sesión de la propia víctima.
