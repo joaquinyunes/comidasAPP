@@ -2,11 +2,21 @@
 // Permiso que exige cada ruta de la API según el MÉTODO (mínimo privilegio).
 // Antes solo ~11 handlers miraban permisos: el resto aceptaba a cualquier usuario con sesión
 // (un mozo podía cobrar, ver auditoría, tocar cupones o compras).
-// Las rutas que no figuran acá (auth, personal/fichaje, feedback…) siguen pidiendo solo sesión.
+// Las rutas que no figuran acá (auth, checklists de lectura/ejecución…) siguen pidiendo solo sesión:
+// cada persona del salón hace sus propias tareas y ve lo suyo.
 // ============================================================
 
-// prefijo de la ruta → recurso de permisos. `fija`: acción única para todos los métodos de escritura.
-const REGLAS: { prefijo: string; recurso: string; escritura?: "actualizar" }[] = [
+// prefijo de la ruta → recurso de permisos. `escritura`: acción única para todos los métodos de escritura.
+// `metodos` + `exacto` acotan la regla (la primera que coincide gana, por eso van antes que las generales).
+interface Regla { prefijo: string; recurso: string; escritura?: "actualizar"; metodos?: string[]; exacto?: boolean }
+const REGLAS: Regla[] = [
+  { prefijo: "/api/personal/checklists", recurso: "rrhh", metodos: ["POST"], exacto: true }, // crear plantillas
+  { prefijo: "/api/personal/checklists/ejecuciones", recurso: "rrhh" },
+  { prefijo: "/api/personal/fichaje", recurso: "rrhh" },
+  { prefijo: "/api/personal/rendimiento", recurso: "rrhh" },
+  { prefijo: "/api/feedback", recurso: "reportes", escritura: "actualizar" },
+  { prefijo: "/api/ia", recurso: "reportes", escritura: "actualizar" },
+  { prefijo: "/api/sectores", recurso: "config", escritura: "actualizar" },
   { prefijo: "/api/pagos", recurso: "pagos" },
   { prefijo: "/api/pedidos", recurso: "pedidos" },
   { prefijo: "/api/cocina", recurso: "pedidos", escritura: "actualizar" },
@@ -39,9 +49,12 @@ const ACCION_POR_METODO: Record<string, string> = {
 };
 
 export function permisoRequeridoApi(pathname: string, metodo: string): string | null {
-  const regla = REGLAS.find((r) => pathname === r.prefijo || pathname.startsWith(r.prefijo + "/"));
+  const m = metodo.toUpperCase();
+  const regla = REGLAS.find(
+    (r) => (r.metodos ? r.metodos.includes(m) : true) && (pathname === r.prefijo || (!r.exacto && pathname.startsWith(r.prefijo + "/")))
+  );
   if (!regla) return null;
-  const accion = ACCION_POR_METODO[metodo.toUpperCase()] ?? "actualizar";
+  const accion = ACCION_POR_METODO[m] ?? "actualizar";
   const final = accion !== "leer" && regla.escritura ? regla.escritura : accion;
   return `${regla.recurso}:${final}`;
 }

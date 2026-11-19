@@ -23,7 +23,9 @@ describe("permiso requerido por ruta y método (revisión independiente, hallazg
   });
 
   it("rutas sin regla (auth, públicas, personal) siguen pidiendo solo sesión", () => {
-    for (const r of ["/api/auth/me", "/api/personal/fichaje", "/api/feedback", "/api/ia/x"]) expect(permisoRequeridoApi(r, "POST")).toBeNull();
+    for (const r of ["/api/auth/me", "/api/personal/checklists/abc/ejecutar"]) expect(permisoRequeridoApi(r, "POST")).toBeNull();
+    expect(permisoRequeridoApi("/api/personal/checklists", "GET")).toBeNull();
+    expect(permisoRequeridoApi("/api/personal/checklists/abc", "GET")).toBeNull();
   });
 
   it("el mozo y el cocinero NO pueden cobrar, ni tocar compras, cupones, RRHH, auditoría, dueño ni inventario", () => {
@@ -38,6 +40,23 @@ describe("permiso requerido por ruta y método (revisión independiente, hallazg
       expect(puede(rol, "GET", "/api/dueno/control-operativo")).toBe(false);
       expect(puede(rol, "POST", "/api/inventario/movimientos")).toBe(false);
     }
+  });
+
+  it("personal, feedback, IA y sectores piden permiso por rol (mozo y cocinero → 403)", () => {
+    const cerradas: [string, string][] = [
+      ["GET", "/api/personal/fichaje"], ["POST", "/api/personal/fichaje"], ["GET", "/api/personal/rendimiento"],
+      ["POST", "/api/personal/checklists"], ["GET", "/api/personal/checklists/ejecuciones"],
+      ["GET", "/api/feedback/resumen"], ["GET", "/api/ia/prediccion-stock"], ["GET", "/api/ia/prediccion-ventas"],
+      ["GET", "/api/sectores"], ["POST", "/api/sectores"],
+    ];
+    for (const rol of [MOZO, COCINERO, CAJERO]) for (const [met, ruta] of cerradas) expect(puede(rol, met, ruta), `${met} ${ruta}`).toBe(false);
+    expect(puede(GERENTE, "GET", "/api/feedback/resumen")).toBe(true);
+    expect(puede(GERENTE, "GET", "/api/ia/prediccion-stock")).toBe(true);
+    expect(puede(GERENTE, "POST", "/api/sectores")).toBe(false);
+    for (const [met, ruta] of cerradas) expect(puede(ADMIN, met, ruta)).toBe(true);
+    // lo que hace cada persona con su trabajo sigue abierto
+    expect(puede(MOZO, "GET", "/api/personal/checklists")).toBe(true);
+    expect(puede(MOZO, "POST", "/api/personal/checklists/abc/ejecutar")).toBe(true);
   });
 
   it("el mozo sí hace su trabajo: pedidos, mesas, salón, carta (disponibilidad)", () => {

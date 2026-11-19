@@ -30,6 +30,12 @@ describe("proxy: autorización por rol y método", () => {
     ["rol-cocinero", "POST", "/api/inventario/movimientos"],
     ["rol-cajero", "POST", "/api/compras/ordenes"],
     ["rol-gerente", "GET", "/api/audit"],
+    ["rol-mozo", "GET", "/api/personal/rendimiento"],
+    ["rol-mozo", "POST", "/api/personal/fichaje"],
+    ["rol-cocinero", "GET", "/api/feedback/resumen"],
+    ["rol-cocinero", "GET", "/api/ia/prediccion-stock"],
+    ["rol-mozo", "POST", "/api/sectores"],
+    ["rol-cajero", "GET", "/api/ia/prediccion-ventas"],
   ])("%s %s %s → 403", async (rol, metodo, ruta) => {
     expect(await llamar(rol, metodo, ruta)).toBe(403);
   });
@@ -42,7 +48,9 @@ describe("proxy: autorización por rol y método", () => {
     ["rol-gerente", "POST", "/api/compras/ordenes"],
     ["rol-admin", "GET", "/api/audit"],
     ["rol-mozo", "GET", "/api/auth/me"],
-    ["rol-mozo", "POST", "/api/personal/fichaje"],
+    ["rol-mozo", "POST", "/api/personal/checklists/abc/ejecutar"],
+    ["rol-gerente", "GET", "/api/feedback/resumen"],
+    ["rol-admin", "POST", "/api/sectores"],
   ])("%s %s %s → pasa", async (rol, metodo, ruta) => {
     expect(await llamar(rol, metodo, ruta)).toBe(200);
   });
