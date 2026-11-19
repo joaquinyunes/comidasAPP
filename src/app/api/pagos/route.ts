@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { mesaSinPendientes } from "@/lib/pedidos/mesa-sin-pendientes";
+import { validarCobro } from "@/lib/pedidos/validar-cobro";
 import { getTenantContext } from "@/lib/auth-context";
 import { z } from "zod";
 
@@ -12,6 +13,9 @@ const PagoSchema = z.object({
   propina: z.number().min(0).max(100_000_000).default(0),
   metodoPago: z.enum(METODOS),
   cajaId: z.string().uuid().nullish(),
+  // Cobrar menos que el saldo exige declararlo y dar el motivo (queda en el evento del pedido).
+  parcial: z.boolean().default(false),
+  motivo: z.string().trim().max(200).nullish(),
 });
 
 // ============================================
@@ -27,66 +31,64 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Datos inválidos", details: parsed.error.issues }, { status: 400 });
     }
-    const { pedidoId, monto, propina, metodoPago, cajaId } = parsed.data;
+    const { pedidoId, monto, propina, metodoPago, cajaId, parcial, motivo } = parsed.data;
 
-    // Verificar que el pedido existe
     const pedido = await prisma.pedido.findFirst({
       where: { id: pedidoId, tenantId: ctx.tenantId },
-      include: { pagos: { where: { estado: "completado" }, select: { id: true } } },
+      select: { id: true, tenantId: true, mesaId: true },
     });
-
-    if (!pedido) {
-      return NextResponse.json(
-        { error: "Pedido no encontrado" },
-        { status: 404 }
-      );
-    }
+    if (!pedido) return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
 
     if (cajaId && !(await prisma.caja.findFirst({ where: { id: cajaId, tenantId: ctx.tenantId }, select: { id: true } }))) {
       return NextResponse.json({ error: "Caja no encontrada" }, { status: 404 });
     }
 
-    // Idempotente: si ya tiene un pago completado, no duplicamos.
-    if (pedido.pagos.length > 0) {
-      return NextResponse.json({
-        success: true,
-        yaPagado: true,
-        pago: { id: pedido.pagos[0].id },
-      });
-    }
+    // El saldo se lee y se valida DENTRO de la transacción, con el pedido bloqueado:
+    // dos cobros a la vez del mismo pedido se hacen en fila y no se pisan.
+    const resultado = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM pedidos WHERE id = ${pedido.id}::uuid FOR UPDATE`;
+      const actual = await tx.pedido.findUniqueOrThrow({ where: { id: pedido.id }, select: { total: true, estado: true } });
+      if (actual.estado === "cancelado") return { error: "El pedido está cancelado: no se puede cobrar.", status: 409 } as const;
 
-    // Crear pago + cerrar pedido + liberar mesa en una transacción.
-    const pago = await prisma.$transaction(async (tx) => {
+      const previos = await tx.pago.findMany({
+        where: { pedidoId: pedido.id, estado: "completado" },
+        select: { id: true, monto: true, propina: true },
+      });
+      const cobrado = previos.reduce((a, p) => a + (Number(p.monto) - Number(p.propina)), 0);
+      const decision = validarCobro({ total: Number(actual.total), cobrado, monto, propina, parcial, motivo });
+      if (!decision.ok) {
+        if (decision.codigo === "YA_PAGADO") return { yaPagado: previos[0]?.id ?? "" } as const;
+        return { error: decision.mensaje, status: decision.status } as const;
+      }
+
       const creado = await tx.pago.create({
-        data: {
-          tenantId: pedido.tenantId,
-          pedidoId,
-          cajaId: cajaId ?? null,
-          monto,
-          propina,
-          metodoPago,
-          estado: "completado",
-        },
+        data: { tenantId: pedido.tenantId, pedidoId, cajaId: cajaId ?? null, monto, propina, metodoPago, estado: "completado" },
       });
 
-      await tx.pedido.update({ where: { id: pedidoId }, data: { estado: "pagado" } });
-
-      // La mesa se libera solo si no le queda otra comanda sin cobrar.
-      if (pedido.mesaId && (await mesaSinPendientes(tx, pedido.mesaId, pedidoId))) {
-        await tx.mesa.update({ where: { id: pedido.mesaId }, data: { estado: "libre" } });
+      if (decision.salda) {
+        await tx.pedido.update({ where: { id: pedidoId }, data: { estado: "pagado" } });
+        // La mesa se libera solo si no le queda otra comanda sin cobrar.
+        if (pedido.mesaId && (await mesaSinPendientes(tx, pedido.mesaId, pedidoId))) {
+          await tx.mesa.update({ where: { id: pedido.mesaId }, data: { estado: "libre" } });
+        }
       }
 
       await tx.pedidoEvento.create({
         data: {
           tenantId: pedido.tenantId,
           pedidoId,
-          evento: "PAGO_COMPLETADO",
-          metadata: { pagoId: creado.id, monto, metodoPago },
+          evento: decision.salda ? "PAGO_COMPLETADO" : "PAGO_PARCIAL",
+          metadata: { pagoId: creado.id, monto, metodoPago, saldoAntes: decision.saldoAntes, ...(decision.salda ? {} : { motivo }) },
         },
       });
-
-      return creado;
+      return { pago: creado } as const;
     });
+
+    if ("error" in resultado) return NextResponse.json({ error: resultado.error }, { status: resultado.status });
+    if ("yaPagado" in resultado) {
+      return NextResponse.json({ success: true, yaPagado: true, pago: { id: resultado.yaPagado } });
+    }
+    const pago = resultado.pago;
 
     return NextResponse.json({
       success: true,
