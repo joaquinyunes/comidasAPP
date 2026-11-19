@@ -31,7 +31,7 @@ describe("proxy: autorización por rol y método", () => {
     ["rol-cajero", "POST", "/api/compras/ordenes"],
     ["rol-gerente", "GET", "/api/audit"],
     ["rol-mozo", "GET", "/api/personal/rendimiento"],
-    ["rol-mozo", "POST", "/api/personal/fichaje"],
+    ["rol-mozo", "GET", "/api/personal/fichaje"],
     ["rol-cocinero", "GET", "/api/feedback/resumen"],
     ["rol-cocinero", "GET", "/api/ia/prediccion-stock"],
     ["rol-mozo", "POST", "/api/sectores"],
@@ -49,6 +49,7 @@ describe("proxy: autorización por rol y método", () => {
     ["rol-admin", "GET", "/api/audit"],
     ["rol-mozo", "GET", "/api/auth/me"],
     ["rol-mozo", "POST", "/api/personal/checklists/abc/ejecutar"],
+    ["rol-mozo", "POST", "/api/personal/fichaje"],
     ["rol-gerente", "GET", "/api/feedback/resumen"],
     ["rol-admin", "POST", "/api/sectores"],
   ])("%s %s %s → pasa", async (rol, metodo, ruta) => {

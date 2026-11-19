@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTenantContext } from "@/lib/auth-context";
+import { tienePermisoRuta } from "@/lib/auth/permiso-ruta";
 
 // ============================================
 // GET /api/dashboard/resumen
@@ -12,6 +13,8 @@ export async function GET(request: NextRequest) {
   }
 
   const tenantId = ctx.tenantId;
+  // Las ventas y la cantidad de clientes son de quien ve reportes; el resto del personal ve lo operativo.
+  const verFinanzas = tienePermisoRuta(ctx.permisos ?? [], "reportes:leer");
   const hoy = new Date();
   const inicioHoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
   const inicioAyer = new Date(inicioHoy);
@@ -28,18 +31,9 @@ export async function GET(request: NextRequest) {
     clientes,
     stock,
   ] = await Promise.all([
-    prisma.pago.findMany({
-      where: { tenantId, createdAt: { gte: inicioHoy } },
-      select: { monto: true },
-    }),
-    prisma.pago.findMany({
-      where: { tenantId, createdAt: { gte: inicioAyer, lt: inicioHoy } },
-      select: { monto: true },
-    }),
-    prisma.pago.findMany({
-      where: { tenantId, createdAt: { gte: inicioMes } },
-      select: { monto: true },
-    }),
+    verFinanzas ? prisma.pago.findMany({ where: { tenantId, estado: "completado", createdAt: { gte: inicioHoy } }, select: { monto: true } }) : Promise.resolve([]),
+    verFinanzas ? prisma.pago.findMany({ where: { tenantId, estado: "completado", createdAt: { gte: inicioAyer, lt: inicioHoy } }, select: { monto: true } }) : Promise.resolve([]),
+    verFinanzas ? prisma.pago.findMany({ where: { tenantId, estado: "completado", createdAt: { gte: inicioMes } }, select: { monto: true } }) : Promise.resolve([]),
     prisma.mesa.findMany({ where: { tenantId }, select: { estado: true } }),
     prisma.pedido.count({
       where: {
@@ -48,7 +42,7 @@ export async function GET(request: NextRequest) {
       },
     }),
     prisma.producto.count({ where: { tenantId } }),
-    prisma.cliente.count({ where: { tenantId } }),
+    verFinanzas ? prisma.cliente.count({ where: { tenantId } }) : Promise.resolve(0),
     prisma.stockPorSucursal.findMany({
       where: { tenantId, sucursalId: ctx.sucursalId ?? undefined },
       include: { ingrediente: true },
@@ -70,6 +64,7 @@ export async function GET(request: NextRequest) {
   }).length;
 
   return NextResponse.json({
+    soloOperativo: !verFinanzas,
     ventasHoy,
     ventasAyer,
     // Ticket = lo cobrado dividido por la cantidad de cobros del día.

@@ -10,17 +10,21 @@ export default function CifrasTurno({ r }: { r: ResumenApi }) {
 
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {!r.soloOperativo && (
       <Cifra
         etiqueta="Vendido hoy"
         valor={formatCurrency(r.ventasHoy)}
         detalle={textoVariacion(variacion)}
         tono={variacion !== null && variacion < 0 ? "aviso" : "neutro"}
       />
+      )}
+      {!r.soloOperativo && (
       <Cifra
         etiqueta="Ticket promedio"
         valor={formatCurrency(r.ticketPromedio)}
         detalle={`${r.cobrosHoy} cobros hoy`}
       />
+      )}
       <Cifra
         etiqueta="Mesas ocupadas"
         valor={`${r.mesasOcupadas} de ${r.mesasTotales}`}

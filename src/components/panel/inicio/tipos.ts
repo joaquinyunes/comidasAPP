@@ -1,6 +1,7 @@
 // Lo que devuelven las APIs que alimentan el resumen del turno.
 
 export interface ResumenApi {
+  soloOperativo?: boolean; // sin permiso de reportes: las cifras de plata vienen en cero y no se muestran
   ventasHoy: number;
   ventasAyer: number;
   ventasMes: number;

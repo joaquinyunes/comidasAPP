@@ -44,15 +44,15 @@ describe("permiso requerido por ruta y método (revisión independiente, hallazg
 
   it("personal, feedback, IA y sectores piden permiso por rol (mozo y cocinero → 403)", () => {
     const cerradas: [string, string][] = [
-      ["GET", "/api/personal/fichaje"], ["POST", "/api/personal/fichaje"], ["GET", "/api/personal/rendimiento"],
+      ["GET", "/api/personal/fichaje"], ["GET", "/api/personal/rendimiento"],
       ["POST", "/api/personal/checklists"], ["GET", "/api/personal/checklists/ejecuciones"],
       ["GET", "/api/feedback/resumen"], ["GET", "/api/ia/prediccion-stock"], ["GET", "/api/ia/prediccion-ventas"],
-      ["GET", "/api/sectores"], ["POST", "/api/sectores"],
+      ["POST", "/api/sectores"],
     ];
     for (const rol of [MOZO, COCINERO, CAJERO]) for (const [met, ruta] of cerradas) expect(puede(rol, met, ruta), `${met} ${ruta}`).toBe(false);
     expect(puede(GERENTE, "GET", "/api/feedback/resumen")).toBe(true);
     expect(puede(GERENTE, "GET", "/api/ia/prediccion-stock")).toBe(true);
-    expect(puede(GERENTE, "POST", "/api/sectores")).toBe(false);
+    expect(puede(GERENTE, "POST", "/api/sectores")).toBe(true); // sectores es de mesas
     for (const [met, ruta] of cerradas) expect(puede(ADMIN, met, ruta)).toBe(true);
     // lo que hace cada persona con su trabajo sigue abierto
     expect(puede(MOZO, "GET", "/api/personal/checklists")).toBe(true);

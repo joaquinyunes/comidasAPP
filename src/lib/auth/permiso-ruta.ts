@@ -8,23 +8,25 @@
 
 // prefijo de la ruta → recurso de permisos. `escritura`: acción única para todos los métodos de escritura.
 // `metodos` + `exacto` acotan la regla (la primera que coincide gana, por eso van antes que las generales).
-interface Regla { prefijo: string; recurso: string; escritura?: "actualizar"; metodos?: string[]; exacto?: boolean }
+interface Regla { prefijo: string; recurso?: string; escritura?: "actualizar"; metodos?: string[]; exacto?: boolean; libre?: boolean }
 const REGLAS: Regla[] = [
-  { prefijo: "/api/personal/checklists", recurso: "rrhh", metodos: ["POST"], exacto: true }, // crear plantillas
+  // Personal: todo es de RRHH, salvo lo que hace cada persona con su trabajo (`libre`: solo sesión).
+  { prefijo: "/api/personal/fichaje", metodos: ["POST"], libre: true },
   { prefijo: "/api/personal/checklists/ejecuciones", recurso: "rrhh" },
-  { prefijo: "/api/personal/fichaje", recurso: "rrhh" },
-  { prefijo: "/api/personal/rendimiento", recurso: "rrhh" },
-  { prefijo: "/api/feedback", recurso: "reportes", escritura: "actualizar" },
-  { prefijo: "/api/ia", recurso: "reportes", escritura: "actualizar" },
-  { prefijo: "/api/sectores", recurso: "config", escritura: "actualizar" },
+  { prefijo: "/api/personal/checklists", metodos: ["POST"], exacto: true, recurso: "rrhh" }, // crear plantillas
+  { prefijo: "/api/personal/checklists", metodos: ["GET", "POST"], libre: true }, // ver y ejecutar checklists
+  { prefijo: "/api/personal", recurso: "rrhh" },
+  { prefijo: "/api/feedback", recurso: "reportes" },
+  { prefijo: "/api/ia", recurso: "reportes" },
+  { prefijo: "/api/sectores", recurso: "mesas" },
   { prefijo: "/api/pagos", recurso: "pagos" },
   { prefijo: "/api/pedidos", recurso: "pedidos" },
   { prefijo: "/api/cocina", recurso: "pedidos", escritura: "actualizar" },
   { prefijo: "/api/delivery", recurso: "pedidos", escritura: "actualizar" },
   { prefijo: "/api/carta", recurso: "pedidos" },
-  { prefijo: "/api/mesas", recurso: "mesas", escritura: "actualizar" },
-  { prefijo: "/api/salon", recurso: "mesas", escritura: "actualizar" },
-  { prefijo: "/api/mozo", recurso: "mesas", escritura: "actualizar" },
+  { prefijo: "/api/mesas", recurso: "mesas" }, // crear/borrar mesas piden mesas:crear / mesas:eliminar
+  { prefijo: "/api/salon", recurso: "mesas" },
+  { prefijo: "/api/mozo", recurso: "mesas" },
   { prefijo: "/api/reservas", recurso: "reservas" },
   { prefijo: "/api/caja", recurso: "caja" },
   { prefijo: "/api/inventario", recurso: "inventario" },
@@ -53,7 +55,7 @@ export function permisoRequeridoApi(pathname: string, metodo: string): string | 
   const regla = REGLAS.find(
     (r) => (r.metodos ? r.metodos.includes(m) : true) && (pathname === r.prefijo || (!r.exacto && pathname.startsWith(r.prefijo + "/")))
   );
-  if (!regla) return null;
+  if (!regla || regla.libre || !regla.recurso) return null;
   const accion = ACCION_POR_METODO[m] ?? "actualizar";
   const final = accion !== "leer" && regla.escritura ? regla.escritura : accion;
   return `${regla.recurso}:${final}`;

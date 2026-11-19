@@ -45,10 +45,10 @@ export default function ResumenTurno() {
 
           <div className="grid gap-4 lg:grid-cols-2">
             {control.datos && <RendimientoMozos filas={control.datos.rendimiento} />}
-            <Bloque titulo="El mes hasta hoy">
+            {!resumen.datos.soloOperativo && <Bloque titulo="El mes hasta hoy">
               <p className="pn-num text-3xl font-semibold">{formatCurrency(resumen.datos.ventasMes)}</p>
               <p className="mt-1 text-sm text-pn-suave">Cobrado desde el 1 del mes, propinas incluidas.</p>
-            </Bloque>
+            </Bloque>}
           </div>
         </div>
       )}

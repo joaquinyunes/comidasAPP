@@ -27,6 +27,7 @@ const API_PUBLICAS = [
   "/api/publico",
   "/api/cliente",
   "/api/pagos/mercadopago/webhook",
+  "/api/v1", // API pública: cada ruta exige su propia X-API-Key (no hay sesión)
   "/api/csp", // reportes que manda el navegador
   "/api/salud", // chequeo de disponibilidad (V7)
 ];
