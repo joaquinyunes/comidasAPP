@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       }
 
       const creado = await tx.pago.create({
-        data: { tenantId: pedido.tenantId, pedidoId, cajaId: cajaId ?? null, monto, propina, metodoPago, estado: "completado" },
+        data: { tenantId: pedido.tenantId, pedidoId, cajaId: cajaId ?? null, monto, propina, metodoPago, estado: "completado", usuarioId: ctx.usuarioId },
       });
 
       if (decision.salda) {
@@ -77,8 +77,20 @@ export async function POST(request: NextRequest) {
         data: {
           tenantId: pedido.tenantId,
           pedidoId,
+          usuarioId: ctx.usuarioId,
           evento: decision.salda ? "PAGO_COMPLETADO" : "PAGO_PARCIAL",
           metadata: { pagoId: creado.id, monto, metodoPago, saldoAntes: decision.saldoAntes, ...(decision.salda ? {} : { motivo }) },
+        },
+      });
+      // Quién cobró queda también en la auditoría (inmutable), dentro de la misma transacción.
+      await tx.auditLog.create({
+        data: {
+          tenantId: pedido.tenantId,
+          usuarioId: ctx.usuarioId,
+          accion: "create",
+          entidad: "Pago",
+          entidadId: creado.id,
+          valorNuevo: { pedidoId, monto, propina, metodoPago, parcial: !decision.salda, ...(decision.salda ? {} : { motivo }) },
         },
       });
       return { pago: creado } as const;

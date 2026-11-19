@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
   pedidoUpdate: vi.fn(),
   mesaUpdate: vi.fn(),
   eventoCreate: vi.fn(),
+  auditCreate: vi.fn(),
 }));
 
 vi.mock("@/lib/auth-context", () => ({ getTenantContext: async () => ({ tenantId: T, usuarioId: "u1", roles: [], permisos: ["*"] }) }));
@@ -32,6 +33,7 @@ vi.mock("@/lib/prisma", () => {
     },
     mesa: { update: m.mesaUpdate },
     pedidoEvento: { create: m.eventoCreate },
+    auditLog: { create: m.auditCreate },
   };
   return {
     prisma: {
@@ -51,7 +53,7 @@ beforeEach(() => {
   m.pagosPrevios = [];
   m.total = 1000;
   m.estado = "entregado";
-  [m.pagoCreate, m.pedidoUpdate, m.mesaUpdate, m.eventoCreate].forEach((f) => f.mockReset());
+  [m.pagoCreate, m.pedidoUpdate, m.mesaUpdate, m.eventoCreate, m.auditCreate].forEach((f) => f.mockReset());
 });
 
 describe("POST /api/pagos — el monto se valida contra el saldo", () => {
@@ -61,6 +63,20 @@ describe("POST /api/pagos — el monto se valida contra el saldo", () => {
     expect(m.pagoCreate).toHaveBeenCalledOnce();
     expect(m.pedidoUpdate).toHaveBeenCalledWith({ where: { id: PEDIDO }, data: { estado: "pagado" } });
     expect(m.mesaUpdate).toHaveBeenCalled();
+  });
+
+  it("cada cobro guarda QUIÉN lo hizo: en el pago, en el evento y en la auditoría (M2)", async () => {
+    await post({ pedidoId: PEDIDO, monto: 1000, metodoPago: "efectivo" });
+    expect(m.pagoCreate.mock.calls[0][0].data.usuarioId).toBe("u1");
+    expect(m.eventoCreate.mock.calls[0][0].data.usuarioId).toBe("u1");
+    expect(m.auditCreate.mock.calls[0][0].data).toMatchObject({ tenantId: T, usuarioId: "u1", accion: "create", entidad: "Pago", entidadId: "pago-nuevo" });
+    expect(m.auditCreate.mock.calls[0][0].data.valorNuevo).toMatchObject({ pedidoId: PEDIDO, monto: 1000, metodoPago: "efectivo" });
+  });
+
+  it("un cobro parcial también queda auditado", async () => {
+    await post({ pedidoId: PEDIDO, monto: 400, metodoPago: "efectivo", parcial: true, motivo: "divide la cuenta" });
+    expect(m.auditCreate).toHaveBeenCalledOnce();
+    expect(m.auditCreate.mock.calls[0][0].data.valorNuevo).toMatchObject({ parcial: true, motivo: "divide la cuenta" });
   });
 
   it("cobrar de más: 409 y no crea nada", async () => {
