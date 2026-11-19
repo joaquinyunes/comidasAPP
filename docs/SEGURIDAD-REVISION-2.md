@@ -1,6 +1,6 @@
 # Segunda revisión de seguridad (independiente, solo lectura) — corregida el 17/11/2026
 
-Una revisión externa encontró fallas reales que mi propia pasada (S13, `docs/SEGURIDAD.md`) no vio. Se corrigieron en la rama `feat/venta-fase2`, **con el test escrito antes** (se vio fallar) y verificado al final: `build` ✔, `lint` ✔, `npm test` **554 de 554** (tras la segunda tanda), `tsc` ✔, `npm audit --omit=dev` **0 vulnerabilidades** (la herramienta `shadcn` pasó a `devDependencies`). Ensayo de despliegue de cero en Postgres 18 real (`scripts/prueba-local/despliegue-de-cero.mts`, 7 migraciones, sin deriva, build de producción): **todas las comprobaciones en verde**, incluido «administrador sin 2FA → 403 hasta activarlo».
+Una revisión externa encontró fallas reales que mi propia pasada (S13, `docs/SEGURIDAD.md`) no vio. Se corrigieron en la rama `feat/venta-fase2`, **con el test escrito antes** (se vio fallar) y verificado al final: `build` ✔, `lint` ✔, `npm test` **626 de 626** (tras la tercera tanda), `tsc` ✔, `npm audit --omit=dev` **0 vulnerabilidades** (la herramienta `shadcn` pasó a `devDependencies`). Ensayo de despliegue de cero en Postgres 18 real (`scripts/prueba-local/despliegue-de-cero.mts`, 7 migraciones, sin deriva, build de producción): **todas las comprobaciones en verde**, incluido «administrador sin 2FA → 403 hasta activarlo».
 
 | # | Gravedad | Hallazgo | Arreglo | Commit |
 |---|---|---|---|---|
@@ -30,6 +30,40 @@ Una revisión externa encontró fallas reales que mi propia pasada (S13, `docs/S
 
 Uso: `node scripts/verificar-despliegue.mjs --env .env.cliente-<slug>` (o sin `--env` con las variables del entorno; `--sin-base` para omitir la base).
 
+## Tercera tanda (19/11/2026): hallazgos de la segunda revisión independiente
+
+La segunda revisión confirmó cerrados lo crítico y lo alto (pago público, webhook, permisos por rol, `/api/pagos`) y dejó estos puntos medios y bajos. Todos con test antes del cambio.
+
+| # | Hallazgo | Arreglo | Verificación |
+|---|---|---|---|
+| M1 | El webhook pagaba pedidos **cancelados** | `registrarPagoPedido`: pedido cancelado = «sobrante» (evento `PAGO_MP_SOBRANTE` motivo `pedido_cancelado` + aviso; **no** crea pago ni reabre). La preferencia de pago rechaza pedidos cancelados (409) | `pagos-webhook-concurrente`, `pago-mercadopago-preferencia` |
+| M2 | El cobro no guardaba quién lo hizo | `/api/pagos`: `usuarioId` en el pago y en el evento, y fila de **AuditLog** (`Pago`, `create`) en la misma transacción; el cobro parcial incluye el motivo | `pagos-monto-saldo` |
+| M3 | `/api/dashboard/resumen` mostraba ventas a cualquiera | Sin `reportes:leer` devuelve solo lo operativo (mesas, pedidos abiertos, stock crítico; ventas y clientes en 0, `soloOperativo: true`, ni siquiera consulta pagos) y la pantalla oculta las cifras de plata | `dashboard-resumen-permiso` |
+| M4 | `/api/personal/*` | Todo bajo `rrhh` (cerrado por defecto, también las rutas nuevas). Quedan **para todo el personal** solo: fichar (`POST fichaje`), ver las checklists y ejecutarlas | `permiso-ruta-revision2` |
+| M5 | `/api/mesas`, `salon`, `mozo` | Sin «escritura = actualizar»: crear pide `mesas:crear`, borrar `mesas:eliminar`; el cambio de estado (`PATCH/PUT`) sigue siendo `mesas:actualizar` (el mozo lo tiene) | ídem |
+| M6 | `PUT /api/pedidos/[id]` y `delivery/asignar` | `puedeTransicionarPedido`: un pedido **pagado o cancelado no se modifica** (ni estado ni ítems; agregar ítems a uno pagado también se rechaza). Asignar reparto lo respeta | `transicion-permitida`, `pedidos-estado-y-reparto` |
+| M7 | Ids sin validar contra el restaurante | `delivery/asignar` (empleado y zona), `reservas` y `inventario` (sucursal del cuerpo; proveedor), `compras/ordenes` (cada ingrediente): `findFirst/count({ id, tenantId })`, 404 si es ajeno | `ids-del-tenant` |
+| M8 | `/api/v1/pedidos` | Mesa y productos filtrados por `auth.tenantId`; 400 si falta un producto (antes creaba el pedido a precio 0) | `v1-pedidos-tenant` |
+| M9 | El seed | Aborta si el host de `DATABASE_URL` no es local, salvo `--confirmo-base <host>` (`verificarBaseDelSeed`, antes de tocar nada); **ya no pisa** el `passwordHash` de usuarios existentes | `seed-guard` |
+| M10 | QR del local | El restaurante sale siempre de `TENANT_SLUG` (se ignora `tenant` del cuerpo). El tope ya no depende de la `referencia` (texto libre): se cuenta por **mesa normalizada** («Mesa 5» = «mesa-5»), por **IP** (30 / 10 min) y para **todo el local** (300 / 10 min), en la base | `cliente-local-qr`, `limite-qr` |
+| B2/B3 | `sectores`, `feedback`, `ia` | `/api/sectores` → `mesas`; `/api/feedback` y `/api/ia` → `reportes` | `permiso-ruta-revision2` |
+| B5 | `/api/v1` lo frenaba el proxy antes de leer `X-API-Key` | `/api/v1` es pública para el proxy y cada ruta exige su clave; probado **pasando por el proxy** (con clave, sin clave → 401, y una sesión JWT no abre `/api/v1`) | ídem |
+| B6 | `refunded` / `charged_back` y moneda | Nuevo `revertirPagoPedido`: el pago pasa a «reembolsado» (la caja deja de contarlo), el pedido «pagado» vuelve a «entregado» con saldo y se avisa; idempotente. Un pago aprobado en moneda distinta de ARS **no se registra** (queda en el log) | `pagos-webhook-concurrente`, `mp-webhook` |
+| B7 | `external_reference` | Debe ser un **uuid real** (`z.uuid()`), no cualquier cadena de 36 caracteres | `mp-webhook` |
+| B8 | La preferencia cobraba el total | Cobra el **saldo pendiente** (la propina se calcula sobre el saldo); sin saldo → 409 | `pago-mercadopago-preferencia` |
+| B9 | Pedido en $0 (cupón del 100 %) | Puede pasar a «pagado» sin cobro (no hay nada que cobrar); con saldo sigue siendo 409. Los pagos reembolsados ya no suman en el resumen del día | `transicion-permitida`, `pedidos-estado-y-reparto` |
+| B10 | El login no resolvía el restaurante | Login y recuperación buscan al usuario con `tenant: { slug: TENANT_SLUG }` | `auth-reset-confirmar-y-tenant` |
+| B11 | Slug fijo `pizzaria-demo` y hora `99:99` | Reservas, landing, zonas, cupón y pedidos públicos usan `TENANT_SLUG` y no aceptan `tenant` del visitante. Fecha y hora se validan de verdad (`99:99`, `24:00`, `2026-02-31` → 400; antes Invalid Date → 500), también en la reserva interna | `tenant-fijo-y-fechas` |
+| B12 | Límites de intentos en la base | Ya hecho en la segunda tanda (login, 2FA, QR con `intentos_fallidos`); ahora también el tope por IP, por mesa y del local | `limite-intentos.mts` (Postgres real) |
+| B14 | `reset/confirmar` | Responde 403 en producción (sin canal de email no hay token legítimo); en desarrollo sigue andando | `auth-reset-confirmar-y-tenant` |
+
+`scripts/verificar-despliegue.mjs` ahora también exige `TENANT_SLUG` y que ese restaurante **exista y esté activo** en la base (probado en Postgres real: sin el restaurante, «NO desplegar»).
+
+### Lo que cambia al desplegar esta tanda
+- **`TENANT_SLUG` pasa a ser obligatorio en la práctica**: tiene que ser el `slug` del restaurante en la base. Si queda sin cargar, la app busca «pizzaria-demo» y **nadie del restaurante real podría iniciar sesión**. Comprobarlo con `verificar-despliegue.mjs`.
+- Quien use el seed contra una base remota debe agregar `--confirmo-base <host>`.
+- Un reembolso o contracargo de Mercado Pago deja el pedido otra vez con saldo y un aviso: hay que cobrarlo de nuevo o resolverlo.
+
 ## Lo que cambia para quien opera el sistema (leer antes de desplegar)
 - **Los mozos y cocineros ya no pueden cobrar** (antes sí, por falta de control). Cobra el cajero, el gerente o el administrador.
 - **El cliente que toca «Pagar la cuenta» desde la mesa ya no paga:** avisa al personal y el cobro se hace en el panel. El botón en `src/components/cliente/PagoMesa.tsx` todavía dice «Pagar la cuenta» (la respuesta aclara «Todavía no se cobró nada»): conviene renombrarlo a «Pedir la cuenta». Cambio visual pendiente.
@@ -54,5 +88,8 @@ Uso: `node scripts/verificar-despliegue.mjs --env .env.cliente-<slug>` (o sin `-
 - Los roles *existentes* de producción siguen con los permisos que tengan en la base (solo `Gerente` se completó con `0006`): revisarlos.
 - Los permisos de `rrhh`, `config` y `reportes` no están en el rol `Gerente` base (tampoco lo estaban sus pantallas): si el gerente debe ver feedback, rendimiento del personal o sectores, hay que dárselos a mano.
 - El secreto del 2FA se guarda en claro en la fila del usuario (ver `shortcut:` en `2fa/route.ts`); activar el 2FA no vuelve a pedir la contraseña.
-- Los límites generales por IP del resto de la API (`rate-limit.ts`) siguen en memoria por instancia; solo login, 2FA y QR pasaron a la base.
+- Los límites generales por IP del resto de la API (`rate-limit.ts`, p. ej. el de 20/min del pedido en mesa, la recuperación de clave o el registro) siguen en memoria por instancia; solo login, 2FA y QR pasaron a la base.
+- `POST /api/personal/fichaje` está abierto a todo el personal y acepta cualquier `empleadoId` del restaurante (un mozo podría fichar a otro): falta limitarlo al propio empleado.
+- Un reembolso **parcial** de Mercado Pago (el pago sigue «approved») no se descuenta: solo se revierten `refunded` y `charged_back`.
+- `rrhh`, `config` y la escritura de reportes no están en el rol base «Gerente»: hoy solo el administrador las usa.
 - La recuperación de clave por email sigue deshabilitada en producción (no hay proveedor de email).
