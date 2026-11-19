@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { MEDIDAS_PRODUCTOS } from "./seed-medidas";
 import { ROLES_BASE } from "./roles-base";
-import { claveDelSeed } from "./seed-guard";
+import { claveDelSeed, verificarBaseDelSeed } from "./seed-guard";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { hash } from "bcryptjs";
@@ -40,6 +40,7 @@ const TENANT_ID = uid("tenant-demo-001");
 const SUCURSAL_ID = uid("sucursal-demo-001");
 
 async function main() {
+  verificarBaseDelSeed(process.env.DATABASE_URL, process.argv.slice(2)); // antes de tocar nada
   console.log("🌱 Iniciando seed...");
 
   // ============================================
@@ -116,7 +117,8 @@ async function main() {
     const rolId = uid(user.rolId);
     await prisma.usuario.upsert({
       where: { id: userId },
-      update: { email: user.email, nombre: user.nombre, passwordHash },
+      // No pisa la clave de un usuario que ya existe (el seed no puede cambiar claves reales).
+      update: { email: user.email, nombre: user.nombre },
       create: {
         id: userId,
         tenantId: TENANT_ID,

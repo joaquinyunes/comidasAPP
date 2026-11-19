@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
   const r = await crearPedidoDelivery({
     ...parsed.data,
-    tenantSlug: parsed.data.tenant || SITE_TENANT_SLUG,
+    tenantSlug: SITE_TENANT_SLUG, // nunca del cuerpo: un despliegue = un restaurante
   });
 
   if (!r.ok) {

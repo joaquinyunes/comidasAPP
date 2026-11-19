@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma, getTenantBySlug, getDefaultSucursal } from "@/lib/prisma";
 import { strictRateLimit } from "@/lib/rate-limit";
+import { SITE_TENANT_SLUG } from "@/lib/tenant-slug";
+import { fechaValida, horaValida } from "@/lib/reservas/fecha-hora";
 
 // ============================================
 // POST /api/publico/reservas
@@ -14,12 +16,11 @@ const ReservaSchema = z.object({
   nombre: z.string().trim().min(2, "Nombre requerido").max(100),
   telefono: z.string().trim().min(6, "Teléfono inválido").max(30),
   email: z.string().email().max(255).optional().or(z.literal("")),
-  fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida (AAAA-MM-DD)"),
-  hora: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "Hora inválida (HH:MM)"),
+  fecha: z.string().refine(fechaValida, "Fecha inválida (AAAA-MM-DD)"),
+  hora: z.string().refine(horaValida, "Hora inválida (HH:MM)"),
   cantidadPersonas: z.coerce.number().int().min(1).max(20),
   zona: z.string().max(50).optional(),
   notas: z.string().max(500).optional(),
-  tenant: z.string().max(100).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -36,7 +37,8 @@ export async function POST(request: NextRequest) {
       );
     }
     const data = parsed.data;
-    const slug = data.tenant || "pizzaria-demo";
+    // El restaurante lo define el servidor (TENANT_SLUG): un despliegue = un restaurante.
+    const slug = SITE_TENANT_SLUG;
 
     const tenant = await getTenantBySlug(slug);
     if (!tenant) {

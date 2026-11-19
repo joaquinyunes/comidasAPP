@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { authRateLimit } from "@/lib/rate-limit";
 import { nuevoTokenReset, RESET_VALIDEZ_MS } from "@/lib/auth/token-reset";
 import { logger } from "@/lib/logger";
+import { SITE_TENANT_SLUG } from "@/lib/tenant-slug";
 
 // ============================================
 // POST /api/auth/reset — solicitar recuperación de contraseña
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
   }
 
   const usuario = await prisma.usuario.findFirst({
-    where: { email: parsed.data.email, activo: true },
+    where: { email: parsed.data.email, activo: true, tenant: { slug: SITE_TENANT_SLUG } },
     select: { id: true },
   });
 

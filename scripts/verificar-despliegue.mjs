@@ -34,6 +34,11 @@ export function evaluarVariables(env) {
     }
   }
   chequeo("DATABASE_URL", urlOk, "falta o no es una URL postgresql://…");
+  chequeo(
+    "TENANT_SLUG",
+    hay(env.TENANT_SLUG) && /^[a-z0-9-]{3,40}$/.test(env.TENANT_SLUG),
+    "falta: sin ella la app usa el restaurante de demostración «pizzaria-demo» y nadie del restaurante real puede entrar"
+  );
 
   const jwt = env.JWT_SECRET ?? "";
   chequeo(
@@ -93,6 +98,20 @@ async function aplicadasEnBase(url) {
   }
 }
 
+// El login y los formularios públicos buscan el restaurante por TENANT_SLUG: tiene que existir en la base.
+async function evaluarTenant(env) {
+  const { default: pg } = await import("pg");
+  const cliente = new pg.Client({ connectionString: env.DATABASE_URL, connectionTimeoutMillis: 10_000 });
+  await cliente.connect();
+  try {
+    await cliente.query("SET default_transaction_read_only = on");
+    const hay1 = (await cliente.query("SELECT 1 FROM tenants WHERE slug = $1 AND activo", [env.TENANT_SLUG])).rowCount > 0;
+    return { nombre: "el restaurante TENANT_SLUG existe en la base", ok: hay1, detalle: "no hay un restaurante activo con ese slug: nadie podría iniciar sesión", nivel: ERROR };
+  } finally {
+    await cliente.end();
+  }
+}
+
 async function evaluarBase(env, raiz) {
   const carpetas = readdirSync(join(raiz, "prisma", "migrations"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
   let aplicadas;
@@ -110,6 +129,7 @@ async function evaluarBase(env, raiz) {
     }];
   }
   const resultado = evaluarMigraciones(carpetas, aplicadas);
+  if (hay(env.TENANT_SLUG)) resultado.push(await evaluarTenant(env));
 
   // Segunda opinión de Prisma (solo lectura).
   const p = spawnSync("npx", ["prisma", "migrate", "status"], { cwd: raiz, env: { ...process.env, DATABASE_URL: env.DATABASE_URL }, encoding: "utf8", shell: true });

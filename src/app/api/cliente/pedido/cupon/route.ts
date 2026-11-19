@@ -19,12 +19,12 @@ const Schema = z.object({
   subtotal: z.coerce.number().nonnegative(),
 });
 
-async function resolverTenantId(mesaId?: string, tenant?: string): Promise<string | null> {
+async function resolverTenantId(mesaId?: string): Promise<string | null> {
   if (mesaId) {
     const mesa = await prisma.mesa.findFirst({ where: { id: mesaId }, select: { tenantId: true } });
     return mesa?.tenantId ?? null;
   }
-  const t = await getTenantBySlug(tenant || SITE_TENANT_SLUG);
+  const t = await getTenantBySlug(SITE_TENANT_SLUG);
   return t?.id ?? null;
 }
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   const parsed = Schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Datos inválidos" }, { status: 422 });
 
-  const tenantId = await resolverTenantId(parsed.data.mesaId, parsed.data.tenant);
+  const tenantId = await resolverTenantId(parsed.data.mesaId);
   if (!tenantId) return NextResponse.json({ error: "Local no encontrado" }, { status: 404 });
 
   const cupon = await prisma.cupon.findFirst({

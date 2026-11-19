@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { fechaValida, horaValida } from "@/lib/reservas/fecha-hora";
 
 // ============================================
 // SCHEMAS DE VALIDACIÓN (Zod)
@@ -129,8 +130,8 @@ export const ReservaSchema = z.object({
   clienteNombre: z.string().min(1).max(100).trim(),
   clienteTelefono: z.string().min(8).max(20).trim(),
   clienteEmail: z.string().email().optional().nullable(),
-  fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato YYYY-MM-DD"),
-  hora: z.string().regex(/^\d{2}:\d{2}$/, "Formato HH:MM"),
+  fecha: z.string().refine(fechaValida, "Formato YYYY-MM-DD"),
+  hora: z.string().refine((h) => /^\d{2}:\d{2}$/.test(h) && horaValida(h), "Formato HH:MM"),
   cantidadPersonas: z.number().int().min(1).max(50),
   sector: z.string().max(50).trim().optional(),
   occasion: z.string().max(100).trim().optional(),

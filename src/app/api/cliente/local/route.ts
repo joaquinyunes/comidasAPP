@@ -42,12 +42,12 @@ export async function POST(req: NextRequest) {
   }
 
   // Tope por mesa/referencia: aunque alguien tenga el código, no puede inundar la cocina de una mesa.
-  const topeMesa = await contarPedidoDeMesa(parsed.data.referencia.trim().toLowerCase().slice(0, 50));
+  const topeMesa = await contarPedidoDeMesa(parsed.data.referencia, ip);
   if (topeMesa.bloqueado) return respuesta429(topeMesa.espera);
 
   const r = await crearPedidoLocal({
     ...parsed.data,
-    tenantSlug: parsed.data.tenant || SITE_TENANT_SLUG,
+    tenantSlug: SITE_TENANT_SLUG, // nunca del cuerpo: un despliegue = un restaurante
   });
 
   if (!r.ok) {

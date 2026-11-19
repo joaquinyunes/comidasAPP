@@ -8,8 +8,8 @@ import { SITE_TENANT_SLUG } from "@/lib/tenant-slug";
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request) {
-  const slug = new URL(request.url).searchParams.get("tenant") || SITE_TENANT_SLUG;
+export async function GET() {
+  const slug = SITE_TENANT_SLUG; // lo define el servidor, no la URL
 
   const tenant = await getTenantBySlug(slug);
   if (!tenant) return NextResponse.json({ error: "Local no encontrado" }, { status: 404 });

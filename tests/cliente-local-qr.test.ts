@@ -5,6 +5,7 @@ vi.mock("@/lib/pedidos/crear-local", () => ({ crearPedidoLocal: m.crear }));
 vi.mock("@/lib/limite-intentos", async () => (await import("./ayudas/falso-limite-intentos")).falso);
 
 import { POST } from "@/app/api/cliente/local/route";
+import { SITE_TENANT_SLUG } from "@/lib/tenant-slug";
 import { falso } from "./ayudas/falso-limite-intentos";
 
 const ITEM = { productoId: "11111111-1111-4111-8111-111111111111", cantidad: 1 };
@@ -49,5 +50,32 @@ describe("POST /api/cliente/local (pedido en mesa)", () => {
     expect(ultimo).toBe(429);
     expect(m.crear.mock.calls.length).toBe(30);
     expect((await pedir("codigo-secreto-del-local", "otra-mesa", "2.9.9.9")).status).toBe(201);
+  });
+
+  it("M10: cambiar la referencia en cada pedido NO esquiva el tope: la IP se frena (20/min en memoria y 30 en 10 min en la base)", async () => {
+    let ultimo = 0;
+    for (let i = 0; i < 32; i++) ultimo = (await pedir("codigo-secreto-del-local", `mesa-${i}`, "6.6.6.6")).status;
+    expect(ultimo).toBe(429);
+    expect(m.crear.mock.calls.length).toBeLessThanOrEqual(30);
+  });
+
+  it("M10: «Mesa 5», «mesa-5» y «MESA5» cuentan como la misma mesa", async () => {
+    let ultimo = 0;
+    const variantes = ["Mesa 5", "mesa-5", "MESA5", "mesa 5"];
+    for (let i = 0; i < 32; i++) ultimo = (await pedir("codigo-secreto-del-local", variantes[i % 4], `7.1.${i}.1`)).status;
+    expect(ultimo).toBe(429);
+    expect(m.crear.mock.calls.length).toBe(30);
+  });
+
+  it("M10: el restaurante lo fija el servidor; un tenant en el cuerpo se ignora", async () => {
+    const res = await POST(
+      new Request("http://x/api/cliente/local", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-forwarded-for": "4.4.4.4", "x-qr-local-codigo": "codigo-secreto-del-local" },
+        body: JSON.stringify({ referencia: "mesa-ten", tenant: "restaurante-ajeno", items: [ITEM] }),
+      }) as never
+    );
+    expect(res.status).toBe(201);
+    expect(m.crear.mock.calls[0][0].tenantSlug).toBe(SITE_TENANT_SLUG);
   });
 });

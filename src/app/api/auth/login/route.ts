@@ -8,6 +8,7 @@ import { verificarTotp } from "@/lib/auth/totp";
 import { emitirSesion, borrarCookiesSesion } from "@/lib/auth/emitir-sesion";
 import { revocarRefresco, revocarTodas } from "@/lib/auth/sesion-refresh";
 import { getTenantContext } from "@/lib/auth-context";
+import { SITE_TENANT_SLUG } from "@/lib/tenant-slug";
 
 // ============================================
 // POST /api/auth/login — iniciar sesión (con código 2FA si el usuario lo activó)
@@ -47,7 +48,8 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await prisma.usuario.findFirst({
-      where: { email },
+      // El mismo mail puede existir en otro restaurante: se entra solo al de ESTE despliegue (TENANT_SLUG).
+      where: { email, tenant: { slug: SITE_TENANT_SLUG } },
       include: { usuarioRoles: { include: { rol: true } } },
     });
 

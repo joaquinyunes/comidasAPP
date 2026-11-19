@@ -3,6 +3,7 @@ import { evaluarVariables, evaluarMigraciones } from "../scripts/verificar-despl
 
 const bueno = {
   DATABASE_URL: "postgresql://u:p@db.ejemplo.com:5432/app",
+  TENANT_SLUG: "mi-restaurante",
   JWT_SECRET: "Zq8vK2mXp9LrT4wYc7NbH1sDf6GjA3eU5oIkRtQy0VxW",
   MERCADOPAGO_WEBHOOK_SECRET: "a1b2c3d4e5f60718293a4b5c6d7e8f90",
   QR_LOCAL_CODIGO: "k9Tq2LmX7",
@@ -20,6 +21,12 @@ describe("verificar-despliegue: variables", () => {
       delete resto[k];
       expect(falla(resto).length, k).toBe(1);
     }
+  });
+  it("TENANT_SLUG: sin él, o con un formato raro, es un error", () => {
+    const sin: Record<string, string> = { ...bueno };
+    delete sin.TENANT_SLUG;
+    expect(falla(sin)).toEqual(["TENANT_SLUG"]);
+    expect(falla({ ...bueno, TENANT_SLUG: "Con Espacios" })).toEqual(["TENANT_SLUG"]);
   });
   it("JWT_SECRET débil (corto, repetitivo o de ejemplo) se rechaza", () => {
     for (const j of ["corto", "a".repeat(40), "cambiar-en-produccion-min-32-caracteres"]) expect(falla({ ...bueno, JWT_SECRET: j })).toContain("JWT_SECRET fuerte");

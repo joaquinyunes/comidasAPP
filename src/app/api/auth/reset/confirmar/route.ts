@@ -15,6 +15,11 @@ const Schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Igual que la solicitud: sin canal de email no hay forma legítima de tener un token. Hasta enganchar un
+  // proveedor, en producción se cambia la clave con `scripts/nuevo-cliente clave` (docs/SEGURIDAD-REVISION-2.md).
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "La recuperación de contraseña por enlace está deshabilitada. Pedile una clave nueva a quien administra el sistema." }, { status: 403 });
+  }
   const limitada = await authRateLimit(request);
   if (limitada) return limitada;
 

@@ -12,3 +12,20 @@ export function claveDelSeed(env: { NODE_ENV?: string; SEED_PASSWORD?: string })
   }
   return clave || "admin123"; // solo desarrollo local
 }
+
+// El seed carga usuarios demo y PISA datos: solo corre contra una base local, salvo que se confirme
+// el host exacto de la base remota con `--confirmo-base <host>` (igual que el alta de clientes).
+const HOSTS_LOCALES = ["localhost", "127.0.0.1", "[::1]", "::1"];
+
+export function verificarBaseDelSeed(databaseUrl: string | undefined, argv: string[]): void {
+  let host = "";
+  try {
+    host = new URL(databaseUrl ?? "").hostname;
+  } catch {
+    throw new Error("DATABASE_URL no está definida o no es una URL válida: el seed no corre.");
+  }
+  if (HOSTS_LOCALES.includes(host)) return;
+  const i = argv.indexOf("--confirmo-base");
+  if (i >= 0 && argv[i + 1] === host) return;
+  throw new Error(`El seed escribe datos de demostración y NO corre contra una base remota (${host}). Si es a propósito, agregá: --confirmo-base ${host}`);
+}

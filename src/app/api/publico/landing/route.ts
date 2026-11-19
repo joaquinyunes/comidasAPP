@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma, getTenantBySlug, getDefaultSucursal } from "@/lib/prisma";
+import { SITE_TENANT_SLUG } from "@/lib/tenant-slug";
 
 // ============================================
 // GET /api/publico/landing
 // Datos públicos de la pizzería para la home.
-// Lee desde la BD (tenant "pizzaria-demo").
+// Lee desde la BD (el restaurante de este despliegue: TENANT_SLUG).
 // ============================================
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const slug = searchParams.get("tenant") || "pizzaria-demo";
+export async function GET() {
+  const slug = SITE_TENANT_SLUG; // lo define el servidor (TENANT_SLUG), no la URL
 
   try {
     const tenant = await getTenantBySlug(slug);

@@ -20,6 +20,7 @@ const ok = (cond: boolean, msg: string) => {
 };
 const ENV = {
   DATABASE_URL: url,
+  TENANT_SLUG: "resto-prueba",
   JWT_SECRET: "Zq8vK2mXp9LrT4wYc7NbH1sDf6GjA3eU5oIkRtQy0VxW",
   MERCADOPAGO_WEBHOOK_SECRET: "a1b2c3d4e5f60718293a4b5c6d7e8f90",
   QR_LOCAL_CODIGO: "k9Tq2LmX7",
@@ -46,6 +47,9 @@ try {
 
   correr("npx", ["prisma", "migrate", "deploy"], { DATABASE_URL: url });
   const n = readdirSync("prisma/migrations", { withFileTypes: true }).filter((d) => d.isDirectory()).length;
+  r = verificar();
+  ok(r.codigo === 1 && /TENANT_SLUG existe/.test(r.salida), "sin el restaurante TENANT_SLUG en la base: NO desplegar (nadie podría entrar)");
+  await bd.query("INSERT INTO tenants (id, nombre, slug, updated_at) VALUES (gen_random_uuid(), 'Resto', 'resto-prueba', now())");
   r = verificar();
   ok(r.codigo === 0 && r.salida.includes(`(${n} en el repo)`) && /Listo para desplegar/.test(r.salida), `con las ${n} migraciones aplicadas: listo para desplegar`);
   ok(!r.salida.includes("prueba@") && !r.salida.includes(ENV.JWT_SECRET), "la salida no muestra contraseñas ni secretos");
