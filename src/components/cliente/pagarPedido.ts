@@ -1,7 +1,7 @@
 "use client";
 
-// Llamada de pago desde la mesa. La respuesta HTTP es la única
-// fuente de verdad: si devuelve ok, el pago está hecho.
+// Pedido de cuenta desde la mesa: avisa al personal, NO cobra (el cobro lo carga el panel
+// o el webhook de Mercado Pago). Solo pagarConMercadoPago lleva a un cobro real.
 
 export type MetodoPago = "efectivo" | "tarjeta" | "qr" | "transferencia";
 

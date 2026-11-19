@@ -87,7 +87,7 @@ export default function PagoMesa({ pedidoId, saldo, hayPagosPrevios, onPago }: P
   return (
     <div className="mt-4 rounded-2xl border border-zinc-200 p-5 text-left">
       <h3 className="mb-3 font-semibold">
-        {hayPagosPrevios ? "Seguir pagando" : "Pagar la cuenta"}
+        {hayPagosPrevios ? "Pedir el resto de la cuenta" : "Pedir la cuenta"}
       </h3>
 
       <div className="mb-3 flex justify-between text-sm font-semibold">
@@ -189,7 +189,7 @@ export default function PagoMesa({ pedidoId, saldo, hayPagosPrevios, onPago }: P
         disabled={procesando || !efectivoOk || !parteOk}
         className="w-full rounded-xl bg-green-600 py-3 font-semibold text-white disabled:opacity-40"
       >
-        {procesando ? "Procesando…" : `Pagar ${formatCurrency(totalPagar)}`}
+        {procesando ? "Avisando…" : `Pedir la cuenta (${formatCurrency(totalPagar)})`}
       </button>
 
       {mpDisponible && !dividir && (
