@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTenantContext } from "@/lib/auth-context";
 import { sincronizarEstadoPedido } from "@/lib/pedidos/sincronizar-estado";
-import { transicionPermitida } from "@/lib/pedidos/transicion-permitida";
+import { puedeTransicionarPedido } from "@/lib/pedidos/transicion-permitida";
 import { z } from "zod";
 
 const CambioEstado = z.object({
@@ -75,9 +75,6 @@ export async function PUT(
     }
     const { estado, itemId, itemEstado } = parsedPut.data;
 
-    const veredicto = transicionPermitida(estado, context.permisos);
-    if (!veredicto.ok) return NextResponse.json({ error: veredicto.error }, { status: veredicto.status });
-
     const pedido = await prisma.pedido.findFirst({
       where: { id, tenantId: context.tenantId },
     });
@@ -85,6 +82,10 @@ export async function PUT(
     if (!pedido) {
       return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
     }
+
+    // Pagado/cancelado no se tocan; «pagado» solo con cobro real (o pedido en $0); cerrar/cancelar piden permiso.
+    const veredicto = puedeTransicionarPedido({ actual: pedido.estado, nuevo: estado, total: Number(pedido.total), permisos: context.permisos });
+    if (!veredicto.ok) return NextResponse.json({ error: veredicto.error }, { status: veredicto.status });
 
     const estadosValidos = ["recibido", "aceptado", "en_preparacion", "listo", "entregado", "esperando_cuenta", "pagado", "cerrado", "cancelado"];
     if (estado && !estadosValidos.includes(estado)) {
@@ -189,7 +190,7 @@ export async function POST(
       return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
     }
 
-    if (pedido.estado === "cerrado" || pedido.estado === "cancelado") {
+    if (pedido.estado === "cerrado" || pedido.estado === "cancelado" || pedido.estado === "pagado") {
       return NextResponse.json({ error: "No se pueden agregar items a un pedido cerrado" }, { status: 409 });
     }
 

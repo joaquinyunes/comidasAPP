@@ -124,6 +124,13 @@ export async function POST(request: NextRequest) {
     if (!sucursalId) {
       return NextResponse.json({ error: "Se requiere sucursalId" }, { status: 400 });
     }
+    // Sucursal (puede venir del cuerpo) y proveedor tienen que ser de ESTE restaurante.
+    if (!(await prisma.sucursal.findFirst({ where: { id: sucursalId, tenantId: context.tenantId }, select: { id: true } }))) {
+      return NextResponse.json({ error: "Sucursal no encontrada" }, { status: 404 });
+    }
+    if (validation.data.proveedorId && !(await prisma.proveedor.findFirst({ where: { id: validation.data.proveedorId, tenantId: context.tenantId }, select: { id: true } }))) {
+      return NextResponse.json({ error: "Proveedor no encontrado" }, { status: 404 });
+    }
 
     // Crear ingrediente
     const ingredienteCreado = await prisma.ingrediente.create({

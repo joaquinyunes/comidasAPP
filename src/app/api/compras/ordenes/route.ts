@@ -80,6 +80,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Proveedor o sucursal no encontrados" }, { status: 404 });
     }
 
+    // Cada ingrediente de la orden tiene que ser de ESTE restaurante.
+    const idsIngredientes = [...new Set(items.map((i) => i.ingredienteId))];
+    const propios = await prisma.ingrediente.count({ where: { id: { in: idsIngredientes }, tenantId: context.tenantId } });
+    if (propios !== idsIngredientes.length) {
+      return NextResponse.json({ error: "Algún ingrediente no existe" }, { status: 404 });
+    }
+
     // Calcular total
     const total = items.reduce((sum, item) => sum + item.cantidad * item.precioUnitario, 0);
 

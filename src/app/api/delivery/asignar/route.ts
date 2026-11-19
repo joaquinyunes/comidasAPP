@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTenantContext } from "@/lib/auth-context";
 import { z } from "zod";
+import { puedeTransicionarPedido } from "@/lib/pedidos/transicion-permitida";
 
 const Schema = z.object({
   pedidoId: z.string().uuid(),
@@ -21,6 +22,17 @@ export async function POST(req: NextRequest) {
 
   const pedido = await prisma.pedido.findFirst({ where: { id: parsed.data.pedidoId, tenantId: ctx.tenantId } });
   if (!pedido) return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
+
+  const veredicto = puedeTransicionarPedido({ actual: pedido.estado, nuevo: "en_delivery", total: Number(pedido.total), permisos: ctx.permisos });
+  if (!veredicto.ok) return NextResponse.json({ error: veredicto.error }, { status: veredicto.status });
+
+  // El repartidor y la zona tienen que ser de ESTE restaurante (los ids vienen del cliente).
+  const empleado = await prisma.empleado.findFirst({ where: { id: parsed.data.empleadoId, tenantId: ctx.tenantId }, select: { id: true } });
+  if (!empleado) return NextResponse.json({ error: "Empleado no encontrado" }, { status: 404 });
+  if (parsed.data.zonaId) {
+    const zona = await prisma.zonaReparto.findFirst({ where: { id: parsed.data.zonaId, tenantId: ctx.tenantId }, select: { id: true } });
+    if (!zona) return NextResponse.json({ error: "Zona no encontrada" }, { status: 404 });
+  }
 
   const asignacion = await prisma.asignacionReparto.create({
     data: { tenantId: ctx.tenantId, pedidoId: pedido.id, empleadoId: parsed.data.empleadoId, zonaId: parsed.data.zonaId ?? null, estado: "asignado" },

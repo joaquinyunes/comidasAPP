@@ -19,3 +19,25 @@ describe("transiciones de estado del pedido", () => {
     for (const e of ["en_preparacion", "listo", "entregado", undefined]) expect(transicionPermitida(e, permisosDe("rol-mozo"))).toEqual({ ok: true });
   });
 });
+
+import { puedeTransicionarPedido } from "@/lib/pedidos/transicion-permitida";
+
+describe("puedeTransicionarPedido (revisión 2, M6 y B9)", () => {
+  const admin = permisosDe("rol-admin");
+  const mozo = permisosDe("rol-mozo");
+  it("un pedido pagado o cancelado no cambia de estado, ni siquiera un admin", () => {
+    for (const actual of ["pagado", "cancelado"]) {
+      for (const nuevo of ["en_preparacion", "listo", "entregado", "cerrado", "cancelado", undefined]) {
+        expect(puedeTransicionarPedido({ actual, nuevo, total: 100, permisos: admin }), `${actual} → ${nuevo}`).toMatchObject({ ok: false, status: 409 });
+      }
+    }
+  });
+  it("un pedido abierto sigue las reglas de siempre", () => {
+    expect(puedeTransicionarPedido({ actual: "recibido", nuevo: "listo", total: 100, permisos: mozo })).toEqual({ ok: true });
+    expect(puedeTransicionarPedido({ actual: "recibido", nuevo: "cancelado", total: 100, permisos: mozo })).toMatchObject({ ok: false, status: 403 });
+    expect(puedeTransicionarPedido({ actual: "recibido", nuevo: "pagado", total: 100, permisos: admin })).toMatchObject({ ok: false, status: 409 });
+  });
+  it("B9: un pedido en 0 (cupón del 100%) puede pasar a «pagado»: no hay nada que cobrar", () => {
+    expect(puedeTransicionarPedido({ actual: "entregado", nuevo: "pagado", total: 0, permisos: mozo })).toEqual({ ok: true });
+  });
+});

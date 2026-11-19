@@ -76,6 +76,10 @@ export async function POST(request: NextRequest) {
     if (!sucursalId) {
       return NextResponse.json({ error: "Se requiere sucursalId" }, { status: 400 });
     }
+    // La sucursal puede venir del cuerpo: tiene que ser de ESTE restaurante.
+    if (!(await prisma.sucursal.findFirst({ where: { id: sucursalId, tenantId: context.tenantId }, select: { id: true } }))) {
+      return NextResponse.json({ error: "Sucursal no encontrada" }, { status: 404 });
+    }
 
     // Verificar mesa si se proporciona
     if (mesaId) {

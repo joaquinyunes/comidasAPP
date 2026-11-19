@@ -56,16 +56,19 @@ export async function POST(request: NextRequest) {
 
     const { mesaId, items, notas } = validation.data;
 
-    // Verificar que la mesa existe
-    const mesa = await prisma.mesa.findUnique({ where: { id: mesaId } });
+    // La mesa y los productos tienen que ser del restaurante de la clave de API.
+    const mesa = await prisma.mesa.findFirst({ where: { id: mesaId, tenantId: auth.tenantId } });
     if (!mesa) {
       return NextResponse.json({ error: "Mesa no encontrada" }, { status: 404 });
     }
 
-    // Calcular total
+    const idsProductos = [...new Set(items.map((i) => i.productoId))];
     const productos = await prisma.producto.findMany({
-      where: { id: { in: items.map((i) => i.productoId) } },
+      where: { id: { in: idsProductos }, tenantId: auth.tenantId },
     });
+    if (productos.length !== idsProductos.length) {
+      return NextResponse.json({ error: "Algún producto no existe" }, { status: 400 });
+    }
 
     const total = items.reduce((sum, item) => {
       const prod = productos.find((p) => p.id === item.productoId);
