@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
-import { montoPropina, totalConPropina } from "@/lib/pedidos/precio";
+import { montoPropina, totalConPropina, redondear2 } from "@/lib/pedidos/precio";
 import { mpDisponible, crearPreferencia } from "@/lib/pagos/mercadopago";
 
 // ============================================
@@ -33,14 +33,27 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const pedido = await prisma.pedido.findUnique({
     where: { id },
-    select: { id: true, estado: true, total: true, mesa: { select: { numero: true } } },
+    select: {
+      id: true,
+      estado: true,
+      total: true,
+      mesa: { select: { numero: true } },
+      pagos: { where: { estado: "completado" }, select: { monto: true, propina: true } },
+    },
   });
   if (!pedido) return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
   if (pedido.estado === "pagado") {
     return NextResponse.json({ error: "El pedido ya está pagado." }, { status: 409 });
   }
 
-  const base = Number(pedido.total);
+  if (pedido.estado === "cancelado") {
+    return NextResponse.json({ error: "El pedido fue cancelado." }, { status: 409 });
+  }
+
+  // Se cobra el SALDO pendiente (no el total): si ya hubo pagos parciales, no se pide dos veces lo mismo.
+  const yaCobrado = pedido.pagos.reduce((a, p) => a + (Number(p.monto) - Number(p.propina)), 0);
+  const base = redondear2(Math.max(0, Number(pedido.total) - yaCobrado));
+  if (base <= 0) return NextResponse.json({ error: "El pedido ya está saldado." }, { status: 409 });
   const total = totalConPropina(base, montoPropina(base, propinaPct));
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "");
 

@@ -55,7 +55,17 @@ vi.mock("@/lib/prisma", () => {
       log.liberar.push(soltar);
       return [{ id }];
     },
-    pago: { create: (a: CrearArgs) => crearPago(a, log), findMany },
+    pago: {
+      create: (a: CrearArgs) => crearPago(a, log),
+      findMany,
+      findFirst,
+      update: async ({ where, data }: { where: { id: string }; data: { estado?: string } }) => {
+        await tick();
+        const p = db.pagos.find((x) => x.id === where.id);
+        if (p && data.estado) p.estado = data.estado;
+        return {};
+      },
+    },
     pedido: {
       update: async ({ where, data }: { where: { id: string }; data: { estado?: string } }) => {
         await tick();
@@ -116,6 +126,7 @@ vi.mock("@/lib/prisma", () => {
 });
 
 import { registrarPagoPedido } from "@/lib/pedidos/registrar-pago";
+import { revertirPagoPedido } from "@/lib/pedidos/revertir-pago";
 
 const args = { pedidoId: "ped-1", monto: 5000, metodo: "qr", referencia: "mp:123" };
 
@@ -201,5 +212,47 @@ describe("registrarPagoPedido — monto menor al saldo (hallazgo ALTA)", () => {
     await registrarPagoPedido({ ...args, monto: 3000, referencia: "mp:2" });
     expect(db.pedidos.get("ped-1")!.estado).toBe("pagado");
     expect(db.eventos.filter((e) => e.evento === "PAGO_COMPLETADO")).toHaveLength(1);
+  });
+});
+
+describe("registrarPagoPedido — pedido cancelado (revisión 2, M1)", () => {
+  it("un pago aprobado sobre un pedido CANCELADO no crea pago ni lo reabre: sobrante con alerta", async () => {
+    db.pedidos.get("ped-1")!.estado = "cancelado";
+    const r = await registrarPagoPedido(args);
+    expect("error" in r).toBe(false);
+    expect(db.pagos).toHaveLength(0);
+    expect(db.pedidos.get("ped-1")!.estado).toBe("cancelado");
+    const ev = db.eventos.find((e) => e.evento === "PAGO_MP_SOBRANTE");
+    expect(ev?.metadata).toMatchObject({ motivo: "pedido_cancelado", referencia: "mp:123" });
+    expect(db.notificaciones).toHaveLength(1);
+  });
+});
+
+describe("revertirPagoPedido — reembolso o contracargo (B6)", () => {
+  it("un pago cobrado y luego reembolsado pasa a «reembolsado», el pedido vuelve a tener saldo y se avisa", async () => {
+    await registrarPagoPedido(args);
+    expect(db.pedidos.get("ped-1")!.estado).toBe("pagado");
+    const r = await revertirPagoPedido({ pedidoId: "ped-1", referencia: "mp:123", motivo: "refunded" });
+    expect("error" in r).toBe(false);
+    expect(db.pagos[0].estado).toBe("reembolsado");
+    expect(db.pedidos.get("ped-1")!.estado).toBe("entregado");
+    expect(db.eventos.map((e) => e.evento)).toContain("PAGO_REVERTIDO");
+    expect(db.notificaciones).toHaveLength(1);
+  });
+
+  it("avisar dos veces el mismo reembolso no duplica nada", async () => {
+    await registrarPagoPedido(args);
+    await revertirPagoPedido({ pedidoId: "ped-1", referencia: "mp:123", motivo: "refunded" });
+    const antes = { eventos: db.eventos.length, notifs: db.notificaciones.length };
+    await revertirPagoPedido({ pedidoId: "ped-1", referencia: "mp:123", motivo: "refunded" });
+    expect(db.eventos.length).toBe(antes.eventos);
+    expect(db.notificaciones.length).toBe(antes.notifs);
+  });
+
+  it("reembolso de un pago que nunca registramos: solo alerta, no inventa nada", async () => {
+    const r = await revertirPagoPedido({ pedidoId: "ped-1", referencia: "mp:999", motivo: "charged_back" });
+    expect("error" in r).toBe(false);
+    expect(db.pagos).toHaveLength(0);
+    expect(db.notificaciones).toHaveLength(1);
   });
 });

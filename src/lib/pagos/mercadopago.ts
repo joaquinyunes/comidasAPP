@@ -58,6 +58,7 @@ export interface PagoMP {
   status: string; // approved | pending | rejected | ...
   externalReference: string | null;
   amount: number;
+  currency: string | null; // ARS esperado
 }
 
 export async function consultarPago(paymentId: string): Promise<PagoMP> {
@@ -67,6 +68,7 @@ export async function consultarPago(paymentId: string): Promise<PagoMP> {
     status: string;
     external_reference: string | null;
     transaction_amount: number;
+    currency_id?: string | null;
   };
-  return { status: d.status, externalReference: d.external_reference, amount: d.transaction_amount };
+  return { status: d.status, externalReference: d.external_reference, amount: d.transaction_amount, currency: d.currency_id ?? null };
 }

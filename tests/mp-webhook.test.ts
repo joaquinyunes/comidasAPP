@@ -4,6 +4,7 @@ import { createHmac } from "node:crypto";
 const mocks = vi.hoisted(() => ({
   consultarPago: vi.fn(),
   registrarPagoPedido: vi.fn(),
+  revertirPagoPedido: vi.fn(),
 }));
 
 vi.mock("@/lib/pagos/mercadopago", () => ({
@@ -11,6 +12,7 @@ vi.mock("@/lib/pagos/mercadopago", () => ({
   consultarPago: mocks.consultarPago,
 }));
 vi.mock("@/lib/pedidos/registrar-pago", () => ({ registrarPagoPedido: mocks.registrarPagoPedido }));
+vi.mock("@/lib/pedidos/revertir-pago", () => ({ revertirPagoPedido: mocks.revertirPagoPedido }));
 
 import { POST } from "@/app/api/pagos/mercadopago/webhook/route";
 import { firmaMpValida } from "@/lib/pagos/firma-webhook";
@@ -35,6 +37,7 @@ function firmar(dataId: string, requestId = "req-1", ts = "1730000000", secret =
 beforeEach(() => {
   mocks.consultarPago.mockReset();
   mocks.registrarPagoPedido.mockReset();
+  mocks.revertirPagoPedido.mockReset().mockResolvedValue({ revertido: true });
   mocks.registrarPagoPedido.mockResolvedValue({ pagoId: "pg-1", yaPagado: false });
   process.env.MERCADOPAGO_ACCESS_TOKEN = "test-token";
   delete process.env.MERCADOPAGO_WEBHOOK_SECRET;
@@ -49,7 +52,7 @@ afterEach(() => {
 
 describe("webhook de MercadoPago", () => {
   it("pago aprobado: registra el cobro con la referencia mp:<id>", async () => {
-    mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000 });
+    mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000, currency: "ARS" });
     const res = await post("type=payment&data.id=123");
     expect(res.status).toBe(200);
     expect(mocks.registrarPagoPedido).toHaveBeenCalledWith({
@@ -61,7 +64,7 @@ describe("webhook de MercadoPago", () => {
   });
 
   it("pago pendiente: responde 200 y no registra nada", async () => {
-    mocks.consultarPago.mockResolvedValue({ status: "pending", externalReference: PEDIDO, amount: 5000 });
+    mocks.consultarPago.mockResolvedValue({ status: "pending", externalReference: PEDIDO, amount: 5000, currency: "ARS" });
     const res = await post("type=payment&data.id=123");
     expect(res.status).toBe(200);
     expect(mocks.registrarPagoPedido).not.toHaveBeenCalled();
@@ -87,7 +90,7 @@ describe("webhook de MercadoPago", () => {
   });
 
   it("reintento del mismo aviso: registra dos veces la misma referencia (la BD lo vuelve idempotente) y responde 200", async () => {
-    mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000 });
+    mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000, currency: "ARS" });
     mocks.registrarPagoPedido
       .mockResolvedValueOnce({ pagoId: "pg-1", yaPagado: false })
       .mockResolvedValueOnce({ pagoId: "pg-1", yaPagado: true });
@@ -116,7 +119,7 @@ describe("webhook de MercadoPago — producción sin secreto (falla cerrado)", (
   it("en producción sin MERCADOPAGO_WEBHOOK_SECRET responde 500 y no consulta ni registra nada", async () => {
     vi.stubEnv("NODE_ENV", "production");
     try {
-      mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000 });
+      mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000, currency: "ARS" });
       const res = await post("type=payment&data.id=123");
       expect(res.status).toBe(500);
       expect(mocks.consultarPago).not.toHaveBeenCalled();
@@ -130,7 +133,7 @@ describe("webhook de MercadoPago — producción sin secreto (falla cerrado)", (
     vi.stubEnv("NODE_ENV", "production");
     process.env.MERCADOPAGO_WEBHOOK_SECRET = SECRET;
     try {
-      mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000 });
+      mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000, currency: "ARS" });
       const res = await post("type=payment&data.id=123", firmar("123"));
       expect(res.status).toBe(200);
       expect(mocks.registrarPagoPedido).toHaveBeenCalledTimes(1);
@@ -143,7 +146,7 @@ describe("webhook de MercadoPago — producción sin secreto (falla cerrado)", (
 describe("webhook de MercadoPago — firma x-signature (S6)", () => {
   beforeEach(() => {
     process.env.MERCADOPAGO_WEBHOOK_SECRET = SECRET;
-    mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000 });
+    mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 5000, currency: "ARS" });
   });
 
   it("firma válida: procesa el pago", async () => {
@@ -172,5 +175,33 @@ describe("webhook de MercadoPago — firma x-signature (S6)", () => {
   it("firmaMpValida rechaza v1 mal formado sin lanzar", () => {
     expect(firmaMpValida({ secret: SECRET, xSignature: "ts=1,v1=zz", xRequestId: "r", dataId: "1" })).toBe(false);
     expect(firmaMpValida({ secret: SECRET, xSignature: "basura", xRequestId: "r", dataId: "1" })).toBe(false);
+  });
+});
+
+describe("webhook de MercadoPago — revisión 2 (B6, B7)", () => {
+  it("reembolso o contracargo: revierte el cobro registrado, no registra uno nuevo", async () => {
+    for (const status of ["refunded", "charged_back"]) {
+      mocks.revertirPagoPedido.mockClear();
+      mocks.consultarPago.mockResolvedValue({ status, externalReference: PEDIDO, amount: 5000, currency: "ARS" });
+      const res = await post("type=payment&data.id=321");
+      expect(res.status).toBe(200);
+      expect(mocks.revertirPagoPedido).toHaveBeenCalledWith({ pedidoId: PEDIDO, referencia: "mp:321", motivo: status });
+    }
+    expect(mocks.registrarPagoPedido).not.toHaveBeenCalled();
+  });
+
+  it("pago aprobado en otra moneda: no se registra como pesos", async () => {
+    mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: PEDIDO, amount: 50, currency: "USD" });
+    const res = await post("type=payment&data.id=123");
+    expect(res.status).toBe(200);
+    expect(mocks.registrarPagoPedido).not.toHaveBeenCalled();
+  });
+
+  it("la referencia debe ser un uuid real (no cualquier cadena de 36 guiones y hex)", async () => {
+    for (const ref of ["-".repeat(36), "a".repeat(36), "11111111-2222-0333-8444-555555555555", "11111111-2222-4333-c444-555555555555"]) {
+      mocks.consultarPago.mockResolvedValue({ status: "approved", externalReference: ref, amount: 10, currency: "ARS" });
+      await post("type=payment&data.id=123");
+    }
+    expect(mocks.registrarPagoPedido).not.toHaveBeenCalled();
   });
 });

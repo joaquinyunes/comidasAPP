@@ -50,7 +50,9 @@ export async function registrarPagoPedido(args: Args): Promise<Resultado> {
       // Bloquea la fila del pedido: dos cobros distintos del mismo pedido se hacen en fila.
       await tx.$queryRaw`SELECT id FROM pedidos WHERE id = ${pedido.id}::uuid FOR UPDATE`;
 
-      const total = (await tx.pedido.findUniqueOrThrow({ where: { id: pedido.id }, select: { total: true } })).total;
+      const actual = await tx.pedido.findUniqueOrThrow({ where: { id: pedido.id }, select: { total: true, estado: true } });
+      const total = actual.total;
+      const cancelado = actual.estado === "cancelado";
       const pagos = await tx.pago.findMany({
         where: { pedidoId: pedido.id, estado: "completado" },
         select: { id: true, monto: true, propina: true },
@@ -59,21 +61,21 @@ export async function registrarPagoPedido(args: Args): Promise<Resultado> {
       const saldo = redondear(Math.max(0, Number(total) - cobrado));
       const meta = { metodo: args.metodo, referencia: args.referencia ?? null, monto: args.monto };
 
-      // Pedido ya saldado: no se cobra dos veces. Se avisa para revisar (posible reembolso).
-      if (saldo <= TOLERANCIA && pagos.length > 0) {
+      // Pedido ya saldado o CANCELADO: no se cobra dos veces ni se reabre. Se avisa para revisar (reembolso).
+      if (cancelado || (saldo <= TOLERANCIA && pagos.length > 0)) {
         await tx.pedidoEvento.create({
-          data: { tenantId: pedido.tenantId, pedidoId: pedido.id, evento: "PAGO_MP_SOBRANTE", metadata: { ...meta, saldo } },
+          data: { tenantId: pedido.tenantId, pedidoId: pedido.id, evento: "PAGO_MP_SOBRANTE", metadata: { ...meta, saldo, motivo: cancelado ? "pedido_cancelado" : "pedido_saldado" } },
         });
         await tx.notificacion.create({
           data: {
             tenantId: pedido.tenantId,
             tipo: "pago_sobrante",
-            titulo: "Pago aprobado sobre un pedido ya pagado",
-            mensaje: `Mercado Pago aprobó $${Math.round(args.monto)} (${args.referencia ?? "sin referencia"}) y el pedido ya estaba saldado: revisar y reembolsar si corresponde.`,
+            titulo: cancelado ? "Pago aprobado sobre un pedido CANCELADO" : "Pago aprobado sobre un pedido ya pagado",
+            mensaje: `Mercado Pago aprobó $${Math.round(args.monto)} (${args.referencia ?? "sin referencia"}) y el pedido ${cancelado ? "estaba cancelado" : "ya estaba saldado"}: revisar y reembolsar si corresponde.`,
             leida: false,
           },
         });
-        return { pagoId: pagos[0].id, yaPagado: true };
+        return { pagoId: pagos[0]?.id ?? "", yaPagado: true };
       }
 
       const creado = await tx.pago.create({

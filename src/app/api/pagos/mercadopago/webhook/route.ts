@@ -3,7 +3,9 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { mpDisponible, consultarPago } from "@/lib/pagos/mercadopago";
 import { firmaMpValida } from "@/lib/pagos/firma-webhook";
+import { z } from "zod";
 import { registrarPagoPedido } from "@/lib/pedidos/registrar-pago";
+import { revertirPagoPedido } from "@/lib/pedidos/revertir-pago";
 import { rateLimit } from "@/lib/rate-limit";
 
 // Tope por IP: MP reintenta, pero nunca cientos de veces por minuto.
@@ -60,18 +62,21 @@ export async function POST(req: NextRequest) {
 
   try {
     const pago = await consultarPago(String(paymentId));
-    const refValida = !!pago.externalReference && /^[0-9a-f-]{36}$/i.test(pago.externalReference);
-    if (pago.status === "approved" && !refValida) {
-      console.error("[mp/webhook] pago aprobado sin referencia de pedido válida:", paymentId);
-    }
-    if (pago.status === "approved" && refValida && pago.externalReference) {
-      const r = await registrarPagoPedido({
-        pedidoId: pago.externalReference,
-        monto: pago.amount,
-        metodo: "qr",
-        referencia: `mp:${paymentId}`,
-      });
-      if ("error" in r) console.error("[mp/webhook] registrarPago:", r.error); // pedido inexistente: 200, sin loop
+    const refValida = !!pago.externalReference && z.uuid().safeParse(pago.externalReference).success;
+    const pedidoId = refValida ? pago.externalReference! : null;
+    if (!pedidoId) {
+      console.error("[mp/webhook] aviso sin referencia de pedido válida (uuid):", paymentId, pago.status);
+    } else if (pago.status === "approved") {
+      if (pago.currency !== "ARS") {
+        // Un cobro en otra moneda no se puede tomar como pesos: se deja el aviso y se revisa a mano.
+        console.error("[mp/webhook] pago aprobado en moneda distinta de ARS (", pago.currency, "):", paymentId);
+      } else {
+        const r = await registrarPagoPedido({ pedidoId, monto: pago.amount, metodo: "qr", referencia: `mp:${paymentId}` });
+        if ("error" in r) console.error("[mp/webhook] registrarPago:", r.error); // pedido inexistente: 200, sin loop
+      }
+    } else if (pago.status === "refunded" || pago.status === "charged_back") {
+      const r = await revertirPagoPedido({ pedidoId, referencia: `mp:${paymentId}`, motivo: pago.status });
+      if ("error" in r) console.error("[mp/webhook] revertirPago:", r.error);
     }
   } catch (e) {
     console.error("[mp/webhook]", e);
