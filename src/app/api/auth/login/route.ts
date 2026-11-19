@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const { email, password, codigo } = parsed.data;
     const clave = email.toLowerCase();
 
-    const espera = estaBloqueado(clave);
+    const espera = await estaBloqueado(clave);
     if (espera > 0) {
       return NextResponse.json(
         { error: "Demasiados intentos. Probá de nuevo en unos minutos.", retryAfter: espera },
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user || !(await compare(password, user.passwordHash))) {
-      registrarFallo(clave);
+      await registrarFallo(clave);
       return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
     }
     if (!user.activo) {
@@ -68,12 +68,12 @@ export async function POST(request: NextRequest) {
         );
       }
       if (!verificarTotp(user.totpSecreto, codigo)) {
-        registrarFallo(clave);
+        await registrarFallo(clave);
         return NextResponse.json({ error: "El código no es correcto.", requiere2fa: true }, { status: 401 });
       }
     }
 
-    limpiarFallos(clave);
+    await limpiarFallos(clave);
 
     const response = NextResponse.json({
       success: true,

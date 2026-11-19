@@ -12,6 +12,7 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 vi.mock("@/lib/rate-limit", () => ({ authRateLimit: async () => null }));
+vi.mock("@/lib/limite-intentos", async () => (await import("./ayudas/falso-limite-intentos")).falso);
 
 import { POST } from "@/app/api/auth/login/route";
 

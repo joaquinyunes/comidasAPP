@@ -1,31 +1,26 @@
 // ============================================================
-// Bloqueo temporal tras N intentos fallidos de login por cuenta (S3).
-// shortcut: contador en memoria del proceso; en Vercel cada instancia lleva el suyo,
-// así que el tope real es N x instancias. Cuando haya más de una instancia caliente
-// de forma sostenida, pasarlo a Redis/Upstash o a una tabla.
+// Bloqueo temporal tras N intentos fallidos por cuenta (login y código 2FA).
+// Los contadores viven en la base (src/lib/limite-intentos.ts), no en memoria: valen igual
+// con varias instancias. `prefijo` separa el login ("login") del 2FA del panel ("2fa").
 // ============================================================
 
-const MAX_FALLOS = 5;
-const VENTANA_MS = 15 * 60_000;
+import { contarIntento, leerIntentos, limpiarIntentos } from "@/lib/limite-intentos";
 
-const fallos = new Map<string, { n: number; desde: number }>();
+export const MAX_FALLOS = 5;
+export const VENTANA_MS = 15 * 60_000;
 
-export function estaBloqueado(clave: string, ahora = Date.now()): number {
-  const f = fallos.get(clave);
-  if (!f) return 0;
-  if (ahora - f.desde > VENTANA_MS) {
-    fallos.delete(clave);
-    return 0;
-  }
-  return f.n >= MAX_FALLOS ? Math.ceil((f.desde + VENTANA_MS - ahora) / 1000) : 0; // segundos que faltan
+const k = (prefijo: string, id: string) => `${prefijo}:${id}`;
+
+// Segundos que faltan para poder reintentar (0 = no está bloqueado).
+export async function estaBloqueado(id: string, prefijo = "login"): Promise<number> {
+  const { n, espera } = await leerIntentos(k(prefijo, id), VENTANA_MS);
+  return n >= MAX_FALLOS ? espera : 0;
 }
 
-export function registrarFallo(clave: string, ahora = Date.now()): void {
-  const f = fallos.get(clave);
-  if (!f || ahora - f.desde > VENTANA_MS) fallos.set(clave, { n: 1, desde: ahora });
-  else f.n += 1;
+export async function registrarFallo(id: string, prefijo = "login"): Promise<void> {
+  await contarIntento(k(prefijo, id), VENTANA_MS);
 }
 
-export function limpiarFallos(clave: string): void {
-  fallos.delete(clave);
+export async function limpiarFallos(id: string, prefijo = "login"): Promise<void> {
+  await limpiarIntentos(k(prefijo, id));
 }

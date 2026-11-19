@@ -18,6 +18,7 @@ export interface JWTPayload {
   email: string;
   roles: string[];
   permisos: string[];
+  debe2fa?: boolean;
 }
 
 // APIs que NO requieren sesión (sitio cara-al-cliente + webhooks).
@@ -117,6 +118,12 @@ export async function proxy(request: NextRequest) {
     const renovar = new URL("/api/auth/refresh", request.url);
     renovar.searchParams.set("volver", pathname + request.nextUrl.search);
     return NextResponse.redirect(renovar);
+  }
+
+  // Administrador sin 2FA: solo «Mi cuenta» (y /api/auth, que es pública) hasta que lo active.
+  if (payload.debe2fa && !(pathname === "/dashboard/cuenta")) {
+    if (esApi) return NextResponse.json({ error: "Activá la verificación en dos pasos (Mi cuenta) para seguir.", requiere2fa: true }, { status: 403 });
+    return NextResponse.redirect(new URL("/dashboard/cuenta?obligatorio=1", request.url));
   }
 
   // API: permiso por método (mínimo privilegio). Páginas del panel: permiso de la sección.

@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const m = vi.hoisted(() => ({ crear: vi.fn() }));
 vi.mock("@/lib/pedidos/crear-local", () => ({ crearPedidoLocal: m.crear }));
+vi.mock("@/lib/limite-intentos", async () => (await import("./ayudas/falso-limite-intentos")).falso);
 
 import { POST } from "@/app/api/cliente/local/route";
+import { falso } from "./ayudas/falso-limite-intentos";
 
 const ITEM = { productoId: "11111111-1111-4111-8111-111111111111", cantidad: 1 };
 const pedir = (codigo: string | null, referencia = "mesa-uno", ip = "7.7.7.7") =>
@@ -16,6 +18,7 @@ const pedir = (codigo: string | null, referencia = "mesa-uno", ip = "7.7.7.7") =
   );
 
 beforeEach(() => {
+  falso.vaciar();
   m.crear.mockReset().mockResolvedValue({ ok: true, pedidoId: "p", subtotal: 1, descuento: 0, total: 1, duplicado: false });
   vi.stubEnv("QR_LOCAL_CODIGO", "codigo-secreto-del-local");
   vi.stubEnv("NEXT_PUBLIC_QR_LOCAL_CODIGO", "");
@@ -31,6 +34,14 @@ describe("POST /api/cliente/local (pedido en mesa)", () => {
   it("con el código del servidor: crea el pedido", async () => {
     expect((await pedir("codigo-secreto-del-local", "mesa-ok", "1.0.0.3")).status).toBe(201);
     expect(m.crear).toHaveBeenCalledOnce();
+  });
+  it("10 códigos incorrectos desde una IP la bloquean (429), incluso con el código correcto; otra IP sigue sirviendo", async () => {
+    for (let i = 0; i < 10; i++) expect((await pedir("mal", `m${i}`, "5.5.5.5")).status).toBe(403);
+    const bloqueada = await pedir("codigo-secreto-del-local", "mesa-x", "5.5.5.5");
+    expect(bloqueada.status).toBe(429);
+    expect(bloqueada.headers.get("retry-after")).toBeTruthy();
+    expect(m.crear).not.toHaveBeenCalled();
+    expect((await pedir("codigo-secreto-del-local", "mesa-x", "5.5.5.6")).status).toBe(201);
   });
   it("tope por mesa: pasadas 30 solicitudes en 10 minutos a la misma mesa, 429 (aunque cambie la IP)", async () => {
     let ultimo = 0;

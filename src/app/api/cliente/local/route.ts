@@ -6,11 +6,12 @@ import { crearPedidoLocal } from "@/lib/pedidos/crear-local";
 import { rateLimit } from "@/lib/rate-limit";
 import { SITE_TENANT_SLUG } from "@/lib/tenant-slug";
 import { codigoQrValido } from "@/lib/qr-local";
+import { ipBloqueadaPorCodigo, registrarCodigoMalo, contarPedidoDeMesa } from "@/lib/limite-qr";
 
 const limite = rateLimit({ maxRequests: 20, windowMs: 60_000 });
 
-// Tope por mesa/referencia: aunque alguien tenga el código, no puede inundar la cocina de una mesa.
-const limitePorMesa = rateLimit({ maxRequests: 30, windowMs: 10 * 60_000, keyGenerator: (r) => "mesa:" + (r.headers.get("x-mesa-ref") ?? "?") });
+const respuesta429 = (espera: number) =>
+  NextResponse.json({ error: "Demasiadas solicitudes. Probá de nuevo en unos minutos.", retryAfter: espera }, { status: 429, headers: { "Retry-After": String(espera) } });
 
 const HTTP_POR_CODIGO = {
   LOCAL_NO_ENCONTRADO: 404,
@@ -23,7 +24,12 @@ export async function POST(req: NextRequest) {
   const limitada = await limite(req);
   if (limitada) return limitada;
 
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "desconocida";
+  const ipTope = await ipBloqueadaPorCodigo(ip);
+  if (ipTope.bloqueado) return respuesta429(ipTope.espera);
+
   if (!codigoQrValido(req.headers.get("x-qr-local-codigo"))) {
+    await registrarCodigoMalo(ip);
     return NextResponse.json({ error: "Escaneá el QR del local para pedir." }, { status: 403 });
   }
 
@@ -35,10 +41,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const topeMesa = await limitePorMesa(
-    new NextRequest(req.url, { headers: { "x-mesa-ref": parsed.data.referencia.trim().toLowerCase().slice(0, 50) } })
-  );
-  if (topeMesa) return topeMesa;
+  // Tope por mesa/referencia: aunque alguien tenga el código, no puede inundar la cocina de una mesa.
+  const topeMesa = await contarPedidoDeMesa(parsed.data.referencia.trim().toLowerCase().slice(0, 50));
+  if (topeMesa.bloqueado) return respuesta429(topeMesa.espera);
 
   const r = await crearPedidoLocal({
     ...parsed.data,

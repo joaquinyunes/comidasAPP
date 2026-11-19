@@ -80,7 +80,8 @@ async function comandoBase(a: Record<string, string>) {
 }
 
 // Recuperación de clave SIN email (en producción el enlace por mail no existe todavía).
-//   npx tsx scripts/nuevo-cliente/index.ts clave --email dueno@correo.com --confirmo-base <host>
+//   npx tsx scripts/nuevo-cliente/index.ts clave --email dueno@correo.com --confirmo-base <host> [--reiniciar-2fa si]
+// --reiniciar-2fa si: además apaga el 2FA (administrador que perdió el celular; vuelve a activarlo al entrar).
 async function comandoClave(a: Record<string, string>) {
   const url = process.env.DATABASE_URL;
   if (!url || !a.email) fallar("Faltan DATABASE_URL y --email.");
@@ -91,9 +92,14 @@ async function comandoClave(a: Record<string, string>) {
     const u = await prisma.usuario.findFirst({ where: { email: a.email, activo: true }, select: { id: true } });
     if (!u) fallar("No hay un usuario activo con ese email.");
     const nueva = generarClaveAdmin();
-    await prisma.usuario.update({ where: { id: u.id }, data: { passwordHash: await hash(nueva, 12) } });
+    const reinicia2fa = a["reiniciar-2fa"] === "si";
+    await prisma.usuario.update({
+      where: { id: u.id },
+      data: { passwordHash: await hash(nueva, 12), ...(reinicia2fa ? { totpActivo: false, totpSecreto: null } : {}) },
+    });
     await prisma.sesion.deleteMany({ where: { usuarioId: u.id } });
     console.log(`✔ Clave nueva para ${a.email} (se muestra una sola vez; pedí que la cambie en Mi cuenta): ${nueva}`);
+    if (reinicia2fa) console.log("  Se apagó su 2FA: lo vuelve a activar al entrar.");
     console.log("  Se cerraron todas sus sesiones.");
   } finally {
     await prisma.$disconnect();

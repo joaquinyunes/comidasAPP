@@ -1067,3 +1067,13 @@ model Modulo {
   @@index([tenantId])
   @@map("modulos")
 }
+
+// --- Contadores de intentos fallidos (login, 2FA, QR del local) ---
+// En base de datos para que el tope valga igual con varias instancias (antes vivía en memoria).
+model IntentoFallido {
+  clave String   @id @db.VarChar(200)
+  n     Int
+  desde DateTime @db.Timestamptz(6)
+
+  @@map("intentos_fallidos")
+}

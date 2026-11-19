@@ -4,6 +4,7 @@ import type { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { REFRESCO_SEGUNDOS, firmarAcceso } from "./tokens";
 import { crearRefresco } from "./sesion-refresh";
+import { debeActivar2fa } from "./admin-2fa";
 
 const base = () => ({
   httpOnly: true,
@@ -23,7 +24,8 @@ type UsuarioConRoles = NonNullable<Awaited<ReturnType<typeof cargarUsuarioConRol
 export async function emitirSesion(response: NextResponse, user: UsuarioConRoles): Promise<string[]> {
   const roles = user.usuarioRoles.map((ur) => ur.rol.nombre);
   const permisos = user.usuarioRoles.flatMap((ur) => ur.rol.permisos as string[]);
-  const acceso = firmarAcceso({ userId: user.id, tenantId: user.tenantId, email: user.email, roles, permisos });
+  const debe2fa = debeActivar2fa(permisos, user.totpActivo);
+  const acceso = firmarAcceso({ userId: user.id, tenantId: user.tenantId, email: user.email, roles, permisos, ...(debe2fa ? { debe2fa } : {}) });
   const refresco = await crearRefresco(user.id);
 
   // La cookie de acceso dura como el refresco: el JWT vence a los 15 min y el proxy

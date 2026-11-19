@@ -13,6 +13,8 @@ export interface DatosSesion {
   email: string;
   roles: string[];
   permisos: string[];
+  // Administrador sin 2FA activo: solo puede entrar a «Mi cuenta» a activarlo (ver admin-2fa.ts).
+  debe2fa?: boolean;
 }
 
 export function firmarAcceso(datos: DatosSesion): string {
