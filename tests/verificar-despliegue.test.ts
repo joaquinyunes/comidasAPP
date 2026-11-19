@@ -16,7 +16,8 @@ describe("verificar-despliegue: variables", () => {
   });
   it("cada variable obligatoria que falta se marca", () => {
     for (const k of Object.keys(bueno)) {
-      const { [k]: _quitada, ...resto } = bueno as Record<string, string>;
+      const resto: Record<string, string> = { ...bueno };
+      delete resto[k];
       expect(falla(resto).length, k).toBe(1);
     }
   });

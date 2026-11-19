@@ -1,6 +1,6 @@
 # Segunda revisión de seguridad (independiente, solo lectura) — corregida el 17/11/2026
 
-Una revisión externa encontró fallas reales que mi propia pasada (S13, `docs/SEGURIDAD.md`) no vio. Se corrigieron en la rama `feat/venta-fase2`, **con el test escrito antes** (se vio fallar) y verificado al final: `build` ✔, `lint` ✔, `npm test` **509 de 509**, `npm audit --omit=dev` **0 críticas, 0 altas** (4 moderadas de la herramienta `shadcn`).
+Una revisión externa encontró fallas reales que mi propia pasada (S13, `docs/SEGURIDAD.md`) no vio. Se corrigieron en la rama `feat/venta-fase2`, **con el test escrito antes** (se vio fallar) y verificado al final: `build` ✔, `lint` ✔, `npm test` **554 de 554** (tras la segunda tanda), `tsc` ✔, `npm audit --omit=dev` **0 vulnerabilidades** (la herramienta `shadcn` pasó a `devDependencies`). Ensayo de despliegue de cero en Postgres 18 real (`scripts/prueba-local/despliegue-de-cero.mts`, 7 migraciones, sin deriva, build de producción): **todas las comprobaciones en verde**, incluido «administrador sin 2FA → 403 hasta activarlo».
 
 | # | Gravedad | Hallazgo | Arreglo | Commit |
 |---|---|---|---|---|
@@ -16,14 +16,30 @@ Una revisión externa encontró fallas reales que mi propia pasada (S13, `docs/S
 | 5d | BAJA | Reservas públicas sin largos máximos ni formato | nombre ≤ 100, teléfono ≤ 30, notas ≤ 500, email ≤ 255, fecha AAAA-MM-DD, hora HH:MM | `86a029d` |
 | 5e | BAJA | Cualquiera podía crear el primer usuario de un restaurante vacío | Solo con el `BOOTSTRAP_TOKEN` del servidor y un rol válido; sin la variable, queda cerrado | `86a029d` |
 
+## Segunda tanda (19/11/2026): lo que quedaba pendiente, cerrado
+
+| # | Tema | Qué se hizo | Cómo se verificó |
+|---|---|---|---|
+| 6 | `pagar.ts` | `git rm src/lib/pedidos/pagar.ts` (no lo importaba nadie) | `tsc` limpio |
+| 7 | Botón de la mesa | «Pagar la cuenta» → **«Pedir la cuenta»** (y «Pedir el resto de la cuenta»); el comentario de `pagarPedido.ts` ya no dice que cobra | texto en `PagoMesa.tsx` |
+| 8 | `/api/pagos` y el monto | El saldo se lee **dentro de la transacción con el pedido bloqueado** (`FOR UPDATE`). Cobrar **de más** → 409; cobrar **de menos** → 422 salvo que el cobro venga marcado `parcial: true` con un `motivo` (queda en el evento `PAGO_PARCIAL`; el pedido sigue abierto y la mesa ocupada); propina mayor que el consumo → 422; pedido cancelado → 409; ya saldado → respuesta idempotente. Lógica pura en `src/lib/pedidos/validar-cobro.ts` | `tests/validar-cobro.test.ts` (9) y `tests/pagos-monto-saldo.test.ts` (8) |
+| 9 | Permiso por rol en el resto de la API | `/api/personal/fichaje`, `/rendimiento`, `/checklists/ejecuciones` y crear plantillas → `rrhh`; `/api/feedback` y `/api/ia` → `reportes`; `/api/sectores` → `config` (igual que sus pantallas). **Siguen abiertos a cualquier sesión** solo ver/ejecutar checklists (cada persona hace su tarea). **No hizo falta migración**: ningún rol base tenía esas pantallas | `tests/permiso-ruta.test.ts`, `tests/proxy-permisos.test.ts` (mozo, cocinero y cajero → 403) |
+| 10 | Contadores en base de datos | Tabla `intentos_fallidos` (migración **`0007`**, idempotente) con conteo atómico (`INSERT … ON CONFLICT`): bloqueo de **login** (5 fallos/15 min por cuenta), de **código 2FA** (5/15 min por usuario, en activar y desactivar) y del **QR del local** (10 códigos incorrectos/10 min por IP y 30 pedidos/10 min por mesa). Valen igual con varias instancias | `scripts/prueba-local/limite-intentos.mts` contra **Postgres 18 real**: 50 intentos simultáneos cuentan 50, ventana que se reinicia, bloqueos separados |
+| 11 | 2FA obligatorio para el administrador | En **producción** (o con `ADMIN_2FA_OBLIGATORIO=1`) el rol con permiso `*` que no tiene 2FA recibe una sesión marcada `debe2fa`: el proxy solo lo deja entrar a **Mi cuenta** (y `/api/auth`) hasta activarlo; al activarlo se reemite la sesión sin la marca. **No puede desactivarlo.** Si pierde el celular: `clave … --reiniciar-2fa si` (ver abajo) | `tests/auth-2fa-admin.test.ts` (9) |
+| 12 | `scripts/verificar-despliegue.mjs` | Antes de desplegar comprueba `DATABASE_URL`, `JWT_SECRET` fuerte, `MERCADOPAGO_WEBHOOK_SECRET`, `QR_LOCAL_CODIGO`, `MERCADOPAGO_ACCESS_TOKEN`, que **no** exista `NEXT_PUBLIC_QR_LOCAL_CODIGO`, y que **todas** las migraciones del repo (0001–0007) figuren aplicadas en la base (consulta de solo lectura + `prisma migrate status`). No imprime secretos; sale con código 1 si algo obligatorio falla | `tests/verificar-despliegue.test.ts` (9) y `scripts/prueba-local/verificar-despliegue.mts` contra Postgres real: base sin `_prisma_migrations` → falla y explica el baseline; al día → ok; 0007 sin registrar → falla y la nombra; no escribe nada |
+
+Uso: `node scripts/verificar-despliegue.mjs --env .env.cliente-<slug>` (o sin `--env` con las variables del entorno; `--sin-base` para omitir la base).
+
 ## Lo que cambia para quien opera el sistema (leer antes de desplegar)
 - **Los mozos y cocineros ya no pueden cobrar** (antes sí, por falta de control). Cobra el cajero, el gerente o el administrador.
 - **El cliente que toca «Pagar la cuenta» desde la mesa ya no paga:** avisa al personal y el cobro se hace en el panel. El botón en `src/components/cliente/PagoMesa.tsx` todavía dice «Pagar la cuenta» (la respuesta aclara «Todavía no se cobró nada»): conviene renombrarlo a «Pedir la cuenta». Cambio visual pendiente.
 - **Recuperar la clave por email no funciona en producción.** Para dar una clave nueva: `npx tsx scripts/nuevo-cliente/index.ts clave --email <mail> --confirmo-base <host de la base>` (con `DATABASE_URL` cargada); muestra la clave una sola vez y cierra las sesiones del usuario.
+- **Cobros desde el panel:** el monto tiene que coincidir con el saldo. Si un pedido ya tiene un cobro parcial, el botón «Cobrar» de la lista (que manda el total del pedido) responde 409 con el saldo: cobrar el resto desde el cobro parcial o ajustar el monto. Para cobrar menos que el saldo hay que mandar `parcial: true` y un `motivo` (el panel todavía no tiene ese campo: hoy solo la API).
+- **El administrador debe activar el 2FA** en su primer ingreso en producción (queda en *Mi cuenta* hasta hacerlo). Perdió el celular: `npx tsx scripts/nuevo-cliente/index.ts clave --email <mail> --confirmo-base <host> --reiniciar-2fa si`.
 - **Los permisos viven en la base.** Los roles *nuevos* salen de `prisma/roles-base.ts`; los *existentes* de `comida-app` solo cambian con la migración `0006` (gerente). Revisar que los roles reales tengan lo que su gente necesita (`pagos:crear`, `caja:*`, `inventario:*`…); si no, esa persona recibe 403.
 
 ## Qué es del usuario (👤), en este orden
-1. **Backup restaurable**, y después el **baseline de migraciones** (`docs/PENDIENTES-VENTA.md`: `migrate resolve` para `0001` y `0005`) y `migrate deploy` para `0002`, `0003`, `0004` y `0006`. No desplegar este código sin migrar.
+1. **Backup restaurable**, y después el **baseline de migraciones** (`docs/PENDIENTES-VENTA.md`: `migrate resolve` para `0001` y `0005`) y `migrate deploy` para `0002`, `0003`, `0004`, `0006` y `0007`. No desplegar este código sin migrar. Comprobarlo con `node scripts/verificar-despliegue.mjs --env <archivo>`.
 2. **Variables en Vercel:**
    - `MERCADOPAGO_WEBHOOK_SECRET` — **obligatoria**: sin ella el webhook responde 500 y los pagos con Mercado Pago no se acreditan.
    - `QR_LOCAL_CODIGO` — renombrar la vieja y **cambiar el valor**: el anterior estuvo público en el JavaScript del sitio; hay que reimprimir el QR del local.
@@ -33,8 +49,10 @@ Una revisión externa encontró fallas reales que mi propia pasada (S13, `docs/S
 5. Probar el flujo completo con un pago real de Mercado Pago en modo prueba: aprobado, aviso repetido, monto menor.
 
 ## Lo que NO se hizo
-- No se borró `src/lib/pedidos/pagar.ts` (la herramienta bloqueó el borrado): quedó vacío; `git rm` cuando quieras.
-- Sin cobro real de Mercado Pago probado de punta a punta, y sin revisión externa de estos arreglos.
-- `/api/pagos` sigue aceptando el `monto` que manda el personal (puede cobrar de menos o de más): falta validarlo contra el saldo.
-- Las rutas `/api/personal/*`, `/api/feedback`, `/api/ia/*` y `/api/sectores` siguen pidiendo solo sesión (sin permiso por rol).
-- El 2FA sigue siendo opcional y los límites de intentos viven en memoria por instancia.
+- Sin cobro real de Mercado Pago probado de punta a punta, y **sin revisión externa de estos arreglos** (hay una segunda revisión independiente en curso).
+- El panel de cobro **no tiene todavía** el campo «cobro parcial + motivo» (la API sí): hoy se cobra el saldo completo desde la pantalla.
+- Los roles *existentes* de producción siguen con los permisos que tengan en la base (solo `Gerente` se completó con `0006`): revisarlos.
+- Los permisos de `rrhh`, `config` y `reportes` no están en el rol `Gerente` base (tampoco lo estaban sus pantallas): si el gerente debe ver feedback, rendimiento del personal o sectores, hay que dárselos a mano.
+- El secreto del 2FA se guarda en claro en la fila del usuario (ver `shortcut:` en `2fa/route.ts`); activar el 2FA no vuelve a pedir la contraseña.
+- Los límites generales por IP del resto de la API (`rate-limit.ts`) siguen en memoria por instancia; solo login, 2FA y QR pasaron a la base.
+- La recuperación de clave por email sigue deshabilitada en producción (no hay proveedor de email).

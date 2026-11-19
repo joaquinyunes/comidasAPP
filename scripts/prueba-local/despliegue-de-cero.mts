@@ -182,10 +182,16 @@ try {
     ok(reuso.status === 401, "el token de refresco ya usado no sirve (rotación)");
 
     const cNuevo = cookies(ref);
+    const bloqueado = await fetch(base + "/api/pagos", { headers: { cookie: cNuevo } });
+    ok(bloqueado.status === 403 && (await bloqueado.json()).requiere2fa === true, "administrador SIN 2FA (producción): el resto de la API da 403 hasta activarlo");
     const alta = await fetch(base + "/api/auth/2fa", { method: "POST", headers: { cookie: cNuevo } });
     const secreto = (await alta.json()).data.secreto as string;
     const conf = await fetch(base + "/api/auth/2fa", { method: "PUT", headers: { "content-type": "application/json", cookie: cNuevo }, body: JSON.stringify({ codigo: codigoTotp(secreto) }) });
     ok(conf.status === 200, "2FA activado con un código válido");
+    const tras = await fetch(base + "/api/pagos", { headers: { cookie: cookies(conf) } });
+    ok(tras.status === 200, "al activar el 2FA la sesión nueva ya no está restringida (/api/pagos: 200)");
+    const baja = await fetch(base + "/api/auth/2fa", { method: "DELETE", headers: { "content-type": "application/json", cookie: cookies(conf) }, body: JSON.stringify({ password: clave, codigo: codigoTotp(secreto) }) });
+    ok(baja.status === 403, "el administrador no puede desactivar el 2FA");
     const sinCodigo = await post("/api/auth/login", { email: EMAIL, password: clave });
     ok(sinCodigo.status === 401 && (await sinCodigo.json()).requiere2fa === true, "con 2FA activo el login pide el código");
     const conCodigo = await post("/api/auth/login", { email: EMAIL, password: clave, codigo: codigoTotp(secreto) });

@@ -15,7 +15,7 @@ Es una persona real que acepte probarlo, con seña o uso real. Hasta que exista:
 ## Bloqueantes antes de ofrecer el paquete Completo
 | Qué | Estado | Quién |
 |---|---|---|
-| Migraciones `0002`–`0004` aplicadas a la base de producción (`comida-app`); y **antes**, declarar `0001` y `0005` como aplicadas (ver abajo) | **Sin aplicar.** El código nuevo falla sin ellas | 👤, después de un backup |
+| Migraciones `0002`–`0004`, `0006` y `0007` aplicadas a la base de producción (`comida-app`); y **antes**, declarar `0001` y `0005` como aplicadas (ver abajo) | **Sin aplicar.** El código nuevo falla sin ellas | 👤, después de un backup |
 | Backup restaurado al menos una vez | Workflow listo, **sin correr** | 👤 (secretos) → ver S10 abajo |
 | Mercado Pago real probado (pago aprobado, aviso repetido) | Sin credenciales | 👤 |
 | WhatsApp (aviso de pedido) | **No construido**; falta cuenta de WhatsApp Business | 👤 + sesión |
@@ -32,7 +32,7 @@ Es una persona real que acepte probarlo, con seña o uso real. Hasta que exista:
 `comida-app` se armó con `db push`: no tiene la tabla `_prisma_migrations`. Correr `prisma migrate deploy` a secas intentaría crear tablas que ya existen y fallaría. Orden seguro (todo con `DATABASE_URL` de producción, después de un backup restaurable):
 1. **Mirar sin cambiar nada:** `npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script`. Tiene que mostrar **solo** lo de las migraciones 0002 y 0004: columna `pagos.referencia` con su índice único y columnas `usuarios.totp_secreto` y `usuarios.totp_activo`. Si muestra algo más (por ejemplo columnas de `0005`), producción no está tan alineada como se supone: **parar** y revisar.
 2. **Declarar como ya aplicadas** las que producción ya tiene por `db push`: `npx prisma migrate resolve --applied 0001_init_bloque2` y `npx prisma migrate resolve --applied 0005_alinear_esquema`.
-3. **Aplicar las pendientes:** `npx prisma migrate deploy` (corre `0002`, `0003`, `0004`).
+3. **Aplicar las pendientes:** `npx prisma migrate deploy` (corre `0002`, `0003`, `0004`, `0006` y `0007`). Después: `node scripts/verificar-despliegue.mjs --env <archivo>`.
 4. Antes del paso 3, la consulta de duplicados que está en el encabezado de `0002`: si hay pagos repetidos por pedido y referencia, el índice único fallaría.
 Probado solo en una base **nueva** (`scripts/prueba-local/despliegue-de-cero.mts`); el procedimiento para una base existente **no se ensayó**: probarlo primero en una copia restaurada del backup.
 
