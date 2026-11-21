@@ -19,7 +19,7 @@ describe("guarda del seed", () => {
 import { verificarBaseDelSeed } from "../prisma/seed-guard";
 
 describe("guarda del seed: base de datos (M9)", () => {
-  const remota = "postgresql://u:p@db.abcdef.supabase.co:5432/postgres";
+  const remota = "postgresql://u:p@db.abcdef.supabase.co:5432/cozizina-demo";
   it("una base local pasa sin confirmación", () => {
     for (const h of ["localhost", "127.0.0.1", "[::1]"]) expect(() => verificarBaseDelSeed(`postgresql://u:p@${h}:5432/x`, [])).not.toThrow();
   });
@@ -29,6 +29,10 @@ describe("guarda del seed: base de datos (M9)", () => {
   });
   it("una base remota con el host exacto confirmado pasa", () => {
     expect(() => verificarBaseDelSeed(remota, ["--confirmo-base", "db.abcdef.supabase.co"])).not.toThrow();
+  });
+  it("una base remota que NO es de demo aborta aunque se confirme el host", () => {
+    expect(() => verificarBaseDelSeed("postgresql://u:p@db.abcdef.supabase.co:5432/postgres", ["--confirmo-base", "db.abcdef.supabase.co"])).toThrow(/DEMO/);
+    expect(() => verificarBaseDelSeed("postgresql://u:p@db.demo-123.supabase.co:5432/postgres", ["--confirmo-base", "db.demo-123.supabase.co"])).not.toThrow();
   });
   it("sin DATABASE_URL o inválida aborta", () => {
     expect(() => verificarBaseDelSeed(undefined, [])).toThrow();

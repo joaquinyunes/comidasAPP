@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Anton, Poppins } from "next/font/google";
 import "./globals.css";
+import AvisoDemo from "@/components/demo/AvisoDemo";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -48,7 +49,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${poppins.variable} ${anton.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AvisoDemo />
+        {children}
+      </body>
     </html>
   );
 }

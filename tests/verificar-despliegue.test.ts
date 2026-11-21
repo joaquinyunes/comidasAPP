@@ -49,6 +49,17 @@ describe("verificar-despliegue: variables", () => {
   });
 });
 
+describe("verificar-despliegue: demo", () => {
+  it("DEMO_MODE=1 con una base que dice demo: ok; con la base real: error", () => {
+    expect(falla({ ...bueno, DEMO_MODE: "1", DATABASE_URL: "postgresql://u:p@db.x.supabase.co:5432/cozizina-demo" })).toEqual([]);
+    expect(falla({ ...bueno, DEMO_MODE: "1" })).toEqual(["DEMO_MODE solo con una base de demo"]);
+    expect(falla({ ...bueno, DEMO_MODE: "1", DATABASE_URL: "postgresql://u:p@localhost:5432/x" })).toEqual([]);
+  });
+  it("sin DEMO_MODE no se exige nada del nombre de la base", () => {
+    expect(falla(bueno)).toEqual([]);
+  });
+});
+
 describe("verificar-despliegue: migraciones", () => {
   const carpetas = ["0001_a", "0002_b", "0007_c"];
   it("todas aplicadas: ok", () => {

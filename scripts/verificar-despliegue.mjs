@@ -61,6 +61,20 @@ export function evaluarVariables(env) {
     r.push({ nombre: "MERCADOPAGO_ACCESS_TOKEN de producción", ok: false, detalle: "es un token de PRUEBA (TEST-): los cobros no son reales", nivel: AVISO });
   }
 
+  // El demo (DEMO_MODE=1) jamás con la base real: el nombre de la base o el host debe decir «demo» (o ser local).
+  if (env.DEMO_MODE === "1") {
+    let local = false;
+    let dice = false;
+    try {
+      const u = new URL(env.DATABASE_URL);
+      local = ["localhost", "127.0.0.1", "[::1]", "::1"].includes(u.hostname);
+      dice = /demo/i.test(u.pathname) || /demo/i.test(u.hostname);
+    } catch {
+      /* DATABASE_URL ya se marcó como inválida */
+    }
+    chequeo("DEMO_MODE solo con una base de demo", local || dice, "DEMO_MODE=1 pero la base no parece de demo (su nombre o host no incluye «demo»): el demo nunca debe usar la base real");
+  }
+
   chequeo(
     "sin NEXT_PUBLIC_QR_LOCAL_CODIGO",
     !hay(env.NEXT_PUBLIC_QR_LOCAL_CODIGO),

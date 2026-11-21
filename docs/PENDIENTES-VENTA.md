@@ -2,15 +2,11 @@
 
 Resume lo que **no** está hecho de la sección B y de Z5, con exactamente qué falta y quién lo hace. Lo marcado 👤 lo hace el dueño; ninguna sesión puede hacerlo por él.
 
-## V3 — Entorno de demo separado (👤 + sesión después)
-Hoy **no existe**. Qué falta, en orden:
-1. 👤 Crear un proyecto de Supabase **aparte** (llamarlo `cozizina-demo`) y un proyecto de Vercel aparte con su propio `DATABASE_URL`. **Nunca** `comida-app`.
-2. Sesión: correr `prisma migrate deploy` y `npm run db:seed` contra esa base (el seed ya carga carta, mesas, clientes y pedidos de ejemplo) y poner en la portada un cartel fijo «DEMO — datos de ejemplo».
-3. Verificar que la demo no comparte variables con producción y que sus credenciales de Mercado Pago son de **modo prueba**.
-4. Poner la URL de la demo en `ventas/index.html` (sección Demo).
+## V3 — Entorno de demo separado
+**Hecho y probado en local (21/11/2026):** `DEMO_MODE=1` con cartel fijo, seed protegido por nombre de base, `verificar-despliegue.mjs` que impide usar el demo con la base real y guía en `docs/DEMO.md` (`scripts/prueba-local/demo.mts`: 7 verificaciones en verde). **Falta 👤:** crear el proyecto de Supabase `cozizina-demo` y el de Vercel aparte, y poner la URL en `ventas/index.html` (pasos en `docs/DEMO.md`).
 
 ## V10 — Restaurante piloto (👤)
-Es una persona real que acepte probarlo, con seña o uso real. Hasta que exista: no se sigue construyendo para otro rubro (veredicto del tribunal). Qué se necesita de él: 3 días de pedidos reales, acceso a su cuenta de Mercado Pago (modo prueba primero) y permiso para publicar el resultado.
+Kit listo en `docs/PILOTO.md` (checklist, métricas y contrato borrador). Es una persona real que acepte probarlo, con seña o uso real. Hasta que exista: no se sigue construyendo para otro rubro (veredicto del tribunal). Qué se necesita de él: 3 días de pedidos reales, acceso a su cuenta de Mercado Pago (modo prueba primero) y permiso para publicar el resultado.
 
 ## Bloqueantes antes de ofrecer el paquete Completo
 | Qué | Estado | Quién |

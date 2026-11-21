@@ -1,6 +1,6 @@
 # Segunda revisión de seguridad (independiente, solo lectura) — corregida el 17/11/2026
 
-Una revisión externa encontró fallas reales que mi propia pasada (S13, `docs/SEGURIDAD.md`) no vio. Se corrigieron en la rama `feat/venta-fase2`, **con el test escrito antes** (se vio fallar) y verificado al final: `build` ✔, `lint` ✔, `npm test` **626 de 626** (tras la tercera tanda), `tsc` ✔, `npm audit --omit=dev` **0 vulnerabilidades** (la herramienta `shadcn` pasó a `devDependencies`). Ensayo de despliegue de cero en Postgres 18 real (`scripts/prueba-local/despliegue-de-cero.mts`, 7 migraciones, sin deriva, build de producción): **todas las comprobaciones en verde**, incluido «administrador sin 2FA → 403 hasta activarlo».
+Una revisión externa encontró fallas reales que mi propia pasada (S13, `docs/SEGURIDAD.md`) no vio. Se corrigieron en la rama `feat/venta-fase2`, **con el test escrito antes** (se vio fallar) y verificado al final: `build` ✔, `lint` ✔, `npm test` **632 de 632** (tras el cierre del 21/11), `tsc` ✔, `npm audit --omit=dev` **0 vulnerabilidades** (la herramienta `shadcn` pasó a `devDependencies`). Ensayo de despliegue de cero en Postgres 18 real (`scripts/prueba-local/despliegue-de-cero.mts`, 7 migraciones, sin deriva, build de producción): **todas las comprobaciones en verde**, incluido «administrador sin 2FA → 403 hasta activarlo».
 
 | # | Gravedad | Hallazgo | Arreglo | Commit |
 |---|---|---|---|---|
